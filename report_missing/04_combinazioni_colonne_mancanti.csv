@@ -1,0 +1,93 @@
+combinazione_colonne_mancanti,n_passeggeri,percentuale_passeggeri
+NESSUNA,6606,75.99
+CryoSleep,167,1.92
+VIP,165,1.9
+ShoppingMall,164,1.89
+HomePlanet,163,1.88
+Cabin,158,1.82
+Name,158,1.82
+Spa,153,1.76
+VRDeck,151,1.74
+Age,151,1.74
+RoomService,149,1.71
+Destination,146,1.68
+FoodCourt,142,1.63
+CryoSleep | Name,9,0.1
+CryoSleep | VRDeck,6,0.07
+CryoSleep | Cabin,6,0.07
+FoodCourt | VRDeck,6,0.07
+HomePlanet | RoomService,6,0.07
+ShoppingMall | VRDeck,6,0.07
+HomePlanet | Cabin,6,0.07
+CryoSleep | ShoppingMall,6,0.07
+HomePlanet | ShoppingMall,5,0.06
+Age | VIP,5,0.06
+Destination | ShoppingMall,5,0.06
+FoodCourt | Name,5,0.06
+Cabin | VIP,5,0.06
+CryoSleep | VIP,5,0.06
+Spa | Name,5,0.06
+HomePlanet | Name,5,0.06
+Age | ShoppingMall,4,0.05
+Cabin | VRDeck,4,0.05
+Cabin | RoomService,4,0.05
+Cabin | FoodCourt,4,0.05
+Destination | FoodCourt,4,0.05
+VIP | RoomService,4,0.05
+VIP | FoodCourt,4,0.05
+FoodCourt | Spa,4,0.05
+RoomService | ShoppingMall,4,0.05
+HomePlanet | Destination,3,0.03
+Destination | RoomService,3,0.03
+Age | FoodCourt,3,0.03
+VRDeck | Name,3,0.03
+Destination | Name,3,0.03
+RoomService | Spa,3,0.03
+CryoSleep | FoodCourt,3,0.03
+Destination | VIP,3,0.03
+Spa | VRDeck,3,0.03
+VIP | ShoppingMall,3,0.03
+Age | VRDeck,2,0.02
+Destination | VRDeck,2,0.02
+Cabin | ShoppingMall,2,0.02
+VIP | Spa,2,0.02
+RoomService | FoodCourt,2,0.02
+Destination | Age,2,0.02
+Destination | Spa,2,0.02
+CryoSleep | Spa,2,0.02
+RoomService | VRDeck,2,0.02
+Cabin | Age,2,0.02
+HomePlanet | CryoSleep,2,0.02
+HomePlanet | Spa,2,0.02
+CryoSleep | RoomService,2,0.02
+ShoppingMall | Name,2,0.02
+FoodCourt | ShoppingMall,2,0.02
+HomePlanet | ShoppingMall | Name,2,0.02
+HomePlanet | VIP,2,0.02
+Age | Name,2,0.02
+CryoSleep | Destination,2,0.02
+Cabin | Spa,1,0.01
+Destination | Age | FoodCourt,1,0.01
+CryoSleep | VIP | VRDeck,1,0.01
+Cabin | Age | Spa,1,0.01
+HomePlanet | FoodCourt,1,0.01
+Age | RoomService,1,0.01
+CryoSleep | Spa | Name,1,0.01
+HomePlanet | FoodCourt | Spa,1,0.01
+Cabin | Age | VIP,1,0.01
+CryoSleep | ShoppingMall | Spa,1,0.01
+VIP | Name,1,0.01
+RoomService | Name,1,0.01
+HomePlanet | Destination | VIP,1,0.01
+CryoSleep | VIP | ShoppingMall,1,0.01
+Cabin | Destination,1,0.01
+Cabin | Destination | Name,1,0.01
+CryoSleep | Age,1,0.01
+CryoSleep | Cabin | Destination,1,0.01
+Cabin | Destination | FoodCourt,1,0.01
+HomePlanet | Age,1,0.01
+CryoSleep | Destination | Spa,1,0.01
+Age | VRDeck | Name,1,0.01
+HomePlanet | Age | VRDeck,1,0.01
+Cabin | Name,1,0.01
+ShoppingMall | Spa,1,0.01

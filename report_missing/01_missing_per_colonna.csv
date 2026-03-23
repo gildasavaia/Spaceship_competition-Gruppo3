@@ -1,0 +1,15 @@
+colonna,n_missing,percentuale_missing,n_non_missing
+CryoSleep,217,2.5,8476
+ShoppingMall,208,2.39,8485
+VIP,203,2.34,8490
+HomePlanet,201,2.31,8492
+Name,200,2.3,8493
+Cabin,199,2.29,8494
+VRDeck,188,2.16,8505
+FoodCourt,183,2.11,8510
+Spa,183,2.11,8510
+Destination,182,2.09,8511
+RoomService,181,2.08,8512
+Age,179,2.06,8514
+PassengerId,0,0.0,8693
+Transported,0,0.0,8693
