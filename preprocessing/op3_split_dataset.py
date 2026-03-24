@@ -37,7 +37,8 @@ def run_split_dataset(df: pd.DataFrame) -> SplitDatasetOutputs:
     # df_mod['TotalSpent'] = df_mod[spending_cols].fillna(0).sum(axis=1)
 
     # cols_to_drop = spending_cols + ['PassengerId', 'Cabin', 'Name']
-    # df_mod.drop(columns=cols_to_drop, inplace=True)
+    cols_to_drop = ['PassengerId', 'Cabin', 'Name']
+    df_mod.drop(columns=cols_to_drop, inplace=True)
     
     # Metti 'Group' e 'GroupSize' in testa e 'Transported' in fondo
     cols = list(df_mod.columns)
