@@ -6,10 +6,6 @@ from typing import NamedTuple
 class HandleNullValueOutputs(NamedTuple):
     df_output: pd.DataFrame
 
-
-DESTINATION_VALUES = ['TRAPPIST-1e', '55 Cancri e', 'PSO J318.5-22']
-DESTINATION_WEIGHTS = np.array([0.6985, 0.2089, 0.0926], dtype=float)
-
 def impute_group_mode(df: pd.DataFrame, columns_to_impute: list, group_col: str = 'Group') -> pd.DataFrame:
     """
     Fase 1: Imputa i valori nulli secondo la strategia:
@@ -46,16 +42,74 @@ def impute_group_mode(df: pd.DataFrame, columns_to_impute: list, group_col: str 
         group_mask = mask_null & ~is_solo_traveler
         
         # Applica strategia ai solitari con null
+        solo_strategy = 'moda globale'
         if col == 'Destination':
             solo_count = int(solo_mask.sum())
             if solo_count > 0:
-                random_destinations = rng.choice(
-                    DESTINATION_VALUES,
-                    size=solo_count,
-                    p=DESTINATION_WEIGHTS / DESTINATION_WEIGHTS.sum()
-                )
-                # da mettere in funzione della sommma dei 3 elementi e fare tutte le altre feauture in questo modo
+                random_values = rng.random(solo_count)
+                random_destinations = np.empty(solo_count, dtype=object)
+
+                # Soglie richieste:
+                # < 0.6589 -> TRAPPIST-1e
+                # [0.6985, 0.9074) -> 55 Cancri e
+                # [0.9074, 1] -> PSO J318.5-22
+                # L'intervallo [0.6589, 0.6985) viene assegnato a TRAPPIST-1e
+                # per evitare buchi non assegnati.
+                mask_trappist = random_values < 0.6589
+                mask_cancri = (random_values >= 0.6985) & (random_values < 0.9074)
+                mask_pso = random_values >= 0.9074
+                mask_gap = ~(mask_trappist | mask_cancri | mask_pso)
+
+                random_destinations[mask_trappist | mask_gap] = 'TRAPPIST-1e'
+                random_destinations[mask_cancri] = '55 Cancri e'
+                random_destinations[mask_pso] = 'PSO J318.5-22'
+
                 df_filled.loc[solo_mask, col] = random_destinations
+            solo_strategy = 'estrazione casuale a soglie'
+
+        elif col == 'Deck':
+            solo_count = int(solo_mask.sum())
+            if solo_count > 0:
+                random_values = rng.random(solo_count)
+                random_deck = np.empty(solo_count, dtype=object)
+
+                # Distribuzione Deck:
+                # F 33.46%, G 29.77%, E 10.18%, B 9.16%, C 8.75%, D 5.60%, A 3.01%, T 0.06%
+                mask_f = random_values < 0.3346
+                mask_g = (random_values >= 0.3346) & (random_values < 0.6323)
+                mask_e = (random_values >= 0.6323) & (random_values < 0.7341)
+                mask_b = (random_values >= 0.7341) & (random_values < 0.8257)
+                mask_c = (random_values >= 0.8257) & (random_values < 0.9132)
+                mask_d = (random_values >= 0.9132) & (random_values < 0.9692)
+                mask_a = (random_values >= 0.9692) & (random_values < 0.9993)
+                mask_t = random_values >= 0.9993
+
+                random_deck[mask_f] = 'F'
+                random_deck[mask_g] = 'G'
+                random_deck[mask_e] = 'E'
+                random_deck[mask_b] = 'B'
+                random_deck[mask_c] = 'C'
+                random_deck[mask_d] = 'D'
+                random_deck[mask_a] = 'A'
+                random_deck[mask_t] = 'T'
+
+                df_filled.loc[solo_mask, col] = random_deck
+            solo_strategy = 'estrazione casuale a soglie'
+
+        elif col == 'CryoSleep':
+            solo_count = int(solo_mask.sum())
+            if solo_count > 0:
+                random_values = rng.random(solo_count)
+                random_cryo = np.empty(solo_count, dtype=object)
+
+                mask_true = random_values < 0.3496
+                mask_false = random_values >= 0.3496
+                random_cryo[mask_true] = True
+                random_cryo[mask_false] = False
+
+                df_filled.loc[solo_mask, col] = random_cryo
+            solo_strategy = 'estrazione casuale a soglie'
+
         else:
             df_filled.loc[solo_mask, col] = global_mode
         
@@ -69,10 +123,6 @@ def impute_group_mode(df: pd.DataFrame, columns_to_impute: list, group_col: str 
         solo_imputed = solo_mask.sum() - (df_filled[solo_mask][col].isnull().sum() if solo_mask.sum() > 0 else 0)
         group_imputed = group_mask.sum() - (df_filled[group_mask][col].isnull().sum() if group_mask.sum() > 0 else 0)
         
-        if col == 'Destination':
-            solo_strategy = 'estrazione casuale pesata'
-        else:
-            solo_strategy = 'moda globale'
 
         print(f"Colonna '{col}': Imputati {imputed_count} valori ({solo_imputed} solitari con {solo_strategy}, {group_imputed} in gruppo con moda di gruppo). Nulli rimanenti: {missing_after}")
         
