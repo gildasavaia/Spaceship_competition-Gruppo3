@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 # ---------------------------
 # 1. Caricamento dati
 # ---------------------------
-train_path = "../XGBoost/train_processed_example.csv"
-test_path = "../XGBoost/test_processed_example.csv"
+train_path = "../CATBoost/train_processed_example.csv"
+test_path = "../CATBoost/test_processed_example.csv"
 
 train_df, test_df = load_data(train_path, test_path)
 
