@@ -23,7 +23,6 @@ env/
 # =========================
 # Dati e Modelli (Machine Learning)
 # =========================
-*.csv
 *.dat
 *.pkl
 *.model
