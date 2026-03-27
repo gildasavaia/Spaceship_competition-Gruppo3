@@ -68,11 +68,11 @@ def show_predictions(test_df, predictions, n=10):
 
     return results
 
-
-#  Submission
-def create_submission(test_df, predictions, output_path="submission_nn.csv"):
+# Modifica solo il percorso di default aggiungendo ../
+def create_submission(test_df, predictions, output_path="../outputs/submission_rete_neurale.csv"):
     submission = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Transported": predictions
     })
     submission.to_csv(output_path, index=False)
+    print(f"✅ File salvato in: '{output_path}'")
