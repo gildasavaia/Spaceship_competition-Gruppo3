@@ -106,7 +106,7 @@ def plot_feature_importance(model, feature_names):
 # ---------------------------
 # 🔹 Creazione submission
 # ---------------------------
-def create_submission(test_df, predictions, output_path="submission_catboost.csv"):
+def create_submission(test_df, predictions, output_path="../outputs/submission_catboost.csv"):
     submission = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Transported": predictions

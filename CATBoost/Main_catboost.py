@@ -58,7 +58,3 @@ plot_feature_importance(model, X.columns)
 # ---------------------------
 create_submission(test_df, predictions)
 print("\n Submission creata: submission_catboost.csv")
-
-# ---------------------------
-# 11. Controllo consistenza colonne
-# ---------------------------
