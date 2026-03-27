@@ -54,7 +54,7 @@ def main():
         'Transported': predictions.astype(bool)  # Kaggle richiede True/False
     })
 
-    submission_filename = "submission_lightgbm.csv"
+    submission_filename = "../outputs/submission_lightgbm.csv"
     submission.to_csv(submission_filename, index=False)
 
     # Stampa un piccolo resoconto per capire al volo come è andata
