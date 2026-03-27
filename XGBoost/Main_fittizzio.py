@@ -46,6 +46,5 @@ show_predictions(test_df, predictions, n=10)
 # ---------------------------
 # 9. Creazione submission
 # ---------------------------
-create_submission(test_df, predictions, output_path="submission.csv")
+create_submission(test_df, predictions)
 print("\n Submission creata: submission.csv")
-

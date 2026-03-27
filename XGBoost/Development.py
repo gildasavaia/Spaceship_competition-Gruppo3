@@ -93,7 +93,7 @@ def evaluate_model(model, X, y, cv=5):
 
 
 # 🔹 Creazione submission
-def create_submission(test_df, predictions, output_path="submission.csv"):
+def create_submission(test_df, predictions, output_path="../outputs/submission_XGBoost.csv"):
     submission = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Transported": predictions
