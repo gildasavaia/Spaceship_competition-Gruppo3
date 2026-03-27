@@ -37,3 +37,4 @@ Thumbs.db
 
 # Cartella per i salvataggi dei modelli e delle previsioni
 outputs/
+CATBoost/catboost_info/
