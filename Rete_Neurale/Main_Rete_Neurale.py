@@ -3,10 +3,8 @@ from Rete_neurale_model import *
 # ---------------------------
 # 1. Caricamento dati
 # ---------------------------
-train_df, test_df = load_data(
-    "train_processed_example.csv",
-    "test_processed_example.csv"
-)
+train_df = "../Dataset_Giocattolo/train_processed_example.csv"
+test_df = "../Dataset_Giocattolo/test_processed_example.csv"
 
 # ---------------------------
 #  Preparazione + scaling
