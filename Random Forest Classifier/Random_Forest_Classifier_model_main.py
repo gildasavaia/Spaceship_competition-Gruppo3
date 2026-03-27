@@ -56,7 +56,7 @@ def main():
     })
 
     # Salviamo con un nome diverso per non sovrascrivere LightGBM
-    submission_filename = "submission_random_forest.csv"
+    submission_filename = "../outputs/submission_random_forest.csv"
     submission.to_csv(submission_filename, index=False)
 
     # Stampa un piccolo resoconto per capire al volo come è andata
