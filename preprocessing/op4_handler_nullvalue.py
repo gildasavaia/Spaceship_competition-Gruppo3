@@ -104,13 +104,26 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     """
     Esegue l'imputazione dei valori mancanti:
     - Age: usa la media totale.
+    - Costi: sostituisce i NaN con 0.
     - Altre feature:
         - Gruppi con cardinalità > 1: usa la moda del gruppo.
         - Gruppi con cardinalità = 1: usa le probabilità globali.
     """
     df = df_input.copy()
 
-# --- NUOVA MODIFICA: Imputazione colonna "Age" con la media totale ---
+    #Sostituzione NaN con 0 per le feature dei costi (RoomService, FoodCourt, ShoppingMall, Spa, VRDeck)
+    cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+    #Verifico quali delle colonne dei costi esistono nel dataframe prima di applicare fillna, per evitare errori se alcune colonne non sono presenti
+    existing_cost_cols = [col for col in cost_cols if col in df.columns]
+    if existing_cost_cols:
+        #Stampo il totale dei valori nulli presenti nelle colonne dei costi prima della sostituzione
+        n_missing_costs = df[existing_cost_cols].isna().sum().sum()
+        #Sostituisco i NaN con 0 solo per le colonne dei costi esistenti
+        df[existing_cost_cols] = df[existing_cost_cols].fillna(0)
+        print(f"[OP4] Feature dei costi ({', '.join(existing_cost_cols)}): riempiti {n_missing_costs} valori mancanti con 0.\n")
+
+
+    #Imputazione colonna "Age" con la media totale 
     if "Age" in df.columns:
         n_missing_age = df["Age"].isna().sum()
         
@@ -121,7 +134,8 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
         # fillna per rimpiazzare i NaN con la media calcolata
         df["Age"] = df["Age"].fillna(age_mean)
         print(f"[OP4] Feature 'Age': riempiti {n_missing_age} valori mancanti con la media totale ({age_mean}).\n")
-    # ---------------------------------------------------------------------
+    
+    # Imputazione per le altre feature categoriali
 
     features = [
         "HomePlanet",

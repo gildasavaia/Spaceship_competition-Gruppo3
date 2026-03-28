@@ -41,6 +41,8 @@ from op1_read_file import run_load_and_convert_to_csv
 from op2_data_evaluation import run_evaluation
 from op3_split_dataset import run_split_dataset
 from op4_handler_nullvalue import run_handle_null_values
+from op5_sumcosts_names import run_remove_names
+from op5_sumcosts_names import pulisci_costi_nulli
 
 data_path = Path(__file__).resolve().parents[1] / "data" / "train.csv"
 
@@ -56,6 +58,12 @@ mio_dataframe_modificato = risultato_split.df_output
 risultato_imputazione = run_handle_null_values(mio_dataframe_modificato)
 mio_dataframe_imputato = risultato_imputazione.df_output
 
+
+# OP5: Rimozione feature "Names" e "Surnames"
+risultato_rimozione = run_remove_names(mio_dataframe_imputato)
+mio_dataframe_finale = risultato_rimozione.df_output
+
+
 # Salvataggio dizionari
 dict_output_path = data_path.with_name("probability_dictionaries.json")
 with open(dict_output_path, "w", encoding="utf-8") as f:
@@ -64,15 +72,16 @@ with open(dict_output_path, "w", encoding="utf-8") as f:
 print(f"Dizionari salvati in: {dict_output_path}")
 
 # OP2: Valutazione finale
-valutazione = run_evaluation(mio_dataframe_imputato)
+valutazione = run_evaluation(mio_dataframe_finale)
 print("Valutazione completata.")
 
 
-# Salva il DataFrame imputato
+# CORRETTO (usa mio_dataframe_finale)
 output_path = data_path.with_name("train_processed.csv")
-mio_dataframe_imputato.to_csv(output_path, index=False)
+mio_dataframe_finale.to_csv(output_path, index=False)
 
 print(f"Dataset finale salvato in: {output_path}")
+
 
 
 
