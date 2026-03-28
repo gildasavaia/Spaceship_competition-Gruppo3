@@ -1,4 +1,4 @@
-""""# Importa le funzioni dai file op1, op2, op3 e dal nuovo op4
+"""# Importa le funzioni dai file op1, op2, op3 e dal nuovo op4
 from op1_read_file import run_load_and_convert_to_csv
 from op2_data_evaluation import run_evaluation
 from op3_split_dataset import run_split_dataset  
@@ -34,11 +34,6 @@ print(f"Dataset finale salvato in: {output_path}")
 pipeline iniziale di dario
 """
 
-
-
-
-
-
 from pathlib import Path
 import json
 
@@ -68,11 +63,10 @@ with open(dict_output_path, "w", encoding="utf-8") as f:
 
 print(f"Dizionari salvati in: {dict_output_path}")
 
-"""
 # OP2: Valutazione finale
 valutazione = run_evaluation(mio_dataframe_imputato)
 print("Valutazione completata.")
-"""
+
 
 # Salva il DataFrame imputato
 output_path = data_path.with_name("train_processed.csv")
