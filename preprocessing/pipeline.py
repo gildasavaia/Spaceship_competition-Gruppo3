@@ -41,8 +41,8 @@ from op1_read_file import run_load_and_convert_to_csv
 from op2_data_evaluation import run_evaluation
 from op3_split_dataset import run_split_dataset
 from op4_handler_nullvalue import run_handle_null_values
-from op5_sumcosts_names import run_remove_names
-from op5_sumcosts_names import pulisci_costi_nulli
+from op5_sumcosts_names import run_op5
+
 
 data_path = Path(__file__).resolve().parents[1] / "data" / "train.csv"
 
@@ -58,11 +58,15 @@ mio_dataframe_modificato = risultato_split.df_output
 risultato_imputazione = run_handle_null_values(mio_dataframe_modificato)
 mio_dataframe_imputato = risultato_imputazione.df_output
 
+# OP5: Costi + rimozione nomi
+risultato_op5 = run_op5(mio_dataframe_imputato)
+mio_dataframe_finale = risultato_op5.df_output
+"""
+TotalSpending è fondamentale → spesso è una delle feature più predittive nei dataset tipo Spaceship Titanic.
+Se lasci le singole colonne + il totale → il modello può imparare meglio (non rimuoverle subito).
+Se invece vuoi ridurre dimensionalità → puoi eliminare le singole colonne dopo aver creato il totale.
 
-# OP5: Rimozione feature "Names" e "Surnames"
-risultato_rimozione = run_remove_names(mio_dataframe_imputato)
-mio_dataframe_finale = risultato_rimozione.df_output
-
+"""
 
 # Salvataggio dizionari
 dict_output_path = data_path.with_name("probability_dictionaries.json")
@@ -81,20 +85,6 @@ output_path = data_path.with_name("train_processed.csv")
 mio_dataframe_finale.to_csv(output_path, index=False)
 
 print(f"Dataset finale salvato in: {output_path}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
