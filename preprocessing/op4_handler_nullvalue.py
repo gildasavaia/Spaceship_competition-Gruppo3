@@ -2,12 +2,10 @@ import pandas as pd
 import numpy as np
 from dataclasses import dataclass
 
-
 @dataclass
 class HandleNullValuesResult:
     df_output: pd.DataFrame
     probability_dictionaries: dict
-
 
 def build_probability_dictionary(series: pd.Series) -> dict:
     """
@@ -19,7 +17,6 @@ def build_probability_dictionary(series: pd.Series) -> dict:
     """
     freq = series.dropna().value_counts(normalize=True)
     return freq.to_dict()
-
 
 def get_group_column(df: pd.DataFrame) -> pd.Series:
     """
@@ -38,7 +35,6 @@ def get_group_column(df: pd.DataFrame) -> pd.Series:
     raise ValueError(
         "Non trovo né la colonna 'Group' né la colonna 'PassengerId' per identificare i gruppi."
     )
-
 
 def impute_missing_group_mode(
     df: pd.DataFrame,
@@ -67,7 +63,6 @@ def impute_missing_group_mode(
     df.loc[mask_to_fill, feature] = group_modes[mask_to_fill]
     
     return df
-
 
 def impute_missing_only_singletons(
     df: pd.DataFrame,
@@ -99,10 +94,10 @@ def impute_missing_only_singletons(
     df.loc[mask_to_fill, feature] = sampled_values
     return df
 
-
 def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     """
     Esegue l'imputazione dei valori mancanti:
+    - Pulizia CryoSleep: Uniforma i booleani scritti come stringhe o numeri.
     - Age: usa la media totale.
     - Costi: sostituisce i NaN con 0.
     - Altre feature:
@@ -111,19 +106,38 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     """
     df = df_input.copy()
 
-    #Sostituzione NaN con 0 per le feature dei costi (RoomService, FoodCourt, ShoppingMall, Spa, VRDeck)
+    # --- INIZIO PULIZIA CRYOSLEEP ---
+    if "CryoSleep" in df.columns:
+        # Uniformiamo i valori ambigui
+        # Poiché il DataFrame viene letto come stringhe/object, copriamo i vari casi
+        replace_dict = {
+            '0.0': 'False', 
+            '1.0': 'True',
+            0.0: 'False',
+            1.0: 'True',
+            False: 'False',
+            True: 'True'
+        }
+        df['CryoSleep'] = df['CryoSleep'].replace(replace_dict)
+        # Eventualmente potresti volerlo castare a bool vero e proprio, ma dipende 
+        # se nel resto del codice ti aspetti stringhe 'True'/'False' o oggetti bool.
+        # df['CryoSleep'] = df['CryoSleep'].astype(bool) # (Sconsigliato finché ci sono NaN)
+        print("[OP4] Pulizia feature 'CryoSleep': uniformati '0.0'/'1.0' in 'False'/'True'.\n")
+    # --- FINE PULIZIA CRYOSLEEP ---
+
+
+    # Sostituzione NaN con 0 per le feature dei costi (RoomService, FoodCourt, ShoppingMall, Spa, VRDeck)
     cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
-    #Verifico quali delle colonne dei costi esistono nel dataframe prima di applicare fillna, per evitare errori se alcune colonne non sono presenti
+    # Verifico quali delle colonne dei costi esistono nel dataframe prima di applicare fillna, per evitare errori se alcune colonne non sono presenti
     existing_cost_cols = [col for col in cost_cols if col in df.columns]
     if existing_cost_cols:
-        #Stampo il totale dei valori nulli presenti nelle colonne dei costi prima della sostituzione
+        # Stampo il totale dei valori nulli presenti nelle colonne dei costi prima della sostituzione
         n_missing_costs = df[existing_cost_cols].isna().sum().sum()
-        #Sostituisco i NaN con 0 solo per le colonne dei costi esistenti
+        # Sostituisco i NaN con 0 solo per le colonne dei costi esistenti
         df[existing_cost_cols] = df[existing_cost_cols].fillna(0)
         print(f"[OP4] Feature dei costi ({', '.join(existing_cost_cols)}): riempiti {n_missing_costs} valori mancanti con 0.\n")
 
-
-    #Imputazione colonna "Age" con la media totale 
+    # Imputazione colonna "Age" con la media totale 
     if "Age" in df.columns:
         n_missing_age = df["Age"].isna().sum()
         
@@ -136,7 +150,6 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
         print(f"[OP4] Feature 'Age': riempiti {n_missing_age} valori mancanti con la media totale ({age_mean}).\n")
     
     # Imputazione per le altre feature categoriali
-
     features = [
         "HomePlanet",
         "Destination",
@@ -210,9 +223,8 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
         probability_dictionaries=probability_dictionaries
     )
 
-
 def main():
-    input_path = "train.csv"
+    input_path = "train_processed.csv"  # Modificato in base al tuo file
     output_path = "train_imputed_singletons.csv"
 
     df = pd.read_csv(input_path)
@@ -220,7 +232,6 @@ def main():
 
     risultato.df_output.to_csv(output_path, index=False)
     print(f"\nDataset salvato in: {output_path}")
-
 
 if __name__ == "__main__":
     main()
