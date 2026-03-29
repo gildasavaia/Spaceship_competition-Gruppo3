@@ -23,7 +23,7 @@ def run_op5(df: pd.DataFrame) -> op5_sumcosts_namesResult:
     df_processed['TotalSpending'] = df_processed[cost_cols].sum(axis=1)
 
     # 2. Rimozione colonne inutili
-    colonne_da_rimuovere = ['Names', 'Surnames']
+    colonne_da_rimuovere = ['Names', 'Surnames', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
     colonne_esistenti = [col for col in colonne_da_rimuovere if col in df_processed.columns]
     df_processed = df_processed.drop(columns=colonne_esistenti)
 
