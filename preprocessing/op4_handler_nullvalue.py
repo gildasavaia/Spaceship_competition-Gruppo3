@@ -64,23 +64,23 @@ def impute_missing_group_mode(
     
     return df
 
-def impute_missing_only_singletons(
+def impute_missing_probabilistic(
     df: pd.DataFrame,
     feature: str,
     prob_dict: dict,
-    singleton_mask: pd.Series,
+    target_mask: pd.Series,
     random_state: int = 42
 ) -> pd.DataFrame:
     """
-    Riempie i valori mancanti della feature SOLO per i passeggeri
-    che appartengono a gruppi di cardinalità 1.
+    Riempie i valori mancanti della feature estraendo valori in base alle probabilità globali.
+    Si applica ai passeggeri identificati da target_mask (es. singletons + gruppi interamente NaN).
     """
     if not prob_dict:
         return df
 
     rng = np.random.default_rng(random_state)
 
-    mask_to_fill = df[feature].isna() & singleton_mask
+    mask_to_fill = df[feature].isna() & target_mask
     n_missing = mask_to_fill.sum()
 
     if n_missing == 0:
@@ -102,14 +102,12 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     - Costi: sostituisce i NaN con 0.
     - Altre feature:
         - Gruppi con cardinalità > 1: usa la moda del gruppo.
-        - Gruppi con cardinalità = 1: usa le probabilità globali.
+        - Sezioni rimanenti (cardinalità = 1 OPPURE gruppi interamente vuoti): usa le probabilità globali.
     """
     df = df_input.copy()
 
     # --- INIZIO PULIZIA CRYOSLEEP ---
     if "CryoSleep" in df.columns:
-        # Uniformiamo i valori ambigui
-        # Poiché il DataFrame viene letto come stringhe/object, copriamo i vari casi
         replace_dict = {
             '0.0': 'False', 
             '1.0': 'True',
@@ -119,33 +117,21 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
             True: 'True'
         }
         df['CryoSleep'] = df['CryoSleep'].replace(replace_dict)
-        # Eventualmente potresti volerlo castare a bool vero e proprio, ma dipende 
-        # se nel resto del codice ti aspetti stringhe 'True'/'False' o oggetti bool.
-        # df['CryoSleep'] = df['CryoSleep'].astype(bool) # (Sconsigliato finché ci sono NaN)
         print("[OP4] Pulizia feature 'CryoSleep': uniformati '0.0'/'1.0' in 'False'/'True'.\n")
     # --- FINE PULIZIA CRYOSLEEP ---
 
-
-    # Sostituzione NaN con 0 per le feature dei costi (RoomService, FoodCourt, ShoppingMall, Spa, VRDeck)
+    # Sostituzione NaN con 0 per le feature dei costi
     cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
-    # Verifico quali delle colonne dei costi esistono nel dataframe prima di applicare fillna, per evitare errori se alcune colonne non sono presenti
     existing_cost_cols = [col for col in cost_cols if col in df.columns]
     if existing_cost_cols:
-        # Stampo il totale dei valori nulli presenti nelle colonne dei costi prima della sostituzione
         n_missing_costs = df[existing_cost_cols].isna().sum().sum()
-        # Sostituisco i NaN con 0 solo per le colonne dei costi esistenti
         df[existing_cost_cols] = df[existing_cost_cols].fillna(0)
         print(f"[OP4] Feature dei costi ({', '.join(existing_cost_cols)}): riempiti {n_missing_costs} valori mancanti con 0.\n")
 
     # Imputazione colonna "Age" con la media totale 
     if "Age" in df.columns:
         n_missing_age = df["Age"].isna().sum()
-        
-        # Calcolo la media e arrotondo: >= 5 per eccesso, < 5 per difetto
-        # Aggiungendo 0.5 e convertendo in int otteniamo esattamente questo risultato
         age_mean = int(df["Age"].mean() + 0.5)
-
-        # fillna per rimpiazzare i NaN con la media calcolata
         df["Age"] = df["Age"].fillna(age_mean)
         print(f"[OP4] Feature 'Age': riempiti {n_missing_age} valori mancanti con la media totale ({age_mean}).\n")
     
@@ -193,26 +179,34 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
             group_col=group_col,
             multi_mask=multi_mask
         )
-        after_multi = (df[feature].isna() & multi_mask).sum()
-        filled_multi = before_multi - after_multi
+        
+        # Dopo la moda, controlliamo quanti valori sono rimasti NaN nella multi_mask
+        # Questi sono esattamente i passeggeri appartenenti a gruppi in cui la feature era TUTTA NaN
+        after_multi_remaining_nans = (df[feature].isna() & multi_mask).sum()
+        filled_multi = before_multi - after_multi_remaining_nans
 
-        # 2. Imputazione probabilistica (cardinalità == 1)
-        before_single = (df[feature].isna() & singleton_mask).sum()
-        df = impute_missing_only_singletons(
+        # 2. Imputazione probabilistica
+        # Uniamo la maschera dei singletons con i valori ancora NaN dei multi_groups
+        prob_mask = singleton_mask | (df[feature].isna() & multi_mask)
+        
+        before_prob = (df[feature].isna() & prob_mask).sum()
+        df = impute_missing_probabilistic(
             df=df,
             feature=feature,
             prob_dict=probability_dictionaries[feature],
-            singleton_mask=singleton_mask,
+            target_mask=prob_mask,
             random_state=42 + i
         )
-        after_single = (df[feature].isna() & singleton_mask).sum()
-        filled_single = before_single - after_single
+        after_prob = (df[feature].isna() & prob_mask).sum()
+        filled_prob = before_prob - after_prob
 
         print(
             f"[OP4] Feature '{feature}': "
             f"riempiti {filled_multi} valori (moda gruppi multipli), "
-            f"riempiti {filled_single} valori (probabilità gruppi singoli)."
+            f"riempiti {filled_prob} valori (probabilità globale)."
         )
+        if after_multi_remaining_nans > 0:
+            print(f"      -> Di questi {filled_prob} probabilistici, {after_multi_remaining_nans} provenivano da gruppi multipli completamente vuoti.")
 
     print(f"\n[OP4] Statistiche gruppi:")
     print(f"  - Passeggeri in gruppi multipli (>1): {multi_mask.sum()}")
@@ -227,7 +221,14 @@ def main():
     input_path = "train_processed.csv"  # Modificato in base al tuo file
     output_path = "train_imputed_singletons.csv"
 
-    df = pd.read_csv(input_path)
+    # Creo un dataframe fittizio di test per dimostrazione se non trova il file, 
+    # ma il comportamento principale usa pd.read_csv()
+    try:
+        df = pd.read_csv(input_path)
+    except FileNotFoundError:
+        print(f"Attenzione: File '{input_path}' non trovato. Assicurati che esista nella directory.")
+        return
+
     risultato = run_handle_null_values(df)
 
     risultato.df_output.to_csv(output_path, index=False)

@@ -680,8 +680,8 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 0709,3,Europa,True,55 Cancri e,25.0,0.0,A,7,S,True,0.0
 0709,3,Europa,True,55 Cancri e,23.0,False,A,7,S,True,0.0
 0710,1,Mars,False,TRAPPIST-1e,23.0,False,E,42,P,False,2075.0
-0712,2,Mars,,TRAPPIST-1e,20.0,False,F,150,P,False,1759.0
-0712,2,Mars,,TRAPPIST-1e,2.0,False,F,150,P,True,0.0
+0712,2,Mars,False,TRAPPIST-1e,20.0,False,F,150,P,False,1759.0
+0712,2,Mars,True,TRAPPIST-1e,2.0,False,F,150,P,True,0.0
 0713,1,Earth,False,TRAPPIST-1e,26.0,False,E,50,S,False,1609.0
 0714,7,Earth,True,PSO J318.5-22,38.0,False,G,109,P,True,0.0
 0714,7,Earth,False,TRAPPIST-1e,1.0,False,G,109,P,False,0.0
@@ -1007,7 +1007,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1075,2,Europa,True,TRAPPIST-1e,14.0,False,B,41,S,True,0.0
 1075,2,Europa,True,TRAPPIST-1e,27.0,False,B,41,S,True,0.0
 1076,1,Earth,True,TRAPPIST-1e,25.0,False,G,161,P,False,0.0
-1077,1,Earth,False,TRAPPIST-1e,37.0,False,G,162,P,False,851.0
+1077,1,Earth,True,TRAPPIST-1e,37.0,False,G,162,P,False,851.0
 1078,1,Earth,False,55 Cancri e,25.0,False,E,60,P,False,788.0
 1079,1,Earth,False,55 Cancri e,41.0,False,G,163,P,False,771.0
 1080,1,Mars,False,TRAPPIST-1e,50.0,False,F,204,S,False,1310.0
@@ -1036,7 +1036,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1100,4,Mars,False,TRAPPIST-1e,5.0,False,F,226,P,True,0.0
 1100,4,Mars,False,TRAPPIST-1e,18.0,False,F,226,P,False,2603.0
 1100,4,Mars,False,TRAPPIST-1e,29.0,False,E,62,P,False,1028.0
-1102,1,Mars,True,PSO J318.5-22,39.0,False,F,227,P,False,1615.0
+1102,1,Mars,False,PSO J318.5-22,39.0,False,F,227,P,False,1615.0
 1105,1,Earth,False,TRAPPIST-1e,17.0,False,F,208,S,False,876.0
 1108,2,Mars,False,TRAPPIST-1e,58.0,False,F,211,S,False,1157.0
 1108,2,Mars,True,TRAPPIST-1e,5.0,False,F,211,S,True,0.0
@@ -1218,7 +1218,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1294,3,Europa,True,TRAPPIST-1e,28.0,False,A,14,S,True,0.0
 1294,3,Europa,True,PSO J318.5-22,30.0,False,A,14,S,True,0.0
 1294,3,Europa,False,TRAPPIST-1e,28.0,True,A,14,S,False,0.0
-1295,1,Earth,False,TRAPPIST-1e,19.0,False,F,281,S,False,787.0
+1295,1,Earth,True,TRAPPIST-1e,19.0,False,F,281,S,False,787.0
 1299,1,Earth,False,TRAPPIST-1e,22.0,False,F,250,S,True,680.0
 1300,1,Earth,False,55 Cancri e,27.0,False,F,251,S,False,694.0
 1302,1,Mars,False,55 Cancri e,22.0,False,D,45,S,True,5487.0
@@ -1262,7 +1262,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1333,1,Earth,False,PSO J318.5-22,32.0,False,F,269,P,False,741.0
 1335,1,Earth,True,TRAPPIST-1e,44.0,False,G,199,P,False,0.0
 1336,1,Earth,True,TRAPPIST-1e,17.0,False,G,201,S,True,0.0
-1337,1,Earth,True,55 Cancri e,35.0,False,F,258,S,False,1403.0
+1337,1,Earth,False,55 Cancri e,35.0,False,F,258,S,False,1403.0
 1340,1,Earth,True,TRAPPIST-1e,23.0,False,G,203,S,False,0.0
 1342,1,Earth,False,TRAPPIST-1e,34.0,False,G,200,P,False,884.0
 1345,1,Earth,False,TRAPPIST-1e,25.0,False,F,260,S,False,1913.0
@@ -1289,7 +1289,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1366,1,Earth,True,55 Cancri e,40.0,False,G,206,P,True,0.0
 1368,1,Earth,True,TRAPPIST-1e,27.0,False,G,208,P,False,0.0
 1370,1,Earth,False,TRAPPIST-1e,21.0,False,E,102,S,False,991.0
-1371,1,Mars,True,TRAPPIST-1e,25.0,False,D,44,P,False,1057.0
+1371,1,Mars,False,TRAPPIST-1e,25.0,False,D,44,P,False,1057.0
 1375,2,Earth,False,TRAPPIST-1e,2.0,False,G,208,S,False,0.0
 1375,2,Earth,False,TRAPPIST-1e,19.0,False,F,267,S,False,949.0
 1376,1,Earth,True,TRAPPIST-1e,41.0,False,G,211,P,False,0.0
@@ -1404,7 +1404,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1478,2,Earth,False,PSO J318.5-22,39.0,False,F,289,P,False,1453.0
 1479,1,Mars,True,TRAPPIST-1e,49.0,False,F,290,P,True,0.0
 1481,1,Mars,False,TRAPPIST-1e,27.0,False,E,91,P,False,1299.0
-1484,1,Earth,False,TRAPPIST-1e,16.0,False,E,93,P,False,977.0
+1484,1,Earth,True,TRAPPIST-1e,16.0,False,E,93,P,False,977.0
 1485,1,Mars,True,TRAPPIST-1e,38.0,False,F,291,P,True,0.0
 1488,1,Mars,True,TRAPPIST-1e,42.0,False,E,94,P,True,0.0
 1489,1,Earth,False,TRAPPIST-1e,19.0,False,G,229,S,False,888.0
@@ -1564,7 +1564,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 1657,1,Earth,False,TRAPPIST-1e,21.0,False,G,267,P,False,5648.0
 1658,1,Mars,False,TRAPPIST-1e,29.0,False,F,312,S,True,1160.0
 1659,1,Earth,False,TRAPPIST-1e,41.0,False,F,313,S,False,803.0
-1660,1,Earth,True,TRAPPIST-1e,20.0,False,E,122,S,False,906.0
+1660,1,Earth,False,TRAPPIST-1e,20.0,False,E,122,S,False,906.0
 1661,4,Europa,False,TRAPPIST-1e,56.0,False,A,20,S,False,0.0
 1661,4,Europa,False,TRAPPIST-1e,57.0,False,A,20,S,False,2376.0
 1661,4,Europa,True,TRAPPIST-1e,48.0,False,A,20,S,True,0.0
@@ -1927,7 +1927,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2059,1,Earth,False,TRAPPIST-1e,55.0,False,G,333,P,True,909.0
 2060,1,Earth,False,55 Cancri e,22.0,False,G,327,S,False,1853.0
 2061,1,Europa,False,TRAPPIST-1e,34.0,False,D,65,P,True,5446.0
-2062,1,Mars,False,TRAPPIST-1e,17.0,False,F,398,S,False,1336.0
+2062,1,Mars,True,TRAPPIST-1e,17.0,False,F,398,S,False,1336.0
 2063,1,Earth,True,PSO J318.5-22,38.0,False,G,328,S,False,0.0
 2065,1,Earth,False,TRAPPIST-1e,13.0,False,F,410,P,False,1975.0
 2066,1,Earth,True,TRAPPIST-1e,19.0,False,G,329,S,True,0.0
@@ -2230,7 +2230,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2385,1,Mars,False,TRAPPIST-1e,23.0,False,F,461,S,False,1854.0
 2387,1,Earth,False,TRAPPIST-1e,58.0,False,E,142,P,True,1580.0
 2389,1,Earth,False,TRAPPIST-1e,22.0,False,G,384,S,False,722.0
-2390,1,Earth,False,TRAPPIST-1e,24.0,False,G,385,P,False,4179.0
+2390,1,Earth,True,TRAPPIST-1e,24.0,False,G,385,P,False,4179.0
 2391,1,Earth,False,TRAPPIST-1e,20.0,False,E,143,P,False,788.0
 2392,1,Europa,True,TRAPPIST-1e,37.0,False,G,386,P,True,0.0
 2395,1,Earth,False,TRAPPIST-1e,49.0,False,G,387,P,False,713.0
@@ -2401,7 +2401,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2581,2,Earth,False,TRAPPIST-1e,20.0,False,E,156,P,False,786.0
 2581,2,Earth,False,TRAPPIST-1e,22.0,False,F,531,P,False,759.0
 2582,1,Earth,False,TRAPPIST-1e,22.0,False,G,415,P,False,785.0
-2584,1,Earth,True,PSO J318.5-22,21.0,False,G,417,P,False,0.0
+2584,1,Earth,False,PSO J318.5-22,21.0,False,G,417,P,False,0.0
 2588,1,Earth,False,TRAPPIST-1e,28.0,False,G,419,P,True,913.0
 2589,5,Europa,True,TRAPPIST-1e,26.0,False,C,91,P,True,0.0
 2589,5,Europa,True,55 Cancri e,50.0,False,C,91,P,True,0.0
@@ -2439,7 +2439,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2607,4,Europa,False,55 Cancri e,35.0,False,B,99,S,True,2451.0
 2607,4,Europa,False,TRAPPIST-1e,12.0,False,B,99,S,True,0.0
 2609,1,Earth,True,PSO J318.5-22,29.0,False,G,416,S,True,0.0
-2616,1,Earth,True,TRAPPIST-1e,17.0,False,F,541,P,False,822.0
+2616,1,Earth,False,TRAPPIST-1e,17.0,False,F,541,P,False,822.0
 2617,1,Earth,False,PSO J318.5-22,32.0,False,G,424,P,False,528.0
 2618,1,Earth,True,TRAPPIST-1e,23.0,False,E,159,P,True,0.0
 2619,1,Earth,False,55 Cancri e,17.0,False,F,504,S,False,2000.0
@@ -2559,7 +2559,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2743,1,Earth,False,TRAPPIST-1e,15.0,False,F,528,S,False,759.0
 2745,1,Mars,False,TRAPPIST-1e,31.0,False,F,568,P,False,1821.0
 2746,1,Mars,False,TRAPPIST-1e,52.0,False,F,569,P,False,1119.0
-2747,1,Mars,False,TRAPPIST-1e,49.0,False,F,570,P,True,0.0
+2747,1,Mars,True,TRAPPIST-1e,49.0,False,F,570,P,True,0.0
 2748,1,Earth,False,55 Cancri e,29.0,False,F,529,S,True,691.0
 2750,1,Earth,False,TRAPPIST-1e,18.0,False,F,571,P,True,790.0
 2751,1,Mars,True,55 Cancri e,41.0,False,F,530,S,True,0.0
@@ -2764,7 +2764,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 2970,1,Earth,False,TRAPPIST-1e,29.0,False,F,1615,S,False,829.0
 2971,1,Europa,False,TRAPPIST-1e,38.0,False,T,3,P,True,3164.0
 2972,1,Earth,False,TRAPPIST-1e,14.0,False,E,182,P,True,1632.0
-2975,1,Earth,True,PSO J318.5-22,20.0,False,F,564,S,False,595.0
+2975,1,Earth,False,PSO J318.5-22,20.0,False,F,564,S,False,595.0
 2979,1,Europa,False,TRAPPIST-1e,33.0,False,B,93,P,False,0.0
 2982,1,Europa,True,55 Cancri e,33.0,False,B,111,S,True,0.0
 2983,1,Earth,False,TRAPPIST-1e,13.0,False,E,183,P,True,841.0
@@ -2857,7 +2857,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 3083,1,Europa,False,55 Cancri e,23.0,False,D,100,S,False,3098.0
 3084,1,Mars,True,55 Cancri e,60.0,False,D,101,S,True,0.0
 3085,1,Earth,False,TRAPPIST-1e,73.0,False,G,504,P,False,709.0
-3087,1,Earth,False,TRAPPIST-1e,35.0,False,G,505,P,True,0.0
+3087,1,Earth,True,TRAPPIST-1e,35.0,False,G,505,P,True,0.0
 3088,1,Europa,False,TRAPPIST-1e,28.0,False,A,25,P,False,0.0
 3090,1,Europa,False,TRAPPIST-1e,27.0,True,B,115,S,True,6864.0
 3091,2,Europa,False,TRAPPIST-1e,14.0,False,D,102,S,False,9190.0
@@ -2980,7 +2980,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 3220,1,Earth,False,TRAPPIST-1e,33.0,False,G,522,P,False,784.0
 3221,1,Earth,False,PSO J318.5-22,19.0,False,G,511,S,False,616.0
 3223,1,Earth,False,TRAPPIST-1e,29.0,False,G,523,P,False,852.0
-3224,1,Earth,False,TRAPPIST-1e,33.0,False,F,607,S,True,1052.0
+3224,1,Earth,True,TRAPPIST-1e,33.0,False,F,607,S,True,1052.0
 3225,2,Europa,True,55 Cancri e,17.0,False,C,120,S,True,0.0
 3225,2,Europa,False,TRAPPIST-1e,28.0,False,C,120,S,True,3690.0
 3227,1,Earth,False,TRAPPIST-1e,21.0,False,G,513,S,False,882.0
@@ -3054,7 +3054,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 3296,1,Earth,False,55 Cancri e,44.0,False,F,624,S,True,738.0
 3297,1,Earth,False,TRAPPIST-1e,64.0,False,F,686,P,False,1103.0
 3298,1,Earth,False,TRAPPIST-1e,27.0,False,F,687,P,True,902.0
-3299,1,Earth,True,TRAPPIST-1e,24.0,False,G,524,S,False,0.0
+3299,1,Earth,False,TRAPPIST-1e,24.0,False,G,524,S,False,0.0
 3300,2,Mars,True,TRAPPIST-1e,38.0,False,F,688,P,True,0.0
 3300,2,Mars,False,TRAPPIST-1e,47.0,False,F,688,P,False,1774.0
 3301,4,Earth,True,55 Cancri e,8.0,False,G,525,S,True,0.0
@@ -3071,7 +3071,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 3312,1,Europa,False,TRAPPIST-1e,30.0,False,E,203,P,False,4810.0
 3313,1,Europa,True,55 Cancri e,49.0,False,B,122,S,True,0.0
 3314,1,Earth,False,TRAPPIST-1e,19.0,False,F,626,S,False,645.0
-3315,1,Earth,True,TRAPPIST-1e,15.0,False,F,627,S,False,2140.0
+3315,1,Earth,False,TRAPPIST-1e,15.0,False,F,627,S,False,2140.0
 3317,1,Earth,False,TRAPPIST-1e,27.0,False,G,540,P,False,1765.0
 3318,5,Europa,False,TRAPPIST-1e,39.0,False,B,123,S,True,1380.0
 3318,5,Europa,True,55 Cancri e,32.0,False,B,123,S,True,0.0
@@ -3346,7 +3346,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 3597,1,Earth,False,TRAPPIST-1e,25.0,False,G,589,P,False,914.0
 3598,1,Earth,False,55 Cancri e,19.0,False,G,205,P,False,676.0
 3600,1,Earth,True,TRAPPIST-1e,24.0,False,G,580,S,True,0.0
-3602,1,Mars,False,TRAPPIST-1e,11.0,False,F,678,S,True,0.0
+3602,1,Mars,True,TRAPPIST-1e,11.0,False,F,678,S,True,0.0
 3605,1,Earth,True,55 Cancri e,31.0,False,G,592,P,True,0.0
 3606,1,Earth,True,TRAPPIST-1e,46.0,False,G,593,P,False,0.0
 3607,1,Mars,True,TRAPPIST-1e,31.0,False,F,747,P,True,0.0
@@ -3775,7 +3775,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 4030,5,Earth,False,TRAPPIST-1e,8.0,False,G,661,S,False,0.0
 4031,2,Europa,True,55 Cancri e,29.0,False,C,131,P,True,0.0
 4031,2,Europa,True,TRAPPIST-1e,27.0,False,C,131,P,True,0.0
-4032,1,Earth,False,PSO J318.5-22,13.0,False,G,661,P,True,0.0
+4032,1,Earth,True,PSO J318.5-22,13.0,False,G,661,P,True,0.0
 4033,1,Europa,False,55 Cancri e,49.0,False,C,144,S,True,11695.0
 4034,1,Mars,True,TRAPPIST-1e,38.0,False,E,247,P,False,0.0
 4035,1,Earth,True,55 Cancri e,21.0,False,G,662,P,True,0.0
@@ -3849,7 +3849,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 4116,1,Earth,False,TRAPPIST-1e,21.0,False,F,774,S,True,776.0
 4120,1,Earth,True,PSO J318.5-22,29.0,False,G,680,S,False,0.0
 4125,1,Earth,True,PSO J318.5-22,22.0,False,G,677,P,True,0.0
-4127,1,Europa,True,TRAPPIST-1e,23.0,False,B,130,P,True,0.0
+4127,1,Europa,False,TRAPPIST-1e,23.0,False,B,130,P,True,0.0
 4128,3,Mars,False,TRAPPIST-1e,54.0,True,F,846,P,False,1286.0
 4128,3,Mars,False,TRAPPIST-1e,0.0,False,F,846,P,True,0.0
 4128,3,Mars,True,TRAPPIST-1e,4.0,False,F,846,P,True,0.0
@@ -4089,7 +4089,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 4362,1,Europa,False,TRAPPIST-1e,43.0,False,B,168,S,True,3598.0
 4364,1,Earth,True,PSO J318.5-22,25.0,False,G,720,P,True,0.0
 4365,1,Europa,False,TRAPPIST-1e,13.0,False,F,898,P,False,803.0
-4366,1,Earth,False,PSO J318.5-22,15.0,False,F,899,P,True,878.0
+4366,1,Earth,True,PSO J318.5-22,15.0,False,F,899,P,True,878.0
 4367,1,Earth,True,55 Cancri e,37.0,False,G,710,S,True,0.0
 4368,1,Mars,True,55 Cancri e,32.0,False,F,900,P,True,0.0
 4369,1,Earth,False,TRAPPIST-1e,19.0,False,F,820,S,False,857.0
@@ -4128,7 +4128,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 4402,1,Earth,True,PSO J318.5-22,29.0,False,G,725,P,False,0.0
 4403,2,Earth,False,TRAPPIST-1e,55.0,False,F,831,S,False,1469.0
 4403,2,Earth,False,TRAPPIST-1e,41.0,False,G,717,S,False,773.0
-4404,1,Earth,True,TRAPPIST-1e,38.0,False,G,726,P,False,527.0
+4404,1,Earth,False,TRAPPIST-1e,38.0,False,G,726,P,False,527.0
 4405,1,Europa,True,TRAPPIST-1e,27.0,False,C,159,S,True,0.0
 4407,1,Earth,True,TRAPPIST-1e,55.0,False,G,719,S,True,0.0
 4408,1,Mars,True,TRAPPIST-1e,75.0,False,F,906,P,True,0.0
@@ -4657,7 +4657,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 4961,1,Mars,False,TRAPPIST-1e,32.0,False,F,942,S,True,1328.0
 4963,1,Earth,True,TRAPPIST-1e,61.0,False,G,811,S,True,0.0
 4964,1,Mars,False,TRAPPIST-1e,64.0,False,D,154,S,False,2397.0
-4965,1,Earth,True,TRAPPIST-1e,21.0,False,E,308,P,False,1670.0
+4965,1,Earth,False,TRAPPIST-1e,21.0,False,E,308,P,False,1670.0
 4970,1,Earth,False,PSO J318.5-22,26.0,False,F,943,S,False,1385.0
 4972,1,Europa,False,55 Cancri e,35.0,False,B,162,P,True,4635.0
 4973,2,Earth,False,TRAPPIST-1e,43.0,False,E,309,P,False,997.0
@@ -4750,7 +4750,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5065,2,Europa,True,55 Cancri e,29.0,False,E,326,S,True,0.0
 5065,2,Europa,False,55 Cancri e,26.0,False,E,326,S,False,3697.0
 5067,1,Earth,False,55 Cancri e,36.0,False,F,964,S,True,2152.0
-5068,1,Earth,False,TRAPPIST-1e,19.0,False,E,314,P,True,0.0
+5068,1,Earth,True,TRAPPIST-1e,19.0,False,E,314,P,True,0.0
 5069,1,Earth,False,PSO J318.5-22,56.0,False,F,965,S,False,1379.0
 5070,1,Earth,False,TRAPPIST-1e,20.0,False,F,966,S,True,722.0
 5072,2,Earth,False,TRAPPIST-1e,10.0,False,G,817,P,False,0.0
@@ -4874,7 +4874,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5197,1,Earth,False,TRAPPIST-1e,20.0,False,E,325,P,True,788.0
 5198,1,Mars,False,TRAPPIST-1e,45.0,False,F,1059,P,False,1308.0
 5199,1,Europa,False,TRAPPIST-1e,35.0,False,D,158,S,False,4141.0
-5201,1,Earth,False,TRAPPIST-1e,21.0,False,F,1060,P,False,2151.0
+5201,1,Earth,True,TRAPPIST-1e,21.0,False,F,1060,P,False,2151.0
 5202,1,Earth,True,TRAPPIST-1e,14.0,False,G,840,P,True,0.0
 5204,1,Earth,False,PSO J318.5-22,46.0,False,F,1061,P,False,550.0
 5205,3,Earth,False,TRAPPIST-1e,22.0,False,F,997,S,False,1500.0
@@ -5007,7 +5007,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5347,1,Europa,False,TRAPPIST-1e,18.0,False,C,169,P,False,7548.0
 5348,1,Mars,False,TRAPPIST-1e,26.0,False,D,168,P,True,1056.0
 5350,1,Europa,False,TRAPPIST-1e,35.0,False,C,170,P,False,4548.0
-5351,1,Mars,True,55 Cancri e,46.0,False,F,1026,S,False,2662.0
+5351,1,Mars,False,55 Cancri e,46.0,False,F,1026,S,False,2662.0
 5353,2,Europa,True,55 Cancri e,13.0,False,B,205,S,True,0.0
 5353,2,Europa,False,TRAPPIST-1e,39.0,False,B,205,S,True,9670.0
 5354,2,Mars,False,PSO J318.5-22,49.0,False,D,161,S,False,1775.0
@@ -5059,7 +5059,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5408,2,Mars,False,TRAPPIST-1e,16.0,False,D,174,P,False,3367.0
 5410,1,Mars,False,TRAPPIST-1e,33.0,False,D,163,S,False,2383.0
 5411,1,Europa,False,TRAPPIST-1e,38.0,False,B,206,S,False,6087.0
-5412,1,Earth,True,TRAPPIST-1e,23.0,False,G,870,P,True,808.0
+5412,1,Earth,False,TRAPPIST-1e,23.0,False,G,870,P,True,808.0
 5413,1,Earth,False,TRAPPIST-1e,16.0,False,G,871,P,True,928.0
 5414,5,Earth,False,PSO J318.5-22,16.0,False,G,872,P,False,769.0
 5414,5,Earth,False,TRAPPIST-1e,11.0,False,G,872,P,False,0.0
@@ -5369,7 +5369,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5733,2,Earth,False,55 Cancri e,34.0,False,G,922,P,True,1793.0
 5733,2,Earth,False,55 Cancri e,28.0,False,F,1188,P,False,1300.0
 5735,1,Earth,True,TRAPPIST-1e,29.0,False,E,362,P,True,0.0
-5736,1,Earth,False,TRAPPIST-1e,23.0,False,F,1189,P,False,620.0
+5736,1,Earth,True,TRAPPIST-1e,23.0,False,F,1189,P,False,620.0
 5737,2,Europa,False,TRAPPIST-1e,39.0,False,C,216,S,True,11911.0
 5737,2,Europa,False,TRAPPIST-1e,35.0,False,C,216,S,True,8694.0
 5738,1,Earth,True,TRAPPIST-1e,18.0,False,G,929,S,True,0.0
@@ -5530,7 +5530,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5890,1,Earth,True,TRAPPIST-1e,27.0,False,G,955,S,True,0.0
 5891,1,Earth,True,PSO J318.5-22,19.0,False,G,955,P,True,0.0
 5894,1,Earth,True,PSO J318.5-22,18.0,False,G,957,S,True,0.0
-5897,1,Europa,False,55 Cancri e,25.0,False,C,221,S,True,0.0
+5897,1,Europa,True,55 Cancri e,25.0,False,C,221,S,True,0.0
 5898,1,Earth,True,55 Cancri e,41.0,False,G,958,S,True,0.0
 5900,3,Mars,True,TRAPPIST-1e,62.0,False,F,1220,P,True,0.0
 5900,3,Mars,True,TRAPPIST-1e,30.0,False,F,1220,P,True,0.0
@@ -5587,7 +5587,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 5949,2,Mars,True,TRAPPIST-1e,18.0,False,F,1132,S,True,0.0
 5950,1,Earth,False,TRAPPIST-1e,32.0,False,E,378,P,False,69.0
 5951,1,Earth,False,55 Cancri e,21.0,False,F,1133,S,False,595.0
-5952,1,Mars,True,55 Cancri e,22.0,False,F,1134,S,True,0.0
+5952,1,Mars,False,55 Cancri e,22.0,False,F,1134,S,True,0.0
 5953,1,Mars,False,TRAPPIST-1e,13.0,False,E,390,S,False,1370.0
 5954,1,Mars,False,TRAPPIST-1e,25.0,False,E,391,S,False,2099.0
 5955,2,Mars,False,TRAPPIST-1e,33.0,False,E,392,S,False,1022.0
@@ -5772,13 +5772,13 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 6111,5,Europa,False,TRAPPIST-1e,33.0,False,A,58,P,True,2893.0
 6112,1,Mars,True,TRAPPIST-1e,36.0,False,F,1264,P,True,0.0
 6115,1,Mars,False,TRAPPIST-1e,50.0,False,E,390,P,False,1298.0
-6116,1,Mars,True,TRAPPIST-1e,28.0,False,F,1167,S,False,906.0
+6116,1,Mars,False,TRAPPIST-1e,28.0,False,F,1167,S,False,906.0
 6117,1,Europa,False,TRAPPIST-1e,56.0,False,B,234,S,False,5068.0
 6118,2,Mars,False,55 Cancri e,42.0,False,F,1266,P,False,1462.0
 6118,2,Mars,True,TRAPPIST-1e,39.0,False,E,391,P,False,0.0
 6120,1,Earth,False,PSO J318.5-22,13.0,False,F,1169,S,True,1180.0
-6121,2,Europa,False,TRAPPIST-1e,28.0,,C,229,S,True,4622.0
-6121,2,Europa,False,TRAPPIST-1e,55.0,,C,229,S,False,4242.0
+6121,2,Europa,False,TRAPPIST-1e,28.0,False,C,229,S,True,4622.0
+6121,2,Europa,False,TRAPPIST-1e,55.0,False,C,229,S,False,4242.0
 6122,1,Earth,False,55 Cancri e,36.0,False,F,1267,P,True,700.0
 6123,1,Mars,True,TRAPPIST-1e,29.0,False,F,1268,P,True,0.0
 6124,1,Earth,False,PSO J318.5-22,37.0,False,G,991,P,True,842.0
@@ -6686,8 +6686,8 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7049,1,Earth,True,TRAPPIST-1e,21.0,False,G,1153,S,True,0.0
 7050,1,Earth,False,TRAPPIST-1e,13.0,False,F,1344,S,True,1003.0
 7051,1,Mars,False,TRAPPIST-1e,39.0,False,D,223,P,False,764.0
-7052,1,Europa,False,55 Cancri e,27.0,False,E,469,S,True,0.0
-7053,1,Earth,False,PSO J318.5-22,23.0,False,F,1463,P,False,1193.0
+7052,1,Europa,True,55 Cancri e,27.0,False,E,469,S,True,0.0
+7053,1,Earth,True,PSO J318.5-22,23.0,False,F,1463,P,False,1193.0
 7056,1,Europa,False,55 Cancri e,43.0,False,D,217,S,False,5532.0
 7057,1,Mars,False,TRAPPIST-1e,19.0,False,F,1346,S,False,5917.0
 7058,1,Mars,True,55 Cancri e,30.0,False,F,1347,S,True,0.0
@@ -6878,7 +6878,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7278,1,Earth,False,TRAPPIST-1e,17.0,False,E,485,S,True,983.0
 7279,1,Europa,True,55 Cancri e,38.0,False,C,236,P,True,0.0
 7280,1,Mars,False,TRAPPIST-1e,34.0,False,F,1508,P,False,5962.0
-7283,1,Mars,True,TRAPPIST-1e,20.0,False,F,1509,P,True,0.0
+7283,1,Mars,False,TRAPPIST-1e,20.0,False,F,1509,P,True,0.0
 7284,1,Earth,False,TRAPPIST-1e,17.0,False,G,1174,P,False,770.0
 7285,1,Earth,True,PSO J318.5-22,36.0,False,G,1185,S,True,0.0
 7289,1,Europa,False,55 Cancri e,52.0,False,A,78,P,True,2389.0
@@ -6916,8 +6916,8 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7331,1,Mars,False,TRAPPIST-1e,61.0,False,D,232,P,False,1719.0
 7332,1,Earth,False,TRAPPIST-1e,39.0,False,E,488,S,False,791.0
 7334,1,Earth,False,TRAPPIST-1e,22.0,False,E,490,S,False,788.0
-7336,2,,False,TRAPPIST-1e,30.0,False,F,1411,S,False,970.0
-7336,2,,False,TRAPPIST-1e,26.0,False,F,1411,S,False,902.0
+7336,2,Earth,False,TRAPPIST-1e,30.0,False,F,1411,S,False,970.0
+7336,2,Earth,False,TRAPPIST-1e,26.0,False,F,1411,S,False,902.0
 7337,1,Europa,False,TRAPPIST-1e,25.0,False,A,89,S,False,5979.0
 7338,1,Mars,False,TRAPPIST-1e,42.0,False,D,233,P,False,2704.0
 7339,1,Europa,False,TRAPPIST-1e,33.0,False,E,474,P,False,18166.0
@@ -6984,14 +6984,14 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7422,1,Earth,False,TRAPPIST-1e,21.0,False,G,1204,S,False,620.0
 7425,2,Earth,True,TRAPPIST-1e,29.0,False,G,1200,P,True,0.0
 7425,2,Earth,False,TRAPPIST-1e,19.0,False,G,1200,P,False,889.0
-7427,1,Mars,True,TRAPPIST-1e,50.0,False,F,1423,S,True,0.0
+7427,1,Mars,False,TRAPPIST-1e,50.0,False,F,1423,S,True,0.0
 7428,1,Europa,False,TRAPPIST-1e,28.0,False,A,79,P,False,2051.0
 7429,1,Mars,False,TRAPPIST-1e,38.0,False,C,96,P,False,1183.0
 7430,1,Earth,False,PSO J318.5-22,24.0,False,G,1205,S,False,753.0
 7431,1,Europa,False,55 Cancri e,31.0,False,A,90,S,False,3880.0
 7432,1,Europa,True,TRAPPIST-1e,38.0,False,E,481,P,True,0.0
 7435,1,Europa,True,55 Cancri e,26.0,False,B,244,P,True,0.0
-7436,1,Earth,False,TRAPPIST-1e,28.0,False,G,1202,P,False,0.0
+7436,1,Earth,True,TRAPPIST-1e,28.0,False,G,1202,P,False,0.0
 7437,3,Europa,True,55 Cancri e,45.0,False,B,279,S,True,0.0
 7437,3,Europa,True,TRAPPIST-1e,47.0,False,B,279,S,True,0.0
 7437,3,Europa,True,TRAPPIST-1e,60.0,False,B,279,S,True,0.0
@@ -7058,7 +7058,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7509,1,Earth,False,TRAPPIST-1e,37.0,False,F,1434,S,False,1449.0
 7510,1,Mars,False,55 Cancri e,18.0,False,F,1435,S,False,1450.0
 7512,1,Earth,False,PSO J318.5-22,29.0,False,F,1436,S,False,603.0
-7513,1,Earth,True,TRAPPIST-1e,25.0,False,E,488,P,False,787.0
+7513,1,Earth,False,TRAPPIST-1e,25.0,False,E,488,P,False,787.0
 7514,1,Earth,False,TRAPPIST-1e,52.0,False,F,1555,P,False,2106.0
 7515,2,Mars,True,TRAPPIST-1e,24.0,False,F,1437,S,False,0.0
 7515,2,Mars,False,TRAPPIST-1e,0.0,False,F,1437,S,True,0.0
@@ -7092,7 +7092,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7552,1,Earth,False,TRAPPIST-1e,26.0,False,E,490,P,True,792.0
 7553,1,Earth,False,PSO J318.5-22,19.0,False,F,1444,S,False,599.0
 7559,1,Earth,False,TRAPPIST-1e,22.0,False,F,1569,P,False,864.0
-7560,1,Europa,False,TRAPPIST-1e,17.0,False,C,244,P,True,0.0
+7560,1,Europa,True,TRAPPIST-1e,17.0,False,C,244,P,True,0.0
 7561,1,Earth,False,TRAPPIST-1e,18.0,False,F,1445,S,False,776.0
 7563,1,Mars,True,55 Cancri e,39.0,False,F,1570,P,True,0.0
 7565,4,Europa,False,TRAPPIST-1e,37.0,False,B,247,P,True,8606.0
@@ -7217,7 +7217,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7709,2,Earth,False,PSO J318.5-22,27.0,False,F,1604,P,False,2721.0
 7709,2,Earth,True,PSO J318.5-22,24.0,False,G,1238,P,False,0.0
 7710,1,Europa,False,TRAPPIST-1e,27.0,False,B,253,P,True,6751.0
-7711,1,Earth,True,TRAPPIST-1e,24.0,False,D,241,P,False,1783.0
+7711,1,Europa,False,TRAPPIST-1e,24.0,False,D,241,P,False,1783.0
 7712,1,Europa,False,TRAPPIST-1e,25.0,True,A,93,S,True,4301.0
 7713,1,Europa,True,TRAPPIST-1e,30.0,False,B,296,S,True,0.0
 7714,1,Earth,False,TRAPPIST-1e,19.0,False,G,1239,P,False,1800.0
@@ -7292,7 +7292,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7793,1,Earth,False,TRAPPIST-1e,18.0,False,F,1617,P,False,2141.0
 7797,1,Earth,False,TRAPPIST-1e,44.0,False,E,506,P,False,792.0
 7800,1,Earth,True,TRAPPIST-1e,15.0,False,G,1251,P,True,0.0
-7801,1,Europa,False,55 Cancri e,21.0,False,G,1374,S,False,4393.0
+7801,1,Earth,False,55 Cancri e,21.0,False,G,1374,S,False,4393.0
 7802,1,Mars,False,TRAPPIST-1e,33.0,False,F,1620,P,False,2598.0
 7803,2,Earth,False,55 Cancri e,3.0,False,G,1253,P,False,0.0
 7803,2,Earth,True,55 Cancri e,19.0,False,G,1253,P,True,0.0
@@ -7305,7 +7305,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7812,1,Mars,False,TRAPPIST-1e,26.0,False,F,1495,S,False,1383.0
 7813,1,Earth,False,TRAPPIST-1e,27.0,False,F,1622,P,False,880.0
 7815,1,Earth,False,PSO J318.5-22,27.0,False,F,1496,S,True,605.0
-7816,1,Earth,False,PSO J318.5-22,37.0,False,F,1497,S,True,925.0
+7816,1,Earth,True,PSO J318.5-22,37.0,False,F,1497,S,True,925.0
 7818,1,Earth,True,TRAPPIST-1e,22.0,False,G,1257,P,False,0.0
 7820,1,Earth,False,55 Cancri e,24.0,False,G,1258,P,True,809.0
 7821,1,Earth,False,TRAPPIST-1e,23.0,False,G,1264,S,False,769.0
@@ -7345,7 +7345,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 7858,3,Earth,False,TRAPPIST-1e,21.0,False,G,1264,P,False,845.0
 7858,3,Earth,False,55 Cancri e,16.0,False,F,1630,P,False,874.0
 7858,3,Earth,False,TRAPPIST-1e,40.0,False,F,1630,P,False,828.0
-7859,1,Earth,False,TRAPPIST-1e,23.0,False,F,1504,S,True,1288.0
+7859,1,Europa,False,TRAPPIST-1e,23.0,False,F,1504,S,True,1288.0
 7861,1,Earth,True,TRAPPIST-1e,6.0,False,G,1265,P,False,0.0
 7863,1,Earth,False,TRAPPIST-1e,17.0,False,F,1505,S,True,2588.0
 7864,1,Earth,False,55 Cancri e,37.0,False,F,1506,S,True,2234.0
@@ -7518,7 +7518,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8037,1,Earth,False,TRAPPIST-1e,14.0,False,F,1538,S,False,902.0
 8038,2,Europa,True,55 Cancri e,29.0,False,C,301,S,True,0.0
 8038,2,Europa,True,55 Cancri e,26.0,False,C,301,S,True,0.0
-8042,1,Europa,True,55 Cancri e,21.0,False,G,1299,P,False,0.0
+8042,1,Earth,True,55 Cancri e,21.0,False,G,1299,P,False,0.0
 8043,4,Europa,False,55 Cancri e,45.0,False,A,97,S,True,18266.0
 8043,4,Europa,False,TRAPPIST-1e,29.0,0.0,A,97,S,True,1817.0
 8043,4,Europa,False,TRAPPIST-1e,39.0,True,A,97,S,True,1972.0
@@ -7701,7 +7701,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8216,1,Earth,False,TRAPPIST-1e,18.0,False,G,1334,P,True,704.0
 8217,1,Earth,False,TRAPPIST-1e,49.0,False,F,1570,S,False,800.0
 8218,1,Europa,True,TRAPPIST-1e,33.0,False,B,272,P,True,0.0
-8219,1,Earth,False,TRAPPIST-1e,18.0,False,G,1335,P,False,1779.0
+8219,1,Earth,True,TRAPPIST-1e,18.0,False,G,1335,P,False,1779.0
 8220,1,Europa,False,TRAPPIST-1e,29.0,False,A,99,S,True,5326.0
 8221,1,Mars,True,TRAPPIST-1e,34.0,False,F,1696,P,True,0.0
 8222,2,Mars,False,TRAPPIST-1e,43.0,False,D,257,P,False,2384.0
@@ -7760,7 +7760,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8277,1,Earth,True,55 Cancri e,32.0,False,G,1348,P,True,0.0
 8279,1,Earth,False,TRAPPIST-1e,31.0,False,G,1349,P,True,4445.0
 8280,1,Earth,False,TRAPPIST-1e,34.0,False,F,1703,P,True,902.0
-8281,1,Earth,False,TRAPPIST-1e,45.0,False,F,1704,P,False,704.0
+8281,1,Mars,False,TRAPPIST-1e,45.0,False,F,1704,P,False,704.0
 8282,1,Earth,False,TRAPPIST-1e,61.0,False,G,1336,S,False,807.0
 8287,1,Mars,False,TRAPPIST-1e,21.0,False,E,542,S,False,1896.0
 8288,2,Mars,False,TRAPPIST-1e,29.0,False,D,259,P,False,2729.0
@@ -7770,7 +7770,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8292,1,Europa,True,TRAPPIST-1e,39.0,False,C,310,S,True,0.0
 8294,1,Mars,True,TRAPPIST-1e,62.0,False,E,543,S,True,0.0
 8295,1,Mars,False,TRAPPIST-1e,40.0,False,F,1591,S,False,1309.0
-8297,1,Earth,False,TRAPPIST-1e,21.0,False,F,1592,S,False,666.0
+8297,1,Mars,False,TRAPPIST-1e,21.0,False,F,1592,S,False,666.0
 8298,1,Mars,True,TRAPPIST-1e,12.0,False,F,1593,S,True,0.0
 8300,1,Europa,False,TRAPPIST-1e,27.0,False,C,274,P,True,2542.0
 8301,1,Europa,False,TRAPPIST-1e,28.0,False,C,275,P,False,7792.0
@@ -7932,7 +7932,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8467,1,Earth,True,55 Cancri e,14.0,False,G,1379,P,True,0.0
 8468,1,Mars,False,55 Cancri e,38.0,False,D,263,P,False,1180.0
 8469,1,Earth,True,55 Cancri e,23.0,False,G,1356,S,True,0.0
-8470,1,Europa,True,55 Cancri e,31.0,True,C,281,P,False,14028.0
+8470,1,Europa,False,55 Cancri e,31.0,True,C,281,P,False,14028.0
 8471,1,Europa,False,55 Cancri e,66.0,True,E,556,S,False,3747.0
 8472,1,Earth,True,TRAPPIST-1e,56.0,False,G,1380,P,False,0.0
 8474,1,Earth,True,55 Cancri e,21.0,False,F,1632,S,False,737.0
@@ -7968,7 +7968,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8509,1,Earth,False,TRAPPIST-1e,43.0,False,G,1364,S,False,884.0
 8511,1,Earth,False,PSO J318.5-22,51.0,False,G,1365,S,False,773.0
 8512,1,Earth,False,55 Cancri e,48.0,False,F,1637,S,True,727.0
-8514,1,Mars,True,TRAPPIST-1e,51.0,False,F,1748,P,False,2618.0
+8514,1,Mars,False,TRAPPIST-1e,51.0,False,F,1748,P,False,2618.0
 8516,1,Earth,False,TRAPPIST-1e,20.0,False,F,1750,P,True,327.0
 8521,1,Europa,False,TRAPPIST-1e,41.0,False,A,102,S,False,0.0
 8522,1,Earth,False,TRAPPIST-1e,27.0,False,F,1751,P,True,872.0
@@ -8022,7 +8022,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8584,1,Earth,False,TRAPPIST-1e,22.0,False,F,1655,S,False,697.0
 8585,1,Mars,False,TRAPPIST-1e,50.0,False,D,259,S,False,1181.0
 8586,1,Mars,False,55 Cancri e,24.0,False,E,550,P,False,2134.0
-8587,1,Mars,False,TRAPPIST-1e,25.0,False,F,1763,P,False,1040.0
+8587,1,Europa,False,TRAPPIST-1e,25.0,False,F,1763,P,False,1040.0
 8588,1,Mars,True,TRAPPIST-1e,59.0,False,E,562,S,True,0.0
 8589,1,Europa,False,55 Cancri e,26.0,False,D,267,P,False,3123.0
 8592,1,Europa,False,TRAPPIST-1e,19.0,False,D,268,P,False,7728.0
@@ -8053,7 +8053,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8609,1,Earth,False,TRAPPIST-1e,27.0,False,E,564,S,False,996.0
 8610,1,Earth,True,PSO J318.5-22,15.0,False,G,1398,P,True,0.0
 8611,1,Earth,False,55 Cancri e,24.0,False,F,1766,P,False,646.0
-8612,1,Mars,False,TRAPPIST-1e,31.0,False,G,1399,P,False,883.0
+8612,1,Earth,False,TRAPPIST-1e,31.0,False,G,1399,P,False,883.0
 8613,1,Earth,False,TRAPPIST-1e,10.0,False,G,1388,S,True,0.0
 8614,1,Earth,False,TRAPPIST-1e,23.0,False,G,1400,P,True,1792.0
 8615,2,Earth,False,55 Cancri e,50.0,False,E,565,S,True,829.0
@@ -8148,7 +8148,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8708,1,Earth,False,PSO J318.5-22,28.0,False,G,1413,P,False,679.0
 8709,1,Earth,False,TRAPPIST-1e,36.0,False,F,1687,S,False,901.0
 8710,1,Earth,False,PSO J318.5-22,24.0,False,F,1688,S,False,589.0
-8712,1,Mars,True,TRAPPIST-1e,14.0,False,F,1792,P,True,0.0
+8712,1,Mars,True,TRAPPIST-1e,14.0,True,F,1792,P,True,0.0
 8714,1,Mars,False,TRAPPIST-1e,50.0,False,D,270,P,True,1724.0
 8716,1,Earth,False,PSO J318.5-22,20.0,False,F,1793,P,False,648.0
 8717,1,Earth,False,TRAPPIST-1e,38.0,False,F,1689,S,False,730.0
@@ -8276,7 +8276,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8835,1,Earth,True,TRAPPIST-1e,29.0,False,G,1425,S,False,0.0
 8836,2,Earth,False,TRAPPIST-1e,26.0,False,F,1821,P,False,1112.0
 8836,2,Earth,True,TRAPPIST-1e,19.0,False,G,1430,P,False,0.0
-8838,1,Earth,False,TRAPPIST-1e,18.0,True,G,1431,P,True,809.0
+8838,1,Earth,False,TRAPPIST-1e,18.0,False,G,1431,P,True,809.0
 8840,1,Earth,False,55 Cancri e,50.0,False,F,1716,S,False,2457.0
 8841,1,Mars,True,TRAPPIST-1e,28.0,False,F,1822,P,True,0.0
 8842,1,Europa,False,TRAPPIST-1e,24.0,False,D,267,S,True,3061.0
@@ -8284,7 +8284,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8844,1,Earth,False,55 Cancri e,19.0,False,E,579,S,True,718.0
 8845,2,Earth,False,TRAPPIST-1e,20.0,False,F,1823,P,False,777.0
 8845,2,Earth,False,TRAPPIST-1e,23.0,False,E,566,P,False,1619.0
-8848,1,Europa,False,TRAPPIST-1e,19.0,False,F,1824,P,True,1077.0
+8848,1,Mars,False,TRAPPIST-1e,19.0,False,F,1824,P,True,1077.0
 8849,1,Earth,True,55 Cancri e,27.0,False,G,1427,S,True,0.0
 8850,1,Mars,False,TRAPPIST-1e,16.0,False,E,580,S,False,1299.0
 8852,2,Mars,True,TRAPPIST-1e,76.0,False,D,278,P,True,0.0
@@ -8318,13 +8318,13 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8878,1,Earth,False,TRAPPIST-1e,22.0,False,E,568,P,False,906.0
 8880,1,Mars,True,TRAPPIST-1e,28.0,False,F,1829,P,True,0.0
 8881,1,Earth,False,55 Cancri e,34.0,False,F,1719,S,True,717.0
-8883,1,Earth,False,TRAPPIST-1e,8.0,False,G,1438,P,False,0.0
+8883,1,Europa,False,TRAPPIST-1e,8.0,False,G,1438,P,False,0.0
 8884,1,Earth,False,TRAPPIST-1e,26.0,False,F,1830,P,True,1483.0
 8885,1,Mars,False,TRAPPIST-1e,29.0,False,D,269,S,False,1056.0
 8886,3,Earth,False,55 Cancri e,58.0,False,G,1433,S,False,620.0
 8886,3,Earth,True,TRAPPIST-1e,4.0,False,G,1433,S,False,0.0
 8886,3,Earth,False,PSO J318.5-22,1.0,False,G,1433,S,True,0.0
-8889,1,Mars,False,55 Cancri e,17.0,False,G,1439,P,False,615.0
+8889,1,Europa,False,55 Cancri e,17.0,False,G,1439,P,False,615.0
 8890,1,Earth,False,PSO J318.5-22,27.0,False,G,1434,S,False,5281.0
 8891,2,Earth,False,TRAPPIST-1e,24.0,False,F,1831,P,True,1743.0
 8891,2,Earth,False,TRAPPIST-1e,16.0,False,F,1831,P,True,1332.0
@@ -8419,7 +8419,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 8989,4,Europa,True,TRAPPIST-1e,29.0,False,B,291,P,True,0.0
 8989,4,Europa,False,55 Cancri e,29.0,False,B,291,P,False,6572.0
 8992,1,Mars,False,TRAPPIST-1e,46.0,False,D,283,P,False,1182.0
-8993,1,Earth,False,PSO J318.5-22,27.0,False,F,1844,P,False,651.0
+8993,1,Earth,True,PSO J318.5-22,27.0,False,F,1844,P,False,651.0
 8996,1,Europa,False,TRAPPIST-1e,39.0,False,D,285,P,False,2686.0
 8997,2,Earth,True,55 Cancri e,15.0,False,F,1742,S,True,0.0
 8997,2,Earth,False,TRAPPIST-1e,30.0,False,F,1742,S,False,803.0
@@ -8454,7 +8454,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9029,1,Mars,False,TRAPPIST-1e,17.0,False,D,287,P,False,3368.0
 9030,2,Earth,False,TRAPPIST-1e,28.0,False,F,1847,P,False,2004.0
 9030,2,Earth,False,TRAPPIST-1e,27.0,False,G,1465,P,False,809.0
-9031,1,Earth,False,TRAPPIST-1e,51.0,False,G,1455,S,False,721.0
+9031,1,Earth,True,TRAPPIST-1e,51.0,False,G,1455,S,False,721.0
 9032,1,Mars,True,TRAPPIST-1e,37.0,False,E,578,P,False,0.0
 9034,5,Europa,True,TRAPPIST-1e,14.0,False,D,288,P,True,0.0
 9034,5,Europa,True,TRAPPIST-1e,43.0,False,D,288,P,True,0.0
@@ -8467,7 +8467,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9038,1,Europa,True,55 Cancri e,28.0,False,A,106,S,True,0.0
 9041,1,Earth,True,PSO J318.5-22,30.0,False,G,1470,P,True,0.0
 9042,1,Europa,False,55 Cancri e,42.0,False,B,294,P,True,6016.0
-9043,1,Europa,True,TRAPPIST-1e,25.0,False,F,1848,P,True,0.0
+9043,1,Earth,True,TRAPPIST-1e,25.0,False,F,1848,P,True,0.0
 9046,2,Europa,True,55 Cancri e,25.0,False,C,335,S,True,0.0
 9046,2,Europa,False,TRAPPIST-1e,25.0,False,C,335,S,False,11488.0
 9048,1,Earth,True,TRAPPIST-1e,54.0,False,G,1471,P,False,0.0
@@ -8500,7 +8500,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9074,6,Earth,True,TRAPPIST-1e,2.0,False,G,1460,S,True,0.0
 9074,6,Earth,False,55 Cancri e,5.0,False,G,1460,S,True,0.0
 9075,1,Earth,False,TRAPPIST-1e,24.0,False,E,580,P,False,788.0
-9076,1,Earth,True,TRAPPIST-1e,32.0,False,G,1461,S,False,0.0
+9076,1,Earth,False,TRAPPIST-1e,32.0,False,G,1461,S,False,0.0
 9077,2,Earth,False,55 Cancri e,22.0,False,F,1856,P,True,1476.0
 9077,2,Earth,True,PSO J318.5-22,22.0,False,G,1475,P,False,0.0
 9078,1,Earth,False,PSO J318.5-22,44.0,False,E,594,S,False,1558.0
@@ -8514,7 +8514,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9081,8,Earth,False,PSO J318.5-22,16.0,0.0,F,1858,P,False,761.0
 9081,8,Earth,True,TRAPPIST-1e,27.0,False,G,1476,P,True,0.0
 9081,8,Earth,True,PSO J318.5-22,3.0,False,G,1476,P,True,0.0
-9084,1,Europa,False,TRAPPIST-1e,25.0,False,E,582,P,False,1299.0
+9084,1,Earth,False,TRAPPIST-1e,25.0,False,E,582,P,False,1299.0
 9085,3,Europa,False,55 Cancri e,70.0,False,A,95,P,False,4136.0
 9085,3,Europa,False,55 Cancri e,30.0,False,A,95,P,False,4619.0
 9085,3,Europa,True,TRAPPIST-1e,57.0,False,A,95,P,True,0.0
@@ -8663,7 +8663,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9241,1,Mars,False,TRAPPIST-1e,30.0,False,E,595,P,False,1299.0
 9242,1,Earth,False,TRAPPIST-1e,62.0,False,F,1891,P,True,798.0
 9244,1,Earth,True,PSO J318.5-22,13.0,False,G,1489,S,True,0.0
-9246,1,Earth,True,TRAPPIST-1e,32.0,False,G,1490,S,True,0.0
+9246,1,Earth,False,TRAPPIST-1e,32.0,False,G,1490,S,True,0.0
 9247,1,Earth,True,TRAPPIST-1e,33.0,False,G,1491,S,False,0.0
 9248,1,Earth,False,55 Cancri e,38.0,False,F,1792,S,True,2416.0
 9250,1,Europa,False,TRAPPIST-1e,29.0,False,E,597,P,True,3188.0
@@ -8673,7 +8673,7 @@ Group,GroupSize,HomePlanet,CryoSleep,Destination,Age,VIP,Deck,Num,Side,Transport
 9253,1,Earth,True,PSO J318.5-22,16.0,False,G,1493,S,True,0.0
 9254,1,Earth,True,PSO J318.5-22,61.0,False,G,1502,P,False,0.0
 9256,1,Earth,True,TRAPPIST-1e,28.0,False,G,1494,S,True,0.0
-9257,1,Earth,False,TRAPPIST-1e,13.0,False,F,1892,P,False,1148.0
+9257,1,Mars,False,TRAPPIST-1e,13.0,False,F,1892,P,False,1148.0
 9259,1,Earth,False,TRAPPIST-1e,44.0,False,F,1893,P,True,2056.0
 9261,1,Earth,True,PSO J318.5-22,22.0,False,G,1504,P,False,0.0
 9264,1,Europa,True,55 Cancri e,30.0,False,E,606,S,True,0.0
