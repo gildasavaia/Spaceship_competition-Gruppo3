@@ -20,8 +20,8 @@ def run_evaluation(df: pd.DataFrame) -> EvaluationOutputs:
     """
     print("DataFrame Information Summary:")
     # Provides a summary of the dataset information
-    df.info()
-    print("\n" + "="*50 + "\n")
+    # df.info()
+    # print("\n" + "="*50 + "\n")
 
     print("Missing Values Analysis:")
     # Counts how many records are null in each column
@@ -37,50 +37,54 @@ def run_evaluation(df: pd.DataFrame) -> EvaluationOutputs:
         print("Columns with missing values:")
         print(columns_with_nulls)
 
-    print("\nStatistical Description of the DataFrame:")
+    # print("\nStatistical Description of the DataFrame:")
     # Prints statistical data for both numerical and categorical columns
-    print(df.describe(include='all'))
+    # print(df.describe(include='all'))
     print("\n" + "="*50 + "\n")
 
     # Print a summary of the dataset's structure
-    print("Summary:")
+    # print("Summary:")
     shape = df.shape
     data_types = df.dtypes.unique()
-    print(f"The DataFrame contains {shape[1]} columns and {shape[0]} rows.")
-    print(f"The possible data types are: {data_types}.")
-    print(f"Total null values found: {columns_with_nulls.sum()}.")
+    # print(f"The DataFrame contains {shape[1]} columns and {shape[0]} rows.")
+    # print(f"The possible data types are: {data_types}.")
+    # print(f"Total null values found: {columns_with_nulls.sum()}.")
 
-    print("\n" + "="*50 + "\n")
+    # print("\n" + "="*50 + "\n")
 
-    print("First 5 rows preview:")
+    # print("First 5 rows preview:")
     # Prints the first rows of the dataframe
-    print(df.head())
-    print("\n" + "="*50 + "\n")
+    # print(df.head())
+    # print("\n" + "="*50 + "\n")
 
     # List of columns with dtype 'O' (object/text)
     object_columns = df.select_dtypes(include=['object']).columns
 
-    print("Object-type Columns Analysis:")
+    # print("Object-type Columns Analysis:")
     if object_columns.empty:
-        print("No object-type (string) columns found in the dataset.")
+        # print("No object-type (string) columns found in the dataset.")
+        pass
     else:
-        print(f"Found {len(object_columns)} object-type columns: {list(object_columns)}")
+        # print(f"Found {len(object_columns)} object-type columns: {list(object_columns)}")
+        pass
         
         df_objects = df[object_columns]
         
-        print("\nFirst rows of the Object-only DataFrame:")
-        print(df_objects.head())
+        # print("\nFirst rows of the Object-only DataFrame:")
+        # print(df_objects.head())
 
         # Inspect the actual unique values of these text columns
-        print("\nUnique values within Object columns:")
+        # print("\nUnique values within Object columns:")
         for col in object_columns:
             unique_values = df_objects[col].dropna().unique()
-            print(f"\nColumn: **{col}**")
+            # print(f"\nColumn: **{col}**")
             # Stampiamo solo i primi 20 valori unici per non intasare lo schermo (utile per i nomi)
             if len(unique_values) > 20:
-                print(f"Values (first 20 of {len(unique_values)}): {unique_values[:20]}...")
+                # print(f"Values (first 20 of {len(unique_values)}): {unique_values[:20]}...")
+                pass
             else:
-                print(f"Values: {unique_values}")
+                # print(f"Values: {unique_values}")
+                pass
 
     print("\n" + "="*50 + "\n")
 

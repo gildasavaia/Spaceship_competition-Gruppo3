@@ -126,14 +126,14 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     if existing_cost_cols:
         n_missing_costs = df[existing_cost_cols].isna().sum().sum()
         df[existing_cost_cols] = df[existing_cost_cols].fillna(0)
-        print(f"[OP4] Feature dei costi ({', '.join(existing_cost_cols)}): riempiti {n_missing_costs} valori mancanti con 0.\n")
+        # print(f"[OP4] Feature dei costi ({', '.join(existing_cost_cols)}): riempiti {n_missing_costs} valori mancanti con 0.\n")
 
     # Imputazione colonna "Age" con la media totale 
     if "Age" in df.columns:
         n_missing_age = df["Age"].isna().sum()
         age_mean = int(df["Age"].mean() + 0.5)
         df["Age"] = df["Age"].fillna(age_mean)
-        print(f"[OP4] Feature 'Age': riempiti {n_missing_age} valori mancanti con la media totale ({age_mean}).\n")
+        # print(f"[OP4] Feature 'Age': riempiti {n_missing_age} valori mancanti con la media totale ({age_mean}).\n")
     
     # Imputazione per le altre feature categoriali
     features = [
@@ -163,12 +163,12 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     for feature in features:
         probability_dictionaries[feature] = build_probability_dictionary(df[feature])
 
-    print("Dizionari delle probabilità (basati sull'intero dataset):\n")
-    for feature, prob_dict in probability_dictionaries.items():
-        print(f"{feature}:")
-        for key, value in prob_dict.items():
-            print(f"  {key}: {value:.6f}")
-        print()
+    # print("Dizionari delle probabilità (basati sull'intero dataset):\n")
+    # for feature, prob_dict in probability_dictionaries.items():
+    #     print(f"{feature}:")
+    #     for key, value in prob_dict.items():
+    #         print(f"  {key}: {value:.6f}")
+    #     print()
 
     for i, feature in enumerate(features):
         # 1. Imputazione con la moda del gruppo (cardinalità > 1)
@@ -200,17 +200,17 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
         after_prob = (df[feature].isna() & prob_mask).sum()
         filled_prob = before_prob - after_prob
 
-        print(
-            f"[OP4] Feature '{feature}': "
-            f"riempiti {filled_multi} valori (moda gruppi multipli), "
-            f"riempiti {filled_prob} valori (probabilità globale)."
-        )
+        # print(
+        #     f"[OP4] Feature '{feature}': "
+        #     f"riempiti {filled_multi} valori (moda gruppi multipli), "
+        #     f"riempiti {filled_prob} valori (probabilità globale)."
+        # )
         if after_multi_remaining_nans > 0:
             print(f"      -> Di questi {filled_prob} probabilistici, {after_multi_remaining_nans} provenivano da gruppi multipli completamente vuoti.")
 
-    print(f"\n[OP4] Statistiche gruppi:")
-    print(f"  - Passeggeri in gruppi multipli (>1): {multi_mask.sum()}")
-    print(f"  - Passeggeri in gruppi solitari (=1): {singleton_mask.sum()}")
+    # print(f"\n[OP4] Statistiche gruppi:")
+    # print(f"  - Passeggeri in gruppi multipli (>1): {multi_mask.sum()}")
+    # print(f"  - Passeggeri in gruppi solitari (=1): {singleton_mask.sum()}")
 
     return HandleNullValuesResult(
         df_output=df,
