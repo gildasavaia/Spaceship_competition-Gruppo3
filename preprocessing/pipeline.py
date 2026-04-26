@@ -147,11 +147,10 @@ def main():
     repository_dictionary = data_path.parent / "probability_dictionaries"
     repository_dictionary.mkdir(parents=True, exist_ok=True)
 
-    j=0
-    while j==0:
-        if scelta  in ['1', '2', '3']:
-            print("Scelta non valida. Uscita dalla pipeline.")
-            j=1
+    # Ripeti la richiesta finché l'utente non inserisce una scelta valida
+    while scelta not in ['1', '2', '3']:
+        print("Scelta non valida. Inserisci 1 o 2.") 
+        scelta = input("Inserisci 1 o 2: ").strip()
             
     
     if scelta == '1':
