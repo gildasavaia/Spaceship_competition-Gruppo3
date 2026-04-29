@@ -434,6 +434,9 @@ def main():
         print("\n[Esecuzione OP4] Gestione e imputazione valori nulli (Train)...")
         risultato_imputazione = run_handle_null_values(X_train)
         mio_dataframe_imputato = risultato_imputazione.df_output
+        
+        train_dicts = risultato_imputazione.probability_dictionaries
+        train_age_mean = risultato_imputazione.age_mean
 
         dict_output_path = repository_dictionary / "holdout_probability_dictionaries_train.json"
         with open(dict_output_path, "w", encoding="utf-8") as f:
@@ -445,7 +448,9 @@ def main():
         
         # OP4 (test)
         print("\n[Esecuzione OP4] Gestione e imputazione valori nulli (Test)...")
-        risultato_imputazione = run_handle_null_values(X_test)
+        risultato_imputazione = run_handle_null_values(X_test,
+                                                       train_prob_dicts=train_dicts, 
+                                                       train_age_mean=train_age_mean)
         mio_dataframe_imputato = risultato_imputazione.df_output
 
         dict_output_path = repository_dictionary / "holdout_probability_dictionaries_test.json"
@@ -512,10 +517,15 @@ def main():
             risultato_train_fold = run_handle_null_values(df_train_fold)
             df_train_imputato = risultato_train_fold.df_output
             
+            train_dicts_fold = risultato_train_fold.probability_dictionaries
+            train_age_mean_fold = risultato_train_fold.age_mean
+            
             with open(repository_dictionary / f"kfold_{numero_fold}_prob_dict_train.json", "w", encoding="utf-8") as f:
                 json.dump(risultato_train_fold.probability_dictionaries, f, indent=4)
             
-            risultato_test_fold = run_handle_null_values(df_test_fold)
+            risultato_test_fold = run_handle_null_values(df_test_fold, 
+                                                        train_prob_dicts=train_dicts_fold, 
+                                                        train_age_mean=train_age_mean_fold)
             df_test_imputato = risultato_test_fold.df_output
             
             with open(repository_dictionary / f"kfold_{numero_fold}_prob_dict_test.json", "w", encoding="utf-8") as f:

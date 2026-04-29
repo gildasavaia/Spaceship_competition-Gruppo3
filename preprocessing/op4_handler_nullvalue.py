@@ -6,6 +6,7 @@ from dataclasses import dataclass
 class HandleNullValuesResult:
     df_output: pd.DataFrame
     probability_dictionaries: dict
+    age_mean: float = None
 
 def build_probability_dictionary(series: pd.Series) -> dict:
     """
@@ -111,7 +112,7 @@ def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
+def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train_age_mean=None,) -> HandleNullValuesResult:
     """
     Esegue l'imputazione dei valori mancanti:
     - Pulizia CryoSleep e VIP
@@ -153,11 +154,13 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     df = enforce_cryo_sleep_spending_rule(df)
 
     # AGE
+    age_mean_to_return = train_age_mean
     if "Age" in df.columns:
         n_missing_age = df["Age"].isna().sum()
-        age_mean = int(df["Age"].mean() + 0.5)
-        df["Age"] = df["Age"].fillna(age_mean)
-        print(f"[OP4] Age: {n_missing_age} NaN → {age_mean}\n")
+        # Se ci viene passata la media del train (siamo nel Test) usiamo quella, altrimenti la calcoliamo (siamo nel Train)
+        age_mean_to_use = train_age_mean if train_age_mean is not None else int(df["Age"].mean() + 0.5)
+        df["Age"] = df["Age"].fillna(age_mean_to_use)
+        age_mean_to_return = age_mean_to_use
     
     features = [
         "HomePlanet", "Destination", "CryoSleep",
@@ -174,10 +177,14 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     singleton_mask = group_sizes == 1
     multi_mask = group_sizes > 1
 
-    probability_dictionaries = {}
-    for feature in features:
-        probability_dictionaries[feature] = build_probability_dictionary(df[feature])
+    if train_prob_dicts is None:
+        probability_dictionaries = {}
+        for feature in features:
+            probability_dictionaries[feature] = build_probability_dictionary(df[feature])
 
+    else:
+        probability_dictionaries = train_prob_dicts
+        
     for i, feature in enumerate(features):
 
         before_multi = (df[feature].isna() & multi_mask).sum()
