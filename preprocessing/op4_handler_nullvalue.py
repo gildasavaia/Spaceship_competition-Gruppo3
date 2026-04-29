@@ -114,7 +114,7 @@ def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
 def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     """
     Esegue l'imputazione dei valori mancanti:
-    - Pulizia CryoSleep
+    - Pulizia CryoSleep e VIP
     - Age: media
     - Costi: NaN → 0
     - Regola logica CryoSleep
@@ -122,18 +122,23 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     """
     df = df_input.copy()
 
-    # --- INIZIO PULIZIA CRYOSLEEP ---
-    if "CryoSleep" in df.columns:
-        replace_dict = {
-            '0.0': 'False', 
-            '1.0': 'True',
-            0.0: 'False',
-            1.0: 'True',
-            False: 'False',
-            True: 'True'
-        }
-        df['CryoSleep'] = df['CryoSleep'].replace(replace_dict)
-        print("[OP4] Pulizia feature 'CryoSleep'\n")
+    # --- INIZIO PULIZIA BOOLEANE (CRYOSLEEP E VIP) ---
+    bool_cols = ["CryoSleep", "VIP"]
+    replace_dict = {
+        '0.0': 'False', 
+        '1.0': 'True',
+        0.0: 'False',
+        1.0: 'True',
+        False: 'False',
+        True: 'True'
+    }
+    
+    for col in bool_cols:
+        if col in df.columns:
+            df[col] = df[col].replace(replace_dict)
+            # Fondamentale per evitare la divisione in float/stringhe in fase di encoding
+            df[col] = df[col].astype(str) 
+            print(f"[OP4] Pulizia feature '{col}'\n")
 
     # COSTI
     cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
@@ -172,13 +177,6 @@ def run_handle_null_values(df_input: pd.DataFrame) -> HandleNullValuesResult:
     probability_dictionaries = {}
     for feature in features:
         probability_dictionaries[feature] = build_probability_dictionary(df[feature])
-
-    # print("Dizionari delle probabilità (basati sull'intero dataset):\n")
-    # for feature, prob_dict in probability_dictionaries.items():
-    #     print(f"{feature}:")
-    #     for key, value in prob_dict.items():
-    #         print(f"  {key}: {value:.6f}")
-    #     print()
 
     for i, feature in enumerate(features):
 
