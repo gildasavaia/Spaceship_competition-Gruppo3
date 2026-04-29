@@ -138,7 +138,7 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
         if col in df.columns:
             df[col] = df[col].replace(replace_dict)
             # Fondamentale per evitare la divisione in float/stringhe in fase di encoding
-            df[col] = df[col].astype(str) 
+            df.loc[df[col].notna(), col] = df.loc[df[col].notna(), col].astype(str)
             print(f"[OP4] Pulizia feature '{col}'\n")
 
     # COSTI
@@ -217,7 +217,8 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
             f"{filled_prob} (prob)"
         )
 
-    return HandleNullValuesResult(df, probability_dictionaries)
+    # Corretto
+    return HandleNullValuesResult(df, probability_dictionaries, age_mean_to_return)
 
 def main():
     input_path = "train_processed.csv"
