@@ -59,6 +59,7 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
     # --- NOVITÀ: ELIMINAZIONE COLONNA 'CryoSleep_False' NEL TRAIN ---
     df_nn_train_enc = df_nn_train_enc.drop(columns=['CryoSleep_False'], errors='ignore')
     df_nn_train_enc = df_nn_train_enc.drop(columns=['VIP_False'], errors='ignore')
+    df_nn_train_enc = df_nn_train_enc.drop(columns=['Side_S'], errors='ignore')
     # ----------------------------------------------------------------
 
     # Transform sul test
@@ -73,6 +74,7 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
         # --- NOVITÀ: ELIMINAZIONE COLONNA 'CryoSleep_False' NEL TEST ---
         df_nn_test_enc = df_nn_test_enc.drop(columns=['CryoSleep_False'], errors='ignore')
         df_nn_test_enc = df_nn_test_enc.drop(columns=['VIP_False'], errors='ignore')
+        df_nn_test_enc = df_nn_test_enc.drop(columns=['Side_S'], errors='ignore')
         # ---------------------------------------------------------------
 
     return EncodingResult(df_tree_train_enc, df_nn_train_enc, df_tree_test_enc, df_nn_test_enc)
