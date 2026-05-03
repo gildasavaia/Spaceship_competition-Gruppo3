@@ -2,8 +2,9 @@ import pandas as pd
 from catboost import CatBoostClassifier
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
-
-
+from sklearn.model_selection import KFold
+import numpy as np
+from sklearn.metrics import accuracy_score
 # ---------------------------
 # 🔹 Caricamento dati
 # ---------------------------
@@ -88,10 +89,24 @@ def predict(model, X_test):
 # 🔹 Valutazione con cross-validation
 # ---------------------------
 def evaluate_model(model, X, y, cv=5):
-    scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
-    return scores.mean()
+    kf = KFold(n_splits=cv, shuffle=True, random_state=42)
+    scores = []
 
+    for train_idx, val_idx in kf.split(X):
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
+        model.fit(X_train, y_train, eval_set=(X_val, y_val), verbose=False)
+
+        y_pred = model.predict(X_val)
+        acc = accuracy_score(y_val, y_pred)
+
+        scores.append(acc)
+
+    print("Accuracy per fold:", scores)
+    print("Mean accuracy:", np.mean(scores))
+
+    return np.mean(scores)
 # ---------------------------
 # 🔹 Feature importance
 # ---------------------------
