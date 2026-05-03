@@ -1,8 +1,7 @@
 import pandas as pd
 from catboost import CatBoostClassifier
-from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 import numpy as np
 from sklearn.metrics import accuracy_score
 
@@ -151,13 +150,11 @@ def predict(model, X_test):
 
 def evaluate_model(model, X, y, cv=5):
     """
-    Valuta il modello con K-Fold Cross Validation
+    Valuta il modello con Stratified K-Fold Cross Validation
 
-    Processo:
-    - divide i dati in k fold
-    - allena su k-1
-    - valida su 1
-    - ripete
+    Differenza:
+    - mantiene la proporzione delle classi in ogni fold
+    - evita errori tipo "Target contains only one unique value"
 
     Args:
         model: modello
@@ -167,29 +164,38 @@ def evaluate_model(model, X, y, cv=5):
     Returns:
         accuracy media
     """
-    kf = KFold(n_splits=cv, shuffle=True, random_state=42)
+    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
     scores = []
 
-    for train_idx, val_idx in kf.split(X):
-        # split manuale
+    for train_idx, val_idx in skf.split(X, y):
+        # split dati
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
-        # training con validation
+        # ⚠️ sicurezza extra (evita crash in casi estremi)
+        if len(np.unique(y_train)) < 2:
+            continue
+
+        # training
         model.fit(X_train, y_train, eval_set=(X_val, y_val), verbose=False)
 
         # predizione
         y_pred = model.predict(X_val)
 
-        # calcolo accuracy
+        # accuracy
         acc = accuracy_score(y_val, y_pred)
         scores.append(acc)
 
     print("Accuracy per fold:", scores)
-    print("Mean accuracy:", np.mean(scores))
 
-    return np.mean(scores)
+    if len(scores) == 0:
+        print("⚠️ Nessun fold valido")
+        return 0
 
+    mean_score = np.mean(scores)
+    print("Mean accuracy:", mean_score)
+
+    return mean_score
 
 
 def plot_feature_importance(model, feature_names):
