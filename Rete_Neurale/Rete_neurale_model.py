@@ -1,64 +1,89 @@
 import pandas as pd
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_score
+import numpy as np
 import matplotlib.pyplot as plt
 
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 
-#  Caricamento dati
+
+# ---------------------------
+# 🔹 Caricamento dati
+# ---------------------------
 def load_data(train_path, test_path):
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     return train, test
 
 
-#  Preparazione dati + scaling
+# ---------------------------
+# 🔹 Preparazione dati
+# ---------------------------
 def prepare_data(train_df):
     X = train_df.drop(["Transported", "PassengerId"], axis=1)
     y = train_df["Transported"]
-
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    return X_scaled, y, scaler
+    return X, y
 
 
-def prepare_test(test_df, scaler):
+def prepare_test(test_df):
     X_test = test_df.drop("PassengerId", axis=1)
-    X_test_scaled = scaler.transform(X_test)
-    return X_test_scaled
+    return X_test
 
 
-#  Creazione modello MLP
-def create_nn_model():
-    model = MLPClassifier(
-        hidden_layer_sizes=(64, 32),  # 2 layer
-        activation='relu',
-        solver='adam',
-        max_iter=1000,
-        random_state=42
-    )
+# ---------------------------
+# 🔹 Creazione modello con pipeline
+# ---------------------------
+def create_pipeline_model():
+    model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('mlp', MLPClassifier(
+            hidden_layer_sizes=(64, 32),
+            activation='relu',
+            solver='adam',
+            max_iter=500,
+            early_stopping=True,
+            n_iter_no_change=20,
+            random_state=42
+        ))
+    ])
     return model
 
 
-#  Training
+# ---------------------------
+# 🔹 Training
+# ---------------------------
 def train_model(model, X, y):
     model.fit(X, y)
     return model
 
 
-#  Predizione
+# ---------------------------
+# 🔹 Predizione
+# ---------------------------
 def predict(model, X_test):
     return model.predict(X_test)
 
 
-#  Valutazione
+# ---------------------------
+# 🔹 Valutazione con Stratified CV
+# ---------------------------
 def evaluate_model(model, X, y, cv=5):
-    scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
+    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+
+    scores = cross_val_score(model, X, y, cv=skf, scoring='accuracy')
+
+    print("\n📊 Risultati Cross-Validation:")
+    print("Accuracy per fold:", scores)
+    print("Mean accuracy:", scores.mean())
+    print("Std:", scores.std())
+
     return scores.mean()
 
 
-#  Mostra predizioni
+# ---------------------------
+# 🔹 Mostra predizioni
+# ---------------------------
 def show_predictions(test_df, predictions, n=10):
     results = test_df.copy()
     results["Predicted_Transported"] = predictions
@@ -68,11 +93,15 @@ def show_predictions(test_df, predictions, n=10):
 
     return results
 
-# Modifica solo il percorso di default aggiungendo ../
-def create_submission(test_df, predictions, output_path="../outputs/submission_rete_neurale.csv"):
+
+# ---------------------------
+# 🔹 Creazione submission
+# ---------------------------
+def create_submission(test_df, predictions, output_path="../datas/submission_rete_neurale.csv"):
     submission = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Transported": predictions
     })
+
     submission.to_csv(output_path, index=False)
     print(f"✅ File salvato in: '{output_path}'")
