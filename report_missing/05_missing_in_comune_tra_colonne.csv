@@ -1,0 +1,15 @@
+colonna,PassengerId,HomePlanet,CryoSleep,Cabin,Destination,Age,VIP,RoomService,FoodCourt,ShoppingMall,Spa,VRDeck,Name,Transported
+PassengerId,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+HomePlanet,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+CryoSleep,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Cabin,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Destination,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Age,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+VIP,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+RoomService,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+FoodCourt,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+ShoppingMall,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Spa,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+VRDeck,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Name,False,True,True,True,True,True,True,True,True,True,True,True,True,False
+Transported,False,False,False,False,False,False,False,False,False,False,False,False,False,False

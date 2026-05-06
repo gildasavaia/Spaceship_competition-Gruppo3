@@ -1,0 +1,51 @@
+ANALISI VALORI MANCANTI - SPACESHIP TITANIC
+============================================================
+Righe: 8693
+Colonne: 14
+
+Missing per colonna:
+     colonna  n_missing  percentuale_missing  n_non_missing
+   CryoSleep        217                 2.50           8476
+ShoppingMall        208                 2.39           8485
+         VIP        203                 2.34           8490
+  HomePlanet        201                 2.31           8492
+        Name        200                 2.30           8493
+       Cabin        199                 2.29           8494
+      VRDeck        188                 2.16           8505
+   FoodCourt        183                 2.11           8510
+         Spa        183                 2.11           8510
+ Destination        182                 2.09           8511
+ RoomService        181                 2.08           8512
+         Age        179                 2.06           8514
+ PassengerId          0                 0.00           8693
+ Transported          0                 0.00           8693
+
+Distribuzione missing per passeggero:
+ n_missing_nel_passeggero  n_passeggeri  percentuale_passeggeri
+                        0          6606                   75.99
+                        1          1867                   21.48
+                        2           203                    2.34
+                        3            17                    0.20
+
+Top combinazioni di colonne mancanti:
+combinazione_colonne_mancanti  n_passeggeri  percentuale_passeggeri
+                      NESSUNA          6606                   75.99
+                    CryoSleep           167                    1.92
+                          VIP           165                    1.90
+                 ShoppingMall           164                    1.89
+                   HomePlanet           163                    1.88
+                        Cabin           158                    1.82
+                         Name           158                    1.82
+                          Spa           153                    1.76
+                       VRDeck           151                    1.74
+                          Age           151                    1.74
+                  RoomService           149                    1.71
+                  Destination           146                    1.68
+                    FoodCourt           142                    1.63
+             CryoSleep | Name             9                    0.10
+           CryoSleep | VRDeck             6                    0.07
+            CryoSleep | Cabin             6                    0.07
+           FoodCourt | VRDeck             6                    0.07
+     HomePlanet | RoomService             6                    0.07
+        ShoppingMall | VRDeck             6                    0.07
+           HomePlanet | Cabin             6                    0.07
