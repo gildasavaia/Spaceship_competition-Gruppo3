@@ -32,16 +32,15 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
     # Filtriamo solo quelle effettivamente presenti
     cat_cols = [c for c in cat_cols if c in df_tree_train.columns]
 
-    # --- 1. ORDINAL ENCODING (RAMO TREE) ---
-    ord_enc = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+     # # --- 1. ORDINAL ENCODING (RAMO TREE) ---  # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    # ord_enc = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1) # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
     
-    df_tree_train_enc = df_tree_train.copy()
-    df_tree_train_enc[cat_cols] = ord_enc.fit_transform(df_tree_train[cat_cols].astype(str))
-    
-    df_tree_test_enc = None
-    if df_tree_test is not None:
-        df_tree_test_enc = df_tree_test.copy()
-        df_tree_test_enc[cat_cols] = ord_enc.transform(df_tree_test[cat_cols].astype(str))
+    # df_tree_train_enc = df_tree_train.copy() # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    # df_tree_train_enc[cat_cols] = ord_enc.fit_transform(df_tree_train[cat_cols].astype(str)) # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    # df_tree_test_enc = None # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    # if df_tree_test is not None: # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    #     df_tree_test_enc = df_tree_test.copy() # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
+    #     df_tree_test_enc[cat_cols] = ord_enc.transform(df_tree_test[cat_cols].astype(str)) # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST DECOMMENTA QUESTE RIGA
 
     # --- 2. ONE-HOT ENCODING (RAMO NN) ---
     oh_enc = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
@@ -76,5 +75,7 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
         df_nn_test_enc = df_nn_test_enc.drop(columns=['VIP_False'], errors='ignore')
         df_nn_test_enc = df_nn_test_enc.drop(columns=['Side_S'], errors='ignore')
         # ---------------------------------------------------------------
-
+    df_tree_train_enc = df_tree_train.copy()  # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST COMMENTA QUESTE RIGA
+    df_tree_test_enc = df_tree_test.copy() if df_tree_test is not None else None # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST COMMENTA QUESTE RIGA
+    
     return EncodingResult(df_tree_train_enc, df_nn_train_enc, df_tree_test_enc, df_nn_test_enc)
