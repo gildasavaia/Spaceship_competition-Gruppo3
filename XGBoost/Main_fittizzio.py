@@ -3,8 +3,8 @@ from Development import *
 # ---------------------------
 # 1. Caricamento dati
 # ---------------------------
-train_path = "processed_full_tree.csv"
-test_path = "holdout_tree_test.csv"  # test separato
+train_path = "../data/preprocessed_folds/holdout_tree_train.csv"
+test_path = "../data/preprocessed_folds/holdout_tree_test.csv"
 
 train_df, test_df = load_data(train_path, test_path)
 
@@ -43,11 +43,4 @@ predictions = predict(model, X_test)
 # ---------------------------
 show_predictions(predictions, n=10)
 
-# ---------------------------
-# 8. Feature importance
-# ---------------------------
-
-
-# ---------------------------
-# 9. Creazione submission
-# ---------------------------
+show_confusion_matrix(model, X_test, y_test)

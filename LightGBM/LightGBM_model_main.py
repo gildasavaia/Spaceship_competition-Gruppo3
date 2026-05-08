@@ -10,8 +10,8 @@ def main():
     # ---------------------------------------------------------
     print("\n[1/4] Caricamento dei dati pre-processati...")
     try:
-        train_df = pd.read_csv("../Dataset_Giocattolo/train_processed_example.csv")
-        test_df = pd.read_csv("../Dataset_Giocattolo/test_processed_example.csv")
+        train_df = pd.read_csv("../data/preprocessed_folds/holdout_tree_train.csv")
+        test_df = pd.read_csv("../data/preprocessed_folds/holdout_tree_test.csv")
     except FileNotFoundError:
         print("Errore: Impossibile trovare i file CSV. Assicurati di averli nella stessa cartella!")
         return

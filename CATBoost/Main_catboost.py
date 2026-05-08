@@ -1,5 +1,7 @@
-from Model_CatBoost import *
+
 from sklearn.model_selection import train_test_split
+from Model_CatBoost import *
+from CATBoost.Model_CatBoost import prepare_test
 
 
 train_path = "../data/preprocessed_folds/holdout_tree_train.csv"

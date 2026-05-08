@@ -1,9 +1,13 @@
 import pandas as pd
 from catboost import CatBoostClassifier
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.metrics import accuracy_score
 
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    classification_report
+)
+
+import seaborn as sns
 
 
 def load_data(train_path, test_path):
@@ -27,13 +31,28 @@ def prepare_test(test_df):
 
 def create_catboost_model():
     model = CatBoostClassifier(
-        iterations=1000,
+
+        iterations=3000,
+
         learning_rate=0.03,
-        depth=6,
-        eval_metric="Logloss",
+
+        depth=8,
+
+        l2_leaf_reg=5,
+
+        loss_function='Logloss',
+
+        eval_metric='Accuracy',
+
+        bootstrap_type='Bernoulli',
+
+        subsample=0.8,
+
         random_seed=42,
+
         verbose=100,
-        early_stopping_rounds=50
+
+        early_stopping_rounds=100
     )
     return model
 
@@ -63,16 +82,33 @@ def evaluate_model(model, X_val, y_val):
 
 
 
-def show_predictions(test_df, predictions, n=10, show_counts=True):
+def show_predictions(test_df, predictions, n=10):
+    """
+    Mostra le prime predizioni confrontate col valore reale
+    """
+
     results = test_df.copy()
+
+    # aggiunge predizioni
     results["Predicted_Transported"] = predictions
 
     print(f"\n🔮 Prime {n} predizioni:\n")
-    print(results.head(n))
 
-    if show_counts:
-        print("\n📊 Distribuzione predizioni:")
-        print(results["Predicted_Transported"].value_counts())
+    # se esiste il target reale
+    if "Transported" in results.columns:
+
+        print(
+            results[
+                ["Transported", "Predicted_Transported"]
+            ].head(n)
+        )
+
+    else:
+        print(
+            results[
+                ["Predicted_Transported"]
+            ].head(n)
+        )
 
     return results
 

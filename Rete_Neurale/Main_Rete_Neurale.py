@@ -3,51 +3,33 @@ from Rete_neurale_model import *
 
 #  Caricamento dati
 
-train_path = "../Dataset_Giocattolo/train_processed_example.csv"
-test_path = "../Dataset_Giocattolo/test_processed_example.csv"
+train_path = "../data/preprocessed_folds/holdout_nn_train.csv"
+test_path = "../data/preprocessed_folds/holdout_nn_test.csv"
 
+# 1. Caricamento dati
 train_df, test_df = load_data(train_path, test_path)
 
-
-# 2. Preparazione dati
-
+# 2. Preparazione
 X, y = prepare_data(train_df)
 X_test = prepare_test(test_df)
 
-# ⚠️ Se NON hai già fatto encoding
+# 3. Encoding
 X = pd.get_dummies(X)
 X_test = pd.get_dummies(X_test)
 X_test = X_test.reindex(columns=X.columns, fill_value=0)
 
-
-#  Creazione modello (Pipeline)
-
+# 4. Creazione modello
 model = create_pipeline_model()
 
-
-#  Valutazione
-
-accuracy = evaluate_model(model, X, y)
-print(f"\n Accuracy media (NN): {accuracy:.4f}")
-
-
-#  Training finale su tutti i dati
-
+# 5. FIT PRIMA DI TUTTO
 model = train_model(model, X, y)
 
+# 6. VALUTAZIONE
+accuracy = evaluate_on_test(model, X, y)
+print(f"\nAccuracy media (NN): {accuracy:.4f}")
 
-#  Predizione
-
+# 7. PREDIZIONE
 predictions = predict(model, X_test)
 
-
-#  Mostra predizioni
-
+# 8. OUTPUT
 show_predictions(test_df, predictions)
-
-
-#  Submission
-
-create_submission(test_df, predictions)
-
-print("\n✅ Submission NN creata")

@@ -1,20 +1,17 @@
 import pandas as pd
 from xgboost import XGBClassifier
+from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
-# ---------------------------
-# 🔹 Caricamento dati
-# ---------------------------
 def load_data(train_path, test_path):
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     return train, test
 
 
-# ---------------------------
-# 🔹 Preparazione dati
-# ---------------------------
+
 def prepare_data(train_df):
     """
     Train NON ha PassengerId
@@ -37,43 +34,43 @@ def prepare_test(test_df):
     return X_test
 
 
-# ---------------------------
-# 🔹 Modello XGBoost ottimizzato
-# ---------------------------
+
 def create_model():
     model = XGBClassifier(
-        n_estimators=800,
-        learning_rate=0.03,
-        max_depth=5,
-        subsample=0.9,
+        n_estimators=1200,
+        learning_rate=0.05,
+
+        max_depth=7,
+
+        min_child_weight=3,
+
+        subsample=0.8,
         colsample_bytree=0.8,
-        gamma=0.1,
+
+        gamma=0.3,
+
         reg_lambda=1,
-        reg_alpha=0.5,
+        reg_alpha=0.2,
+
         random_state=42,
+
         eval_metric='logloss'
     )
     return model
 
 
-# ---------------------------
-# 🔹 Training
-# ---------------------------
+
 def train_model(model, X, y):
     model.fit(X, y)
     return model
 
 
-# ---------------------------
-# 🔹 Predizione
-# ---------------------------
+#
 def predict(model, X_test):
     return model.predict(X_test)
 
 
-# ---------------------------
-# 🔹 Valutazione (semplice, senza CV)
-# ---------------------------
+
 def evaluate_on_test(model, X_test, y_test):
     """
     Usa il test (che nel tuo caso ha la label)
@@ -83,18 +80,49 @@ def evaluate_on_test(model, X_test, y_test):
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
 
-    print(f"\n📊 Accuracy sul test: {acc:.4f}")
+    print(f"\n Accuracy sul test: {acc:.4f}")
     return acc
 
 
-# ---------------------------
-# 🔹 Mostra predizioni
-# ---------------------------
+
 def show_predictions(predictions, n=10):
     print(f"\n🔮 Prime {n} predizioni:\n")
     print(predictions[:n])
 
 
-# ---------------------------
-# 🔹 Feature importance
-# ---------------------------
+def show_confusion_matrix(model, X_test, y_test):
+    """
+    Mostra confusion matrix e classification report
+
+    Args:
+        model: modello addestrato
+        X_test: feature del test
+        y_test: target reale
+    """
+
+    # Predizioni
+    y_pred = model.predict(X_test)
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+
+    print("\n📊 Classification Report:\n")
+    print(classification_report(y_test, y_pred))
+
+    # Grafico confusion matrix
+    plt.figure(figsize=(6, 5))
+
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt='d',
+        cmap='Blues',
+        xticklabels=["False", "True"],
+        yticklabels=["False", "True"]
+    )
+
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+
+    plt.show()
