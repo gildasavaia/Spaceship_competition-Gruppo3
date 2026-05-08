@@ -7,14 +7,15 @@ from sklearn.metrics import (
     classification_report
 )
 
-import seaborn as sns
 
+# =========================
+# DATA LOADING
+# =========================
 
 def load_data(train_path, test_path):
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     return train, test
-
 
 
 def prepare_data(train_df):
@@ -24,92 +25,79 @@ def prepare_data(train_df):
 
 
 def prepare_test(test_df):
-    X_test = test_df.copy()
-    return X_test
+    return test_df.copy()
 
 
+# =========================
+# MODEL
+# =========================
 
 def create_catboost_model():
     model = CatBoostClassifier(
-
-        iterations=3000,
-
-        learning_rate=0.03,
-
-        depth=8,
-
-        l2_leaf_reg=5,
-
+        iterations=5000,
+        learning_rate=0.02,
+        depth=6,
         loss_function='Logloss',
-
-        eval_metric='Accuracy',
-
+        eval_metric='AUC',
         bootstrap_type='Bernoulli',
-
         subsample=0.8,
-
         random_seed=42,
-
-        verbose=100,
-
-        early_stopping_rounds=100
+        verbose=200,
+        early_stopping_rounds=200
     )
     return model
 
 
+# =========================
+# TRAINING
+# =========================
 
 def train_model(model, X_train, y_train, X_val=None, y_val=None):
+
+    cat_features = X_train.select_dtypes(include=["object"]).columns.tolist()
+
     if X_val is not None and y_val is not None:
-        model.fit(X_train, y_train, eval_set=(X_val, y_val))
+        model.fit(
+            X_train, y_train,
+            cat_features=cat_features,
+            eval_set=(X_val, y_val)
+        )
     else:
-        model.fit(X_train, y_train)
+        model.fit(
+            X_train, y_train,
+            cat_features=cat_features
+        )
+
     return model
 
 
+# =========================
+# PREDICTION
+# =========================
 
 def predict(model, X_test):
-    return model.predict(X_test)
+    probs = model.predict_proba(X_test)[:, 1]
+    return (probs > 0.5).astype(int)
 
 
+# =========================
+# EVALUATION
+# =========================
 
 def evaluate_model(model, X_val, y_val):
-    y_pred = model.predict(X_val)
+    y_pred = predict(model, X_val)
+
     acc = accuracy_score(y_val, y_pred)
 
-    print(f"\n📊 Validation accuracy: {acc:.4f}")
+    print("\n📊 Validation results")
+    print(f"Accuracy: {acc:.4f}")
+    print("\nClassification report:\n")
+    print(classification_report(y_val, y_pred))
+    print("\nConfusion matrix:\n")
+    print(confusion_matrix(y_val, y_pred))
+
     return acc
 
 
-
-
-def show_predictions(test_df, predictions, n=10):
-    """
-    Mostra le prime predizioni confrontate col valore reale
-    """
-
-    results = test_df.copy()
-
-    # aggiunge predizioni
-    results["Predicted_Transported"] = predictions
-
-    print(f"\n🔮 Prime {n} predizioni:\n")
-
-    # se esiste il target reale
-    if "Transported" in results.columns:
-
-        print(
-            results[
-                ["Transported", "Predicted_Transported"]
-            ].head(n)
-        )
-
-    else:
-        print(
-            results[
-                ["Predicted_Transported"]
-            ].head(n)
-        )
-
-    return results
 
 
