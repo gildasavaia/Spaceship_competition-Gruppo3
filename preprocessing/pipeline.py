@@ -385,16 +385,22 @@ def main():
     
     # Percorso al dataset originale
     data_path = Path(__file__).resolve().parents[1] / "data" / "train.csv"
+    data_path_test = Path(__file__).resolve().parents[1] / "data" / "test.csv"
 
     # OP1: Lettura
     print("\n[Esecuzione OP1] Lettura dataset...")
     risultato = run_load_and_convert_to_csv(str(data_path))
     mio_dataframe = risultato.df_output
+    risultato_test = run_load_and_convert_to_csv(str(data_path_test))
+    mio_dataframe_test = risultato_test.df_output
+    
 
     # OP3: Split / feature engineering
     print("\n[Esecuzione OP3] Split dataset e feature engineering...")
     risultato_split = run_split_dataset(mio_dataframe)
     mio_dataframe_modificato = risultato_split.df_output
+    risultato_split_test = run_split_dataset(mio_dataframe_test)
+    mio_dataframe_modificato_test = risultato_split_test.df_output
     
     # --- PRIMA SCELTA: Metodo di Split ---
     print("\nScegli il metodo di divisione del dataset:")
@@ -580,36 +586,47 @@ def main():
         print("\n[Esecuzione OP4] Gestione e imputazione valori nulli...")
         mio_dataframe_modificato2 = run_handle_null_values(mio_dataframe_modificato)
         mio_dataframe_imputato = mio_dataframe_modificato2.df_output
+        
 
         dict_output_path = repository_dictionary / "full_probability_dictionaries.json"
         with open(dict_output_path, "w", encoding="utf-8") as f:
             json.dump(mio_dataframe_modificato2.probability_dictionaries, f, indent=4, ensure_ascii=False)
+            
+        mio_dataframe_modificato2_test = run_handle_null_values(mio_dataframe_modificato_test)
+        mio_dataframe_imputato_test = mio_dataframe_modificato2_test.df_output
         
         # OP5
         print("\n[Esecuzione OP5] Calcolo costi totali e gestione nomi...")
         mio_dataframe_finale = run_op5(mio_dataframe_imputato).df_output
+        mio_dataframe_finale_test = run_op5(mio_dataframe_imputato_test).df_output
+        
         
         # OP8
         print("\n[Esecuzione OP8] Scaling dei dati...")
         scaling_result = run_scaling(mio_dataframe_finale)
+        scaling_result_test = run_scaling(mio_dataframe_finale_test)
 
         # OP9
         print("\n[Esecuzione OP9] Encoding variabili categoriche...")
+        # Fit sul train e transform sul test (passiamo test come 3°/4° argomento)
         encoding_result = run_encoding(
             scaling_result.df_tree_train,
-            scaling_result.df_nn_train
+            scaling_result.df_nn_train,
+            scaling_result_test.df_tree_train,
+            scaling_result_test.df_nn_train
         )
-        
         # Salvataggio dinamico
         if scelta_modello == '1':
             print("\nSalvataggio versione Alberi Decisionali...")
             encoding_result.df_tree_train.to_csv(processed_folds_path / "processed_full_tree.csv", index=False)
             df_eval_train = encoding_result.df_tree_train
+            encoding_result.df_tree_test.to_csv(processed_folds_path / "processed_full_tree_test.csv", index=False)
+            
         else:
             print("\nSalvataggio versione Reti Neurali...")
             encoding_result.df_nn_train.to_csv(processed_folds_path / "processed_full_nn.csv", index=False)
             df_eval_train = encoding_result.df_nn_train
-        
+            encoding_result.df_nn_test.to_csv(processed_folds_path / "processed_full_nn_test.csv", index=False) 
         print("\n[Esecuzione OP2] Valutazione finale dataset...")
         run_evaluation(df_eval_train) 
         
