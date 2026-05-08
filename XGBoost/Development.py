@@ -1,68 +1,50 @@
 import pandas as pd
 from xgboost import XGBClassifier
-from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import accuracy_score
-import numpy as np
 
-#  Caricamento dati
+
+# ---------------------------
+# 🔹 Caricamento dati
+# ---------------------------
 def load_data(train_path, test_path):
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     return train, test
 
 
-#  Preparazione feature e target
+# ---------------------------
+# 🔹 Preparazione dati
+# ---------------------------
 def prepare_data(train_df):
-    X = train_df.drop(["Transported", "PassengerId"], axis=1)
+    """
+    Train NON ha PassengerId
+    """
+    X = train_df.drop("Transported", axis=1)
     y = train_df["Transported"]
     return X, y
 
 
-def show_predictions(test_df, predictions, n=10):
-    """
-    Mostra le prime n predizioni insieme ai PassengerId
-
-    Parameters:
-    - test_df: dataframe originale del test (con PassengerId)
-    - predictions: array delle predizioni
-    - n: numero di righe da mostrare
-    """
-
-    results = test_df.copy()
-    results["Predicted_Transported"] = predictions
-
-    print(f"\n🔮 Prime {n} predizioni:\n")
-    print(results[["PassengerId", "Predicted_Transported"]].head(n))
-
-    return results
-#  Preparazione test set
 def prepare_test(test_df):
-    X_test = test_df.drop("PassengerId", axis=1)
+    """
+    Nel tuo test hai già Transported (per validazione)
+    → lo togliamo dalle feature
+    """
+    if "Transported" in test_df.columns:
+        X_test = test_df.drop("Transported", axis=1)
+    else:
+        X_test = test_df.copy()
+
     return X_test
 
 
-#  Creazione modello base
+# ---------------------------
+# 🔹 Modello XGBoost ottimizzato
+# ---------------------------
 def create_model():
     model = XGBClassifier(
-        n_estimators=500,
-        learning_rate=0.05,
-        max_depth=6,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        eval_metric='logloss'
-    )
-    return model
-
-
-#  Creazione modello ottimizzato
-def create_optimized_model():
-    model = XGBClassifier(
-        n_estimators=1000,
-        learning_rate=0.02,
-        max_depth=6,
+        n_estimators=800,
+        learning_rate=0.03,
+        max_depth=5,
         subsample=0.9,
         colsample_bytree=0.8,
         gamma=0.1,
@@ -70,54 +52,49 @@ def create_optimized_model():
         reg_alpha=0.5,
         random_state=42,
         eval_metric='logloss'
-
     )
     return model
 
 
-#  Training
+# ---------------------------
+# 🔹 Training
+# ---------------------------
 def train_model(model, X, y):
     model.fit(X, y)
     return model
 
 
-#  Predizione
+# ---------------------------
+# 🔹 Predizione
+# ---------------------------
 def predict(model, X_test):
     return model.predict(X_test)
 
 
-#  Valutazione con cross-validation
-def evaluate_model(model, X, y, cv=5):
-    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
-    scores = []
+# ---------------------------
+# 🔹 Valutazione (semplice, senza CV)
+# ---------------------------
+def evaluate_on_test(model, X_test, y_test):
+    """
+    Usa il test (che nel tuo caso ha la label)
+    """
+    from sklearn.metrics import accuracy_score
 
-    for train_idx, val_idx in skf.split(X, y):
-        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
 
-        model.fit(X_train, y_train)
-
-        y_pred = model.predict(X_val)
-        acc = accuracy_score(y_val, y_pred)
-
-        scores.append(acc)
-
-    print("Accuracy per fold:", scores)
-    print("Mean accuracy:", np.mean(scores))
-    print("Std:", np.std(scores))
-
-    return np.mean(scores)
+    print(f"\n📊 Accuracy sul test: {acc:.4f}")
+    return acc
 
 
+# ---------------------------
+# 🔹 Mostra predizioni
+# ---------------------------
+def show_predictions(predictions, n=10):
+    print(f"\n🔮 Prime {n} predizioni:\n")
+    print(predictions[:n])
 
 
-# 🔹 Creazione submission
-def create_submission(test_df, predictions, output_path="../outputs/submission_XGBoost.csv"):
-    submission = pd.DataFrame({
-        "PassengerId": test_df["PassengerId"],
-        "Transported": predictions
-    })
-
-    submission.to_csv(output_path, index=False)
-
-
+# ---------------------------
+# 🔹 Feature importance
+# ---------------------------
