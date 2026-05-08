@@ -90,39 +90,3 @@ def show_predictions(predictions, n=10):
     print(predictions[:n])
 
 
-def show_confusion_matrix(model, X_test, y_test):
-    """
-    Mostra confusion matrix e classification report
-
-    Args:
-        model: modello addestrato
-        X_test: feature del test
-        y_test: target reale
-    """
-
-    # Predizioni
-    y_pred = model.predict(X_test)
-
-    # Confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
-
-    print("\n📊 Classification Report:\n")
-    print(classification_report(y_test, y_pred))
-
-    # Grafico confusion matrix
-    plt.figure(figsize=(6, 5))
-
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt='d',
-        cmap='Blues',
-        xticklabels=["False", "True"],
-        yticklabels=["False", "True"]
-    )
-
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title("Confusion Matrix")
-
-    plt.show()
