@@ -3,25 +3,10 @@ from Development import *
 # ---------------------------
 # 1. Caricamento dati
 # ---------------------------
-train_path = "../data/preprocessed_folds/processed_full_tree.csv"
-test_path = "../data/preprocessed_folds/processed_full_tree_test.csv"
-yt_2 = "../data/sample_submission.csv"
+train_path = "../data/preprocessed_folds/holdout_tree_train.csv"
+test_path = "../data/preprocessed_folds/holdout_tree_test.csv"
+
 train_df, test_df = load_data(train_path, test_path)
-# ---------------------------
-# 2. Caricamento label reali per test (yt_2)
-# ---------------------------
-yt_2_df = pd.read_csv(yt_2)
-
-
-
-# aggiunta colonna al test set
-test_df = test_df.reset_index(drop=True)
-yt_2_df = yt_2_df.reset_index(drop=True)
-
-test_df["Transported"] = yt_2_df["Transported"]
-
-# y_test (label reali)
-y_test = test_df["Transported"]
 
 # ---------------------------
 # 2. Preparazione dati

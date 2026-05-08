@@ -7,7 +7,6 @@ from sklearn.metrics import (
     classification_report
 )
 
-
 # =========================
 # DATA LOADING
 # =========================
@@ -33,7 +32,7 @@ def prepare_test(test_df):
 # =========================
 
 def create_catboost_model():
-    model = CatBoostClassifier(
+    return CatBoostClassifier(
         iterations=5000,
         learning_rate=0.02,
         depth=6,
@@ -45,28 +44,18 @@ def create_catboost_model():
         verbose=200,
         early_stopping_rounds=200
     )
-    return model
 
 
-# =========================
-# TRAINING
-# =========================
 
-def train_model(model, X_train, y_train, X_val=None, y_val=None):
+def train_model(model, X_train, y_train):
 
     cat_features = X_train.select_dtypes(include=["object"]).columns.tolist()
 
-    if X_val is not None and y_val is not None:
-        model.fit(
-            X_train, y_train,
-            cat_features=cat_features,
-            eval_set=(X_val, y_val)
-        )
-    else:
-        model.fit(
-            X_train, y_train,
-            cat_features=cat_features
-        )
+    model.fit(
+        X_train, y_train,
+        cat_features=cat_features,
+        verbose=200
+    )
 
     return model
 
@@ -75,29 +64,27 @@ def train_model(model, X_train, y_train, X_val=None, y_val=None):
 # PREDICTION
 # =========================
 
-def predict(model, X_test):
-    probs = model.predict_proba(X_test)[:, 1]
+def predict(model, X):
+    probs = model.predict_proba(X)[:, 1]
     return (probs > 0.5).astype(int)
 
 
 # =========================
-# EVALUATION
+# EVALUATION (HOLDOUT TEST)
 # =========================
 
-def evaluate_model(model, X_val, y_val):
-    y_pred = predict(model, X_val)
+def evaluate_model(model, X_test, y_test):
+    y_pred = predict(model, X_test)
 
-    acc = accuracy_score(y_val, y_pred)
+    acc = accuracy_score(y_test, y_pred)
 
-    print("\n📊 Validation results")
+    print("\n Test results")
     print(f"Accuracy: {acc:.4f}")
+
     print("\nClassification report:\n")
-    print(classification_report(y_val, y_pred))
+    print(classification_report(y_test, y_pred))
+
     print("\nConfusion matrix:\n")
-    print(confusion_matrix(y_val, y_pred))
+    print(confusion_matrix(y_test, y_pred))
 
     return acc
-
-
-
-

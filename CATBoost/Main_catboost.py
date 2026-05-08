@@ -1,5 +1,3 @@
-from sklearn.model_selection import train_test_split
-
 from Model_CatBoost import (
     load_data,
     prepare_data,
@@ -7,18 +5,15 @@ from Model_CatBoost import (
     create_catboost_model,
     train_model,
     evaluate_model,
-    predict,
-
-
+    predict
 )
-
 
 # =========================
 # PATHS
 # =========================
 
-train_path = "../data/preprocessed_folds/processed_full_tree.csv"
-test_path = "../data/preprocessed_folds/processed_full_tree_test.csv"
+train_path = "../data/preprocessed_folds/holdout_tree_train.csv"
+test_path = "../data/preprocessed_folds/holdout_tree_test.csv"
 
 
 # =========================
@@ -32,14 +27,10 @@ X_test = prepare_test(test_df)
 
 
 # =========================
-# SPLIT
+# TEST LABEL (se presente)
 # =========================
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42
-)
+y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 
 
 # =========================
@@ -50,26 +41,22 @@ model = create_catboost_model()
 
 
 # =========================
-# TRAIN
+# TRAIN (NO SPLIT - HOLDOUT READY)
 # =========================
 
-train_model(model, X_train, y_train, X_val, y_val)
-
-
-# =========================
-# EVAL
-# =========================
-
-evaluate_model(model, X_val, y_val)
-
-
-
+train_model(model, X, y)
 
 
 # =========================
-# PREDICT TEST
+# EVALUATION SU TEST SET
+# =========================
+
+if y_test is not None:
+    evaluate_model(model, X_test, y_test)
+
+
+# =========================
+# PREDICTIONS
 # =========================
 
 predictions = predict(model, X_test)
-
-
