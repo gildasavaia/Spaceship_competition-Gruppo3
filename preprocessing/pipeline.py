@@ -498,8 +498,8 @@ def main():
         print("\n[Esecuzione OP2] Valutazione finale dataset...")
         run_evaluation(df_eval_train) 
         
-        print("\n[Esecuzione OP6] Calcolo matrice di correlazione...")
-        run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
+        # print("\n[Esecuzione OP6] Calcolo matrice di correlazione...")
+        # run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
         
         return encoding_result
         
@@ -573,8 +573,8 @@ def main():
                 print("\n[Esecuzione OP2] Valutazione finale sull'ultimo fold...")
                 run_evaluation(df_eval_train)
                 
-                print("\n[Esecuzione OP6] Calcolo matrice di correlazione sull'ultimo fold...")
-                run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
+                # print("\n[Esecuzione OP6] Calcolo matrice di correlazione sull'ultimo fold...")
+                # run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
 
         return results
     
@@ -630,8 +630,8 @@ def main():
         print("\n[Esecuzione OP2] Valutazione finale dataset...")
         run_evaluation(df_eval_train) 
         
-        print("\n[Esecuzione OP6] Calcolo matrice di correlazione...")
-        run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
+        # print("\n[Esecuzione OP6] Calcolo matrice di correlazione...")
+        # run_op6(df_eval_train, config={"output_dir": "outputs/op6"})
         
         return encoding_result
 
