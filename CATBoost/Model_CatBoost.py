@@ -1,85 +1,75 @@
 import pandas as pd
 from catboost import CatBoostClassifier
 import matplotlib.pyplot as plt
-from sklearn.model_selection import KFold, StratifiedKFold
 import numpy as np
 from sklearn.metrics import accuracy_score
 
 
 
 def load_data(train_path, test_path):
-    """
-    Carica i dataset di training e test da file CSV
-
-    Args:
-        train_path: percorso file train
-        test_path: percorso file test
-
-    Returns:
-        train, test: DataFrame pandas
-    """
-    train = pd.read_csv(train_path)  # legge il dataset di training
-    test = pd.read_csv(test_path)    # legge il dataset di test
+    train = pd.read_csv(train_path)
+    test = pd.read_csv(test_path)
     return train, test
 
 
-#
+
 def prepare_data(train_df):
-    """
-    Separa features (X) e target (y)
-
-    - Rimuove colonne inutili
-    - Target = "Transported"
-
-    Args:
-        train_df: DataFrame di training
-
-    Returns:
-        X: feature
-        y: target
-    """
-    X = train_df.drop(["Transported", "PassengerId"], axis=1)  # rimuove target e ID
-    y = train_df["Transported"]  # target da predire
+    X = train_df.drop("Transported", axis=1)
+    y = train_df["Transported"]
     return X, y
 
 
-
 def prepare_test(test_df):
-    """
-    Prepara il dataset di test rimuovendo colonne non utili
-
-    Args:
-        test_df: DataFrame test
-
-    Returns:
-        X_test: feature del test
-    """
-    X_test = test_df.drop("PassengerId", axis=1)  # rimuove ID (non serve al modello)
+    X_test = test_df.copy()
     return X_test
 
 
 
+def create_catboost_model():
+    model = CatBoostClassifier(
+        iterations=1000,
+        learning_rate=0.03,
+        depth=6,
+        eval_metric="Logloss",
+        random_seed=42,
+        verbose=100,
+        early_stopping_rounds=50
+    )
+    return model
+
+
+
+def train_model(model, X_train, y_train, X_val=None, y_val=None):
+    if X_val is not None and y_val is not None:
+        model.fit(X_train, y_train, eval_set=(X_val, y_val))
+    else:
+        model.fit(X_train, y_train)
+    return model
+
+
+
+def predict(model, X_test):
+    return model.predict(X_test)
+
+
+
+def evaluate_model(model, X_val, y_val):
+    y_pred = model.predict(X_val)
+    acc = accuracy_score(y_val, y_pred)
+
+    print(f"\n📊 Validation accuracy: {acc:.4f}")
+    return acc
+
+
+
+
 def show_predictions(test_df, predictions, n=10, show_counts=True):
-    """
-    Mostra un'anteprima delle predizioni
+    results = test_df.copy()
+    results["Predicted_Transported"] = predictions
 
-    Args:
-        test_df: dataset originale
-        predictions: output del modello
-        n: numero di righe da mostrare
-        show_counts: mostra distribuzione classi
-
-    Returns:
-        DataFrame con predizioni
-    """
-    results = test_df.copy()  # copia per non modificare originale
-    results["Predicted_Transported"] = predictions  # aggiunge colonna predetta
-
-    # stampa prime n predizioni
     print(f"\n🔮 Prime {n} predizioni:\n")
-    print(results[["PassengerId", "Predicted_Transported"]].head(n))
+    print(results.head(n))
 
-    # stampa distribuzione classi (utile per capire bias)
     if show_counts:
         print("\n📊 Distribuzione predizioni:")
         print(results["Predicted_Transported"].value_counts())
@@ -87,146 +77,3 @@ def show_predictions(test_df, predictions, n=10, show_counts=True):
     return results
 
 
-
-def create_catboost_model():
-    """
-    Crea un modello CatBoost configurato
-
-    Include:
-    - early stopping
-    - parametri base ottimizzati
-    """
-    model = CatBoostClassifier(
-        iterations=1000,         # numero massimo di alberi
-        learning_rate=0.03,      # quanto velocemente apprende
-        depth=6,                 # complessità alberi
-        eval_metric='Logloss',   # funzione di loss
-        random_seed=42,          # per risultati riproducibili
-        verbose=100,             # stampa progresso ogni 100 iterazioni
-        early_stopping_rounds=50 # stop se non migliora per 50 iterazioni
-    )
-    return model
-
-
-def train_model(model, X_train, y_train, X_val=None, y_val=None):
-    """
-    Addestra il modello
-
-    Se viene fornito validation set:
-    → usa early stopping automaticamente
-
-    Args:
-        model: modello CatBoost
-        X_train, y_train: dati training
-        X_val, y_val: dati validation (opzionale)
-
-    Returns:
-        modello addestrato
-    """
-    if X_val is not None and y_val is not None:
-        # training con validation (early stopping attivo)
-        model.fit(X_train, y_train, eval_set=(X_val, y_val))
-    else:
-        # training senza validation
-        model.fit(X_train, y_train)
-
-    return model
-
-
-def predict(model, X_test):
-    """
-    Genera predizioni sul test set
-
-    Args:
-        model: modello addestrato
-        X_test: dati test
-
-    Returns:
-        predizioni
-    """
-    return model.predict(X_test)
-
-
-
-def evaluate_model(model, X, y, cv=5):
-    """
-    Valuta il modello con Stratified K-Fold Cross Validation
-
-    Differenza:
-    - mantiene la proporzione delle classi in ogni fold
-    - evita errori tipo "Target contains only one unique value"
-
-    Args:
-        model: modello
-        X, y: dataset completo
-        cv: numero di fold
-
-    Returns:
-        accuracy media
-    """
-    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
-    scores = []
-
-    for train_idx, val_idx in skf.split(X, y):
-        # split dati
-        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-
-        # ⚠️ sicurezza extra (evita crash in casi estremi)
-        if len(np.unique(y_train)) < 2:
-            continue
-
-        # training
-        model.fit(X_train, y_train, eval_set=(X_val, y_val), verbose=False)
-
-        # predizione
-        y_pred = model.predict(X_val)
-
-        # accuracy
-        acc = accuracy_score(y_val, y_pred)
-        scores.append(acc)
-
-    print("Accuracy per fold:", scores)
-
-    if len(scores) == 0:
-        print("⚠️ Nessun fold valido")
-        return 0
-
-    mean_score = np.mean(scores)
-    print("Mean accuracy:", mean_score)
-
-    return mean_score
-
-
-def plot_feature_importance(model, feature_names):
-    """
-    Mostra importanza delle feature
-
-    Args:
-        model: modello addestrato
-        feature_names: nomi colonne
-    """
-    importances = model.get_feature_importance()  # ottiene importanza
-
-    # grafico orizzontale
-    plt.barh(feature_names, importances)
-    plt.xlabel("Importanza delle feature")
-    plt.title("Feature Importance - CatBoost")
-    plt.show()
-
-
-def create_submission(test_df, predictions, output_path="../outputs/submission_catboost.csv"):
-    """
-    Crea file CSV per submission (es. Kaggle)
-
-    Args:
-        test_df: dataset test originale
-        predictions: predizioni modello
-        output_path: dove salvare il file
-    """
-    submission = pd.DataFrame({
-        "PassengerId": test_df["PassengerId"],  # ID richiesto
-        "Transported": predictions              # target predetto
-    })
-
-    submission.to_csv(output_path, index=False)  # salva CSV
