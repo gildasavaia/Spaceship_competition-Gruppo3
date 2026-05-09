@@ -25,14 +25,17 @@ def run_op5(df: pd.DataFrame) -> op5_sumcosts_namesResult:
     if colonne_costo_esistenti:
         df_processed['TotalSpending'] = df_processed[colonne_costo_esistenti].sum(axis=1)
 
-    # 2. Trasformazione delle colonne di costo in valori binari (0 e 1)
-    for col in colonne_costo_esistenti:
-        # Se il valore è maggiore di 0 restituisce True (1), altrimenti False (0)
-        df_processed[col] = (df_processed[col] > 0).astype(int)
+    # # 2. Trasformazione delle colonne di costo in valori binari (0 e 1)
+    # for col in colonne_costo_esistenti:
+    #     # Se il valore è maggiore di 0 restituisce True (1), altrimenti False (0)
+    #     df_processed[col] = (df_processed[col] > 0).astype(int)
 
     # 3. Rimozione colonne inutili (solo i nomi)
-    colonne_da_rimuovere = ['Names', 'Surnames']
-    colonne_esistenti_da_rimuovere = [col for col in colonne_da_rimuovere if col in df_processed.columns]
+    colonna_da_rimuovere = ['Names']
+    colonne_esistenti_da_rimuovere = [col for col in colonna_da_rimuovere if col in df_processed.columns]
     df_processed = df_processed.drop(columns=colonne_esistenti_da_rimuovere)
+    # colonna_da_rimuovere = ['Surnames']
+    # colonne_esistenti_da_rimuovere = [col for col in colonna_da_rimuovere if col in df_processed.columns]
+    # df_processed = df_processed.drop(columns=colonne_esistenti_da_rimuovere)
 
     return op5_sumcosts_namesResult(df_output=df_processed)

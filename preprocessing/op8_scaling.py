@@ -25,7 +25,7 @@ def run_scaling(df_train, df_test=None):
     df_nn_test = df_test.copy() if df_test is not None else None
 
     # Colonne numeriche da scalare (verifica che corrispondano a quelle che hai post OP5)
-    numeric_cols = ['Age', 'GroupSize', 'Num', 'TotalSpending']
+    numeric_cols = ['Age', 'GroupSize', 'Num', 'TotalSpending', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
     
     # Filtriamo solo le colonne numeriche effettivamente presenti nel dataframe
     numeric_cols = [c for c in numeric_cols if c in df_train.columns]
@@ -35,7 +35,27 @@ def run_scaling(df_train, df_test=None):
         df_nn_train['TotalSpending'] = np.log1p(df_nn_train['TotalSpending'])
         if df_nn_test is not None:
             df_nn_test['TotalSpending'] = np.log1p(df_nn_test['TotalSpending'])
-
+            
+    if 'RoomService' in df_nn_train.columns:
+        df_nn_train['RoomService'] = np.log1p(df_nn_train['RoomService'])
+        if df_nn_test is not None:
+            df_nn_test['RoomService'] = np.log1p(df_nn_test['RoomService'])
+    if 'FoodCourt' in df_nn_train.columns:
+        df_nn_train['FoodCourt'] = np.log1p(df_nn_train['FoodCourt'])
+        if df_nn_test is not None:
+            df_nn_test['FoodCourt'] = np.log1p(df_nn_test['FoodCourt'])
+    if 'ShoppingMall' in df_nn_train.columns:
+        df_nn_train['ShoppingMall'] = np.log1p(df_nn_train['ShoppingMall'])
+        if df_nn_test is not None:
+            df_nn_test['ShoppingMall'] = np.log1p(df_nn_test['ShoppingMall'])
+    if 'Spa' in df_nn_train.columns:
+        df_nn_train['Spa'] = np.log1p(df_nn_train['Spa'])
+        if df_nn_test is not None:
+            df_nn_test['Spa'] = np.log1p(df_nn_test['Spa'])
+    if 'VRDeck' in df_nn_train.columns:
+        df_nn_train['VRDeck'] = np.log1p(df_nn_train['VRDeck'])
+        if df_nn_test is not None:
+            df_nn_test['VRDeck'] = np.log1p(df_nn_test['VRDeck'])
     # Standardizzazione
     if numeric_cols:
         scaler = StandardScaler()
