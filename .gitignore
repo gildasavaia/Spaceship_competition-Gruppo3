@@ -42,7 +42,3 @@ catboost_info/
 
 # Impostazioni di PyCharm (IDE)
 .idea/
-
-# File di cache di Python
-__pycache__/
-*.py[cod]
