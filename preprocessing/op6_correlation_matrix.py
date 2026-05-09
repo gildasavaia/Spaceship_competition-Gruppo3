@@ -5,7 +5,7 @@ import os
 
 def pulisci_binarie(serie):
     """Converte le variabili binarie (testo o booleani) in 0 e 1."""
-    return serie.replace({'False': 0, 'True': 1, False: 0, True: 1}).fillna(0).astype(int)
+    return serie.map({'False': 0, 'True': 1, False: 0, True: 1}).fillna(0).astype(int)
 
 def run_op6(df, config=None):
     """
