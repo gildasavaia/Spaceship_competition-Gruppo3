@@ -1,12 +1,8 @@
 import pandas as pd
-import os
+
 import joblib
-import warnings
 from pathlib import Path
 from Support_Vector_Classifier_model import SupportVectorTrainer
-
-# Ignoriamo i warning per un terminale pulito
-warnings.filterwarnings('ignore')
 
 
 def main():
@@ -24,7 +20,6 @@ def main():
     # 1. RICERCA DINAMICA DEI DATASET
     # =========================================================
     dataset_disponibili = []
-    # Cerchiamo i file generati (Holdout, K-Fold, Full)
     if (preprocessed_dir / "holdout_tree_train.csv").exists():
         dataset_disponibili.append("holdout_tree")
 
@@ -51,7 +46,6 @@ def main():
 
     dataset_scelto = mappa_dataset[scelta]
 
-    # Caricamento percorsi
     if dataset_scelto == 'processed_full_tree':
         train_path = preprocessed_dir / f"{dataset_scelto}.csv"
     else:
@@ -65,13 +59,34 @@ def main():
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
 
-    # Nota: SVC non accetta testo. Ci affidiamo all'encoding della tua pipeline
     X_train = train_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # SVC è LENTO su dataset grandi. Se scegli il dataset intero (8700 righe),
-    # il PC potrebbe metterci qualche minuto per la Grid Search.
+    # =====================================================================
+    # TRUCCO DEFINITIVO PER L'SVC: Unisci, Converti e Dividi (One-Hot Encoding)
+    # =====================================================================
+    # Salviamo il numero di righe del train set per poterlo ristaccare dopo
+    num_train_rows = X_train.shape[0]
+
+    # Uniamo temporaneamente train e test
+    combined_df = pd.concat([X_train, X_test], axis=0, ignore_index=True)
+
+    # Troviamo tutte le colonne che contengono testo
+    colonne_testuali = combined_df.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    if colonne_testuali:
+        print(f"[*] Trovate colonne testuali: {colonne_testuali}. Conversione in corso...")
+        # Convertiamo tutto il calderone in numeri (1 e 0)
+        combined_df = pd.get_dummies(combined_df, columns=colonne_testuali, drop_first=True)
+
+    # Assicuriamoci che tutto sia rigorosamente di tipo numerico (float o int)
+    combined_df = combined_df.astype(float)
+
+    # Ristacchiamo i due dataset in modo perfetto
+    X_train = combined_df.iloc[:num_train_rows, :].copy()
+    X_test = combined_df.iloc[num_train_rows:, :].copy()
+    # =====================================================================
 
     if 'PassengerId' in test_df.columns:
         passenger_ids = test_df['PassengerId']
@@ -83,7 +98,7 @@ def main():
     # ---------------------------------------------------------
     trainer = SupportVectorTrainer(random_state=42)
 
-    print("[2/4] Ottimizzazione iperparametri...")
+    print("[2/4] Ottimizzazione iperparametri SVC (abbi pazienza, la geometria è lenta)...")
     trainer.tune_hyperparameters(X_train, y_train)
 
     print("[3/4] Generazione predizioni...")
@@ -92,20 +107,22 @@ def main():
     # ---------------------------------------------------------
     # 5. SALVATAGGIO
     # ---------------------------------------------------------
+    print("[4/4] Salvataggio dei risultati...")
     submission = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
     })
 
+    outputs_dir.mkdir(parents=True, exist_ok=True)
     sub_file = outputs_dir / f"submission_svc_{dataset_scelto}.csv"
     model_file = outputs_dir / f"modello_svc_{dataset_scelto}.pkl"
 
-    outputs_dir.mkdir(parents=True, exist_ok=True)
     submission.to_csv(sub_file, index=False)
     joblib.dump(trainer.best_model, model_file)
 
     print(f"\n✅ SVC completato con successo!")
-    print(f"-> Modello salvato: {model_file}")
+    print(f"-> Predizioni: {sub_file}")
+    print(f"-> Modello: {model_file}")
 
 
 if __name__ == "__main__":
