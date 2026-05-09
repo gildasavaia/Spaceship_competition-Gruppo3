@@ -17,13 +17,13 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
     # --- NOVITÀ: ELIMINAZIONE COLONNA 'Group' ---
     # Rimuoviamo la colonna Group in partenza da tutti i dataframe, se esiste
     # Usiamo errors='ignore' in modo che il codice non si blocchi se la colonna non c'è
-    df_tree_train = df_tree_train.drop(columns=['Group'], errors='ignore')
-    df_nn_train = df_nn_train.drop(columns=['Group'], errors='ignore')
+    df_tree_train = df_tree_train.drop(columns=['Group','Surnames'], errors='ignore')
+    df_nn_train = df_nn_train.drop(columns=['Group','Surnames'], errors='ignore')
     
     if df_tree_test is not None:
-        df_tree_test = df_tree_test.drop(columns=['Group'], errors='ignore')
+        df_tree_test = df_tree_test.drop(columns=['Group','Surnames'], errors='ignore')
     if df_nn_test is not None:
-        df_nn_test = df_nn_test.drop(columns=['Group'], errors='ignore')
+        df_nn_test = df_nn_test.drop(columns=['Group','Surnames'], errors='ignore')
     # ---------------------------------------------
 
     # Identifichiamo le colonne categoriche (escludendo il target se presente)
