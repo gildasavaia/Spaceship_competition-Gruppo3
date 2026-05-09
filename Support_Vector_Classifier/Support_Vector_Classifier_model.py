@@ -45,3 +45,9 @@ class SupportVectorTrainer:
         # Quando chiami predict, lo StandardScaler interno scalerà in automatico
         # anche i dati di test usando le regole imparate sui dati di train!
         return self.best_model.predict(X)
+
+    def predict_proba(self, X):
+        if self.best_model is None:
+            raise ValueError("Il modello deve essere addestrato prima.")
+        # Prende solo la colonna delle probabilità della classe "True" (Trasportato)
+        return self.best_model.predict_proba(X)[:, 1]
