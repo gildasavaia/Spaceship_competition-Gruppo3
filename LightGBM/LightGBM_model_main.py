@@ -90,9 +90,9 @@ def main():
     print(f"{'=' * 60}")
 
     # ---------------------------------------------------------
-    # 3. CARICAMENTO E CONVERSIONE DEI DATI
+    # 3. CARICAMENTO E PREPARAZIONE DATI
     # ---------------------------------------------------------
-    print("[1/4] Caricamento in corso...")
+    print("[1/4] Caricamento dati in corso...")
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
 
@@ -100,17 +100,32 @@ def main():
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # Convertiamo tutte le colonne testuali in categorie per LightGBM
-    colonne_testuali = X_train.select_dtypes(include=['object']).columns
-    for col in colonne_testuali:
-        X_train[col] = X_train[col].astype('category')
-        if col in X_test.columns:
-            X_test[col] = X_test[col].astype('category')
+    # =====================================================================
+    # TRUCCO SUPREMO PER LIGHTGBM: Unisci, Converti e Dividi
+    # Garantisce che le categorie siano identiche al 100% tra Train e Test
+    # =====================================================================
+    num_train_rows = X_train.shape[0]
+
+    # Uniamo temporaneamente train e test
+    combined_df = pd.concat([X_train, X_test], axis=0, ignore_index=True)
+
+    # Troviamo le colonne testuali nel calderone unito
+    colonne_testuali = combined_df.select_dtypes(include=['object', 'string']).columns.tolist()
+
+    if colonne_testuali:
+        print(f"[*] Colonne testuali rilevate: {colonne_testuali}. Conversione in 'category'...")
+        for col in colonne_testuali:
+            combined_df[col] = combined_df[col].astype('category')
+
+    # Ristacchiamo i dataset in modo perfetto
+    X_train = combined_df.iloc[:num_train_rows, :].copy()
+    X_test = combined_df.iloc[num_train_rows:, :].copy()
+    # =====================================================================
 
     if 'PassengerId' in test_df.columns:
         passenger_ids = test_df['PassengerId']
     else:
-        passenger_ids = [f"ID_Fold_{i}" for i in range(len(test_df))]
+        passenger_ids = range(len(test_df))
 
     # ---------------------------------------------------------
     # 4. INIZIALIZZAZIONE DEL MODELLO
@@ -125,24 +140,42 @@ def main():
     trainer.tune_hyperparameters(X_train, y_train)
 
     # ---------------------------------------------------------
-    # 6. PREDIZIONE E SALVATAGGIO
+    # 6. PREDIZIONE E SALVATAGGIO (con Probabilità per Stacking)
     # ---------------------------------------------------------
-    print("[4/4] Generazione predizioni e salvataggio file...")
-    predictions = trainer.predict(X_test)
+    print("[4/4] Generazione predizioni, probabilità e salvataggio file...")
 
+    # 1. Calcolo predizioni (True/False) e probabilità (0.0 - 1.0)
+    predictions = trainer.predict(X_test)
+    probabilities = trainer.predict_proba(X_test)
+
+    # 2. Creazione dei DataFrame
+    # Questo è per Kaggle
     submission = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
     })
 
-    submission_filename = outputs_dir / f"submission_lightgbm_{dataset_scelto}.csv"
-    submission.to_csv(submission_filename, index=False)
+    # Questo è per il nostro Meta-Modello (Ensemble)
+    stacking_df = pd.DataFrame({
+        'PassengerId': passenger_ids,
+        'Probability': probabilities
+    })
 
+    # 3. Definizione dei percorsi di salvataggio
+    outputs_dir.mkdir(parents=True, exist_ok=True)  # Sicurezza extra
+    submission_filename = outputs_dir / f"submission_lightgbm_{dataset_scelto}.csv"
+    prob_filename = outputs_dir / f"prob_lightgbm_{dataset_scelto}.csv"
     model_filename = outputs_dir / f"modello_lightgbm_{dataset_scelto}.pkl"
+
+    # 4. Salvataggio effettivo su disco
+    submission.to_csv(submission_filename, index=False)
+    stacking_df.to_csv(prob_filename, index=False)
     joblib.dump(trainer.best_model, model_filename)
 
-    print(f"Previsioni salvate in: {submission_filename}")
-    print(f"Modello salvato in: {model_filename}")
+    # 5. Messaggi finali
+    print(f"Previsioni (Kaggle) salvate in: {submission_filename.name}")
+    print(f"Probabilità (Stacking) salvate in: {prob_filename.name}")
+    print(f"Modello (Cervello) salvato in: {model_filename.name}")
     print("\nELABORAZIONE COMPLETATA CON SUCCESSO!")
 
 
