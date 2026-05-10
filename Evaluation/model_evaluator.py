@@ -100,6 +100,17 @@ def main():
 
     y_prob_df = pd.read_csv(prob_file) if prob_file.exists() else None
 
+    # Controllo anti-crash per le submission ufficiali (Kaggle Test Set)
+    if 'Transported' not in y_true_df.columns:
+        print(f"\n{'-' * 60}")
+        print("🏆 DATASET KAGGLE UFFICIALE RILEVATO!")
+        print(f"Il file '{sub_file.name}' è basato sul test set finale.")
+        print("Poiché non abbiamo le risposte corrette ('Transported'), non possiamo calcolare le metriche qui.")
+        print(
+            "Questo file è pronto per essere caricato direttamente su Kaggle per ottenere il tuo punteggio in classifica!")
+        print(f"{'-' * 60}")
+        return
+
     # =========================================================
     # ALLINEAMENTO DATI (A prova di errore)
     # =========================================================
