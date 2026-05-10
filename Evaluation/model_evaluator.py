@@ -100,9 +100,16 @@ def main():
 
     y_prob_df = pd.read_csv(prob_file) if prob_file.exists() else None
 
-    # Assicuriamoci che gli ID corrispondano
-    y_pred_df = y_pred_df.sort_values('PassengerId')
-    y_true_df = y_true_df.sort_values('PassengerId')
+    # =========================================================
+    # ALLINEAMENTO DATI (A prova di errore)
+    # =========================================================
+    # Controlliamo se esiste il PassengerId in entrambi i file
+    if 'PassengerId' in y_pred_df.columns and 'PassengerId' in y_true_df.columns:
+        y_pred_df = y_pred_df.sort_values('PassengerId').reset_index(drop=True)
+        y_true_df = y_true_df.sort_values('PassengerId').reset_index(drop=True)
+    else:
+        # Se i colleghi hanno rimosso l'ID nel preprocessing, ci fidiamo dell'ordine delle righe
+        print("\n[*] Nota: 'PassengerId' assente nel test set. Assumo allineamento sequenziale delle righe.")
 
     y_true = y_true_df['Transported'].astype(bool)
     y_pred = y_pred_df['Transported'].astype(bool)
