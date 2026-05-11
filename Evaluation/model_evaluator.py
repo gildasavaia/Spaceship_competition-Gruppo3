@@ -86,7 +86,22 @@ def main():
     modello = parti_nome[0]
     dataset_name = "_".join(parti_nome[1:])
 
-    test_file_path = preprocessed_dir / f"{dataset_name}_test.csv"
+    # Determiniamo il file di test corrispondente
+    # Esempio: submission_lightgbm_holdout_tree.csv -> holdout_tree_test.csv
+    test_file_name = sub_file.name.replace('submission_', '').replace('svc_', '').replace('nn_', '').replace(
+        'lightgbm_', '').replace('random_forest_', '')
+    test_file_name = test_file_name.replace('.csv', '_test.csv')
+
+    # =========================================================
+    # LOGICA SPECIALE PER FILE "TOTAL" (K-Fold Unificato)
+    # =========================================================
+    if "TOTAL" in sub_file.name:
+        # Se è il file TOTAL, lo confrontiamo con l'intero train processato
+        test_file_path = base_dir / "data" / "train_processed.csv"
+        print(f"[*] Rilevato file TOTAL: Confronto con {test_file_path.name}")
+    else:
+        # Altrimenti cerchiamo il file di test specifico nella cartella preprocessed
+        test_file_path = preprocessed_dir / test_file_name
 
     if not test_file_path.exists():
         print(f"Errore: Non trovo le risposte corrette! File {test_file_path} mancante.")
