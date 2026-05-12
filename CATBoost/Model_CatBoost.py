@@ -101,4 +101,4 @@ def evaluate_model(model, X_test, y_test):
     print("\nConfusion matrix:\n")
     print(confusion_matrix(y_test, y_pred))
 
-    return accuracy_score
+    return acc

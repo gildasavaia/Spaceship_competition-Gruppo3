@@ -4,9 +4,7 @@ import os
 import glob
 from XGBoost.Evaluation_XGBoost import run_full_evaluation
 
-# ==========================================
-# 🔹 MENU
-# ==========================================
+
 
 print("Seleziona il metodo di addestramento per XGBoost:")
 print("1. Holdout")
@@ -16,10 +14,6 @@ scelta = input("Inserisci 1 o 2: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
-
-# ==========================================
-# 🔹 HOLDOUT
-# ==========================================
 
 if scelta == "1":
 
