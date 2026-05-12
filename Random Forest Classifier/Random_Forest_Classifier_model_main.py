@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import joblib
 import warnings
+import glob
 from pathlib import Path
 from Random_Forest_Classifier_model import RandomForestTrainer
 
@@ -9,81 +10,16 @@ from Random_Forest_Classifier_model import RandomForestTrainer
 # Sostituisci il nome della cartella se l'hai rinominata senza spazi
 # (es. from Random_Forest_Classifier_model import ...)
 
-def main():
-    print("Avvio della pipeline Random Forest per Spaceship Titanic...")
-
-    # Gestione dinamica dei percorsi
-    base_dir = Path(__file__).resolve().parent.parent
-    preprocessed_dir = base_dir / "data" / "preprocessed_folds"
-    outputs_dir = base_dir / "outputs"
-
-    if not preprocessed_dir.exists():
-        print(f"Errore: La cartella {preprocessed_dir} non esiste. Esegui prima la pipeline!")
-        return
-
-    # =========================================================
-    # 1. RICERCA DINAMICA DEI DATASET
-    # =========================================================
-    dataset_disponibili = []
-
-    # Cerca Holdout
-    if (preprocessed_dir / "holdout_tree_train.csv").exists():
-        dataset_disponibili.append("holdout_tree")
-
-    # Cerca K-Folds (ordinandoli numericamente)
-    fold_files = list(preprocessed_dir.glob("kfold_*_tree_train.csv"))
-    fold_files.sort(key=lambda x: int(x.name.split('_')[1]) if x.name.split('_')[1].isdigit() else 0)
-
-    for f in fold_files:
-        dataset_disponibili.append(f.name.replace("_train.csv", ""))
-
-    # Cerca Dataset Intero
-    if (preprocessed_dir / "processed_full_tree.csv").exists():
-        dataset_disponibili.append("processed_full_tree")
-
-    if not dataset_disponibili:
-        print("Errore: Nessun dataset trovato in data/preprocessed_folds.")
-        return
-
-    # =========================================================
-    # 2. MENU INTERATTIVO
-    # =========================================================
-    mappa_dataset = {}
-    print("\nScegli quale dataset utilizzare per Random Forest:")
-
-    for i, nome in enumerate(dataset_disponibili, start=1):
-        mappa_dataset[str(i)] = nome
-        if "holdout" in nome:
-            desc = "Holdout (Validazione rapida)"
-        elif "kfold" in nome:
-            n_fold = nome.split('_')[1]
-            desc = f"K-Fold numero {n_fold}"
-        elif "full" in nome:
-            desc = "Intero Dataset (per Submission finale)"
-        else:
-            desc = nome
-        print(f"{i}: {desc}")
-
-    scelta = input(f"\nInserisci un numero (1-{len(dataset_disponibili)}): ").strip()
-    while scelta not in mappa_dataset:
-        scelta = input("Scelta non valida. Riprova: ").strip()
-
-    dataset_scelto = mappa_dataset[scelta]
-
-    # Caricamento percorsi file
-    if dataset_scelto == 'processed_full_tree':
-        train_path = preprocessed_dir / f"{dataset_scelto}.csv"
-    else:
-        train_path = preprocessed_dir / f"{dataset_scelto}_train.csv"
-    test_path = preprocessed_dir / f"{dataset_scelto}_test.csv"
-
+def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_file_singolo=True):
+    """
+    Funzione core che esegue l'intera pipeline Random Forest per una specifica coppia di Train/Test.
+    Restituisce i DataFrame per permettere l'unione dei K-Fold in un unico file TOTAL.
+    """
     print(f"\n{'=' * 60}")
-    print(f"ELABORAZIONE RANDOM FOREST: {dataset_scelto.upper()}")
+    print(f"ELABORAZIONE RANDOM FOREST: {dataset_name.upper()}")
     print(f"{'=' * 60}")
 
-    # ---------------------------------------------------------
-    # 3. CARICAMENTO E PREPARAZIONE DATI
-    # ---------------------------------------------------------
+    # 1. Caricamento Dati
     print("[1/4] Caricamento dati in corso...")
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
@@ -117,48 +53,133 @@ def main():
 
     passenger_ids = test_df['PassengerId'] if 'PassengerId' in test_df.columns else range(len(test_df))
 
-    # ---------------------------------------------------------
-    # 4. ADDESTRAMENTO E TUNING
-    # ---------------------------------------------------------
+    # 2. Addestramento e Tuning
     print("[2/4] Ricerca iperparametri ottimali (GridSearch)...")
     trainer = RandomForestTrainer(random_state=42)
     trainer.tune_hyperparameters(X_train, y_train)
 
-    # ---------------------------------------------------------
-    # 5. PREDIZIONI E PROBABILITÀ
-    # ---------------------------------------------------------
+    # 3. Predizioni e Probabilità
     print("[3/4] Generazione predizioni e probabilità per Stacking...")
     predictions = trainer.predict(X_test)
     probabilities = trainer.predict_proba(X_test)
 
-    # ---------------------------------------------------------
-    # 6. SALVATAGGIO OUTPUT
-    # ---------------------------------------------------------
-    print("[4/4] Salvataggio file in 'outputs'...")
-    outputs_dir.mkdir(parents=True, exist_ok=True)
-
-    # File 1: Sottomissione ufficiale (True/False)
-    sub_file = outputs_dir / f"submission_rf_{dataset_scelto}.csv"
-    pd.DataFrame({
+    # Creazione dei dataframe di output
+    res_df = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
-    }).to_csv(sub_file, index=False)
-
-    # File 2: Probabilità per Stacking (0.0 - 1.0)
-    prob_file = outputs_dir / f"prob_rf_{dataset_scelto}.csv"
-    pd.DataFrame({
+    })
+    prob_df = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Probability': probabilities
-    }).to_csv(prob_file, index=False)
+    })
 
-    # File 3: Il modello addestrato (.pkl)
-    model_file = outputs_dir / f"modello_rf_{dataset_scelto}.pkl"
+    # 4. Salvataggio del Modello (.pkl)
+    print("[4/4] Salvataggio risultati in 'outputs'...")
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    model_file = outputs_dir / f"modello_rf_{dataset_name}.pkl"
     joblib.dump(trainer.best_model, model_file)
 
-    print(f"\n✅ Random Forest completato!")
-    print(f"-> File Kaggle: {sub_file.name}")
-    print(f"-> File Stacking: {prob_file.name}")
-    print(f"-> Modello: {model_file.name}")
+    # Salvataggio dei singoli file CSV solo se richiesto
+    if salva_file_singolo:
+        sub_file = outputs_dir / f"submission_rf_{dataset_name}.csv"
+        res_df.to_csv(sub_file, index=False)
+
+        prob_file = outputs_dir / f"prob_rf_{dataset_name}.csv"
+        prob_df.to_csv(prob_file, index=False)
+        print(f"✅ Modello Random Forest {dataset_name} salvato con successo!")
+
+    return res_df, prob_df
+
+
+def main():
+    print("Avvio della pipeline Random Forest per Spaceship Titanic...\n")
+
+    base_dir = Path(__file__).resolve().parent.parent
+    preprocessed_dir = base_dir / "data" / "preprocessed_folds"
+    outputs_dir = base_dir / "outputs"
+
+    if not preprocessed_dir.exists():
+        print(f"Errore: La cartella {preprocessed_dir} non esiste. Esegui prima la pipeline di preprocessing!")
+        return
+
+    # =========================================================
+    # MENU INTERATTIVO INTELLIGENTE
+    # =========================================================
+    print("Seleziona il metodo di addestramento per Random Forest:")
+    print("1. Holdout (singolo train/test)")
+    print("2. K-Fold (addestramento automatico e output UNIFICATO in file TOTAL)")
+    print("3. Processed Full (preparazione della submission finale per Kaggle)")
+
+    scelta = input("Inserisci 1, 2 o 3: ").strip()
+
+    # ---------------------------------
+    # OPZIONE 1: HOLDOUT
+    # ---------------------------------
+    if scelta == "1":
+        train_path = preprocessed_dir / "holdout_tree_train.csv"
+        test_path = preprocessed_dir / "holdout_tree_test.csv"
+
+        if train_path.exists() and test_path.exists():
+            esegui_pipeline_rf(train_path, test_path, "holdout_tree", outputs_dir, salva_file_singolo=True)
+        else:
+            print("❌ Errore: File holdout mancanti.")
+
+    # ---------------------------------
+    # OPZIONE 2: K-FOLD DINAMICO (FILE TOTAL)
+    # ---------------------------------
+    elif scelta == "2":
+        print("\n🔍 Ricerca dei file K-Fold in corso...")
+        search_pattern = str(preprocessed_dir / "kfold_*_tree_train.csv")
+        train_files = glob.glob(search_pattern)
+
+        if not train_files:
+            print("❌ Errore: Nessun file K-Fold trovato nella cartella 'preprocessed_folds'!")
+        else:
+            num_folds = len(train_files)
+            print(f"✅ Trovati {num_folds} fold. Avvio elaborazione in serie...\n")
+
+            all_res = []
+            all_prob = []
+
+            for i in range(1, num_folds + 1):
+                train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
+                test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
+
+                if not test_path.exists():
+                    print(f"⚠️ File test mancante per il fold {i}. Salto...")
+                    continue
+
+                # Esegue la pipeline ma NON salva i singoli file
+                res, prob = esegui_pipeline_rf(train_path, test_path, f"kfold_{i}_tree", outputs_dir,
+                                               salva_file_singolo=False)
+                all_res.append(res)
+                all_prob.append(prob)
+
+            # --- UNIONE IN UN UNICO FILE ---
+            print("\n[*] Unione di tutte le predizioni K-Fold in un unico file TOTAL...")
+            final_res = pd.concat(all_res).sort_values('PassengerId')
+            final_prob = pd.concat(all_prob).sort_values('PassengerId')
+
+            final_res.to_csv(outputs_dir / "submission_rf_kfold_TOTAL.csv", index=False)
+            final_prob.to_csv(outputs_dir / "prob_rf_kfold_TOTAL.csv", index=False)
+
+            print(f"\n🏆 FINE K-FOLD | Tutti i {num_folds} modelli Random Forest sono stati addestrati!")
+            print(f"✅ Creato UNICO file di submission: submission_rf_kfold_TOTAL.csv")
+
+    # ---------------------------------
+    # OPZIONE 3: FULL KAGGLE DATASET
+    # ---------------------------------
+    elif scelta == "3":
+        train_path = preprocessed_dir / "processed_full_tree.csv"
+        test_path = preprocessed_dir / "processed_full_tree_test.csv"
+
+        if train_path.exists() and test_path.exists():
+            esegui_pipeline_rf(train_path, test_path, "processed_full_tree", outputs_dir, salva_file_singolo=True)
+        else:
+            print("❌ Errore: File processed_full mancanti.")
+
+    else:
+        print("❌ Scelta non valida. Riavvia lo script.")
 
 
 if __name__ == "__main__":
