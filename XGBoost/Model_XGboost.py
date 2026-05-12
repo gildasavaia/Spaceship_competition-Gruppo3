@@ -37,32 +37,41 @@ def prepare_test(test_df):
 
 def create_model():
     model = XGBClassifier(
-        n_estimators=1200,
-        learning_rate=0.05,
 
-        max_depth=7,
+        n_estimators=3500,
+        learning_rate=0.02,
+        max_depth=5,
+        min_child_weight=1,
 
-        min_child_weight=3,
+        gamma=0.05,
 
-        subsample=0.8,
-        colsample_bytree=0.8,
+        subsample=0.9,
+        colsample_bytree=0.85,
 
-        gamma=0.3,
+        reg_lambda=3,
+        reg_alpha=0.3,
+        tree_method="hist",
+        max_bin=256,
+        n_jobs=-1,
+        enable_categorical=True,
 
-        reg_lambda=1,
-        reg_alpha=0.2,
+        objective='binary:logistic',
+        eval_metric='logloss',
 
-        random_state=42,
+        random_state=42
 
-        eval_metric='logloss'
     )
     return model
 
-
+def fix_categorical_dtype(X):
+    for col in X.select_dtypes(include=["object"]).columns:
+        X[col] = X[col].astype("category")
+    return X
 
 def train_model(model, X, y):
     model.fit(X, y)
     return model
+
 
 
 #
@@ -88,5 +97,3 @@ def evaluate_on_test(model, X_test, y_test):
 def show_predictions(predictions, n=10):
     print(f"\n🔮 Prime {n} predizioni:\n")
     print(predictions[:n])
-
-
