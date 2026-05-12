@@ -1,45 +1,193 @@
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, confusion_matrix
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix
 )
 
+# =========================================================
+# 🔹 VALUTAZIONE SINGOLO TEST/FOLD
+# =========================================================
 
 def run_full_evaluation(model, X_test, y_test, title="Test Set"):
-    """
-    Esegue una valutazione completa e stampa i risultati.
-    """
-    # Predizioni secche e probabilità
+
+    # =====================================================
+    # Predizioni
+    # =====================================================
+
     y_pred = model.predict(X_test)
+
     y_probs = model.predict_proba(X_test)[:, 1]
 
-    # Calcolo metriche richieste
+    # =====================================================
+    # Metriche
+    # =====================================================
+
     metrics = {
-        "Accuracy": accuracy_score(y_test, y_pred),
-        "Precision": precision_score(y_test, y_pred),
-        "Recall": recall_score(y_test, y_pred),
-        "F1-Score": f1_score(y_test, y_pred),
-        "AUC-ROC": roc_auc_score(y_test, y_probs)
+
+        "Accuracy":
+            accuracy_score(y_test, y_pred),
+
+        "Precision":
+            precision_score(y_test, y_pred),
+
+        "Recall":
+            recall_score(y_test, y_pred),
+
+        "F1-Score":
+            f1_score(y_test, y_pred),
+
+        "AUC-ROC":
+            roc_auc_score(y_test, y_probs)
     }
 
-    print(f"\n --- REPORT VALUTAZIONE: {title} ---")
-    for name, value in metrics.items():
-        print(f"{name:10}: {value:.4f}")
+    # =====================================================
+    # Confusion Matrix
+    # =====================================================
 
-    # Matrice di Confusione
-    plot_confusion_matrix(y_test, y_pred, title)
-
-    return metrics
-
-
-def plot_confusion_matrix(y_test, y_pred, title):
     cm = confusion_matrix(y_test, y_pred)
+
+    # =====================================================
+    # REPORT
+    # =====================================================
+
+    print(f"\n{'=' * 60}")
+    print(f"📊 REPORT VALUTAZIONE: {title}")
+    print(f"{'=' * 60}")
+
+    for metric_name, metric_value in metrics.items():
+
+        print(f"{metric_name:10}: {metric_value:.4f}")
+
+    # =====================================================
+    # Plot confusion matrix
+    # =====================================================
+
+    plot_confusion_matrix(
+        cm,
+        title
+    )
+
+    return metrics, cm
+
+
+# =========================================================
+# 🔹 PLOT CONFUSION MATRIX
+# =========================================================
+
+def plot_confusion_matrix(cm, title):
+
     plt.figure(figsize=(6, 4))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=['Non Trasp.', 'Trasp.'],
-                yticklabels=['Non Trasp.', 'Trasp.'])
+
+    sns.heatmap(
+        cm,
+
+        annot=True,
+        fmt='d',
+
+        cmap='Blues',
+
+        xticklabels=['Non Trasp.', 'Trasp.'],
+        yticklabels=['Non Trasp.', 'Trasp.']
+    )
+
     plt.xlabel('Predetto')
     plt.ylabel('Reale')
-    plt.title(f'Matrice di Confusione - {title}')
+
+    plt.title(
+        f'Matrice di Confusione - {title}'
+    )
+
+    plt.show()
+
+
+# =========================================================
+# 🔹 SUMMARY COMPLETO K-FOLD
+# =========================================================
+
+def print_kfold_summary(
+        all_metrics,
+        all_confusion_matrices
+):
+
+    print(f"\n{'=' * 70}")
+    print("🏆 RISULTATI MEDI FINALI K-FOLD")
+    print(f"{'=' * 70}")
+
+    # =====================================================
+    # MEDIA METRICHE
+    # =====================================================
+
+    avg_metrics = {}
+
+    for metric_name in all_metrics[0]:
+
+        avg_metrics[metric_name] = np.mean(
+            [m[metric_name] for m in all_metrics]
+        )
+
+    # =====================================================
+    # DEVIAZIONE STANDARD
+    # =====================================================
+
+    std_accuracy = np.std(
+        [m["Accuracy"] for m in all_metrics]
+    )
+
+    # =====================================================
+    # PRINT METRICHE
+    # =====================================================
+
+    for metric_name, metric_value in avg_metrics.items():
+
+        print(f"{metric_name:10}: {metric_value:.4f}")
+
+    print(f"\nStd Accuracy: {std_accuracy:.4f}")
+
+    # =====================================================
+    # MATRICE MEDIA
+    # =====================================================
+
+    avg_cm = np.mean(
+        all_confusion_matrices,
+        axis=0
+    )
+
+    print(f"\n{'=' * 70}")
+    print("📌 MATRICE DI CONFUSIONE MEDIA")
+    print(f"{'=' * 70}")
+
+    print(avg_cm)
+
+    # =====================================================
+    # PLOT MATRICE MEDIA
+    # =====================================================
+
+    plt.figure(figsize=(6, 4))
+
+    sns.heatmap(
+        avg_cm,
+
+        annot=True,
+        fmt='.2f',
+
+        cmap='Blues',
+
+        xticklabels=['Non Trasp.', 'Trasp.'],
+        yticklabels=['Non Trasp.', 'Trasp.']
+    )
+
+    plt.xlabel('Predetto')
+    plt.ylabel('Reale')
+
+    plt.title(
+        'Matrice di Confusione Media K-Fold'
+    )
+
     plt.show()
