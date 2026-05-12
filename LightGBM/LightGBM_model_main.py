@@ -5,6 +5,12 @@ import warnings
 import glob
 from pathlib import Path
 from LightGBM_model import LightGBMTrainer
+import sys
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
+
+from Evaluation.metrics_calculator import MetricsEvaluator
 
 # Sopprime gli avvisi di LightGBM ("No further splits with positive gain")
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -67,10 +73,21 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
         'Probability': probabilities
     })
 
+    if 'Transported' in test_df.columns:
+        # 1. Istanziamo l'Oggetto
+        valutatore = MetricsEvaluator(
+            y_true=test_df['Transported'],
+            y_pred=predictions,
+            y_probs=probabilities,
+            dataset_name=dataset_name
+        )
+        # 2. Gli diciamo di stampare il report
+        valutatore.print_report()
+
     # 4. Salvataggio del Modello (.pkl)
     print("[4/4] Salvataggio risultati in 'outputs'...")
     outputs_dir.mkdir(parents=True, exist_ok=True)
-    model_file = outputs_dir / f"modello_lightgbm_{dataset_scelto}.pkl"
+    model_file = outputs_dir / f"modello_lightgbm_{dataset_name}.pkl"
     joblib.dump(trainer.best_model, model_file)
 
     # Salvataggio dei singoli file CSV solo se richiesto (es. Holdout o Processed Full)
