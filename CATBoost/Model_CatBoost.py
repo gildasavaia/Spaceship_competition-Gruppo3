@@ -33,29 +33,77 @@ def prepare_test(test_df):
 
 def create_catboost_model():
     return CatBoostClassifier(
-        # Core
-        iterations=2000,
-        learning_rate=0.03,
-        depth=6,
 
-        # Quality
-        loss_function='Logloss',
-        eval_metric='Accuracy',
+        iterations=1400,
+        learning_rate=0.035,
 
-        # Speed
-        thread_count=-1,
+        # =================================
+        # TREE COMPLEXITY
+        # =================================
+
+        depth=5,
+
+        # =================================
+        # REGULARIZATION
+        # =================================
+
+        l2_leaf_reg=7,
+
+        # =================================
+        # RANDOMIZATION
+        # =================================
+
+        random_strength=0.8,
+
+        # =================================
+        # SAMPLING
+        # =================================
+
         bootstrap_type='Bernoulli',
         subsample=0.8,
 
-        # Regularization
-        l2_leaf_reg=5,
+        # =================================
+        # FEATURE RANDOMNESS
+        # =================================
 
-        # Overfitting control
-        random_strength=1,
+        rsm=0.85,
+
+        # =================================
+        # LOSS / METRICS
+        # =================================
+
+        loss_function='Logloss',
+        eval_metric='Accuracy',
+
+        # =================================
+        # OVERFITTING CONTROL
+        # =================================
+
         od_type='Iter',
-        od_wait=100,
+        od_wait=80,
 
-        # Misc
+        # =================================
+        # CPU OPTIMIZATION
+        # =================================
+
+        thread_count=-1,
+
+        # =================================
+        # SPEED
+        # =================================
+
+        leaf_estimation_iterations=1,
+
+        # =================================
+        # STABILITY
+        # =================================
+
+        random_seed=42,
+
+        # =================================
+        # OUTPUT
+        # =================================
+
         verbose=100
     )
 
