@@ -175,5 +175,6 @@ def main():
     else:
         print("❌ Scelta non valida. Riavvia lo script.")
 
+
 if __name__ == "__main__":
     main()
