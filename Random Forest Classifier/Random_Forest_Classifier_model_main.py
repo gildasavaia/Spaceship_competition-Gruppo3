@@ -5,6 +5,14 @@ import warnings
 import glob
 from pathlib import Path
 from Random_Forest_Classifier_model import RandomForestTrainer
+import sys
+from pathlib import Path
+
+# Aggiungiamo la cartella principale al percorso per poter importare il valutatore
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
+
+from Evaluation.metrics_calculator import MetricsEvaluator
 
 
 # Sostituisci il nome della cartella se l'hai rinominata senza spazi
@@ -62,6 +70,21 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
     print("[3/4] Generazione predizioni e probabilità per Stacking...")
     predictions = trainer.predict(X_test)
     probabilities = trainer.predict_proba(X_test)
+
+    # =====================================================================
+    # 🌟 CALCOLO METRICHE IN TEMPO REALE (SOLO PER HOLDOUT)
+    # =====================================================================
+    if 'Transported' in test_df.columns:
+        valutatore = MetricsEvaluator(
+            y_true=test_df['Transported'],
+            y_pred=predictions,
+            y_probs=probabilities,
+            dataset_name=dataset_name
+        )
+
+        # Stampa le metriche SOLO se stiamo facendo l'Holdout o salvando file singoli
+        if salva_file_singolo:
+            valutatore.print_report()
 
     # Creazione dei dataframe di output
     res_df = pd.DataFrame({
