@@ -80,20 +80,3 @@ def predict(model, X_test):
 
 
 
-def evaluate_on_test(model, X_test, y_test):
-    """
-    Usa il test (che nel tuo caso ha la label)
-    """
-    from sklearn.metrics import accuracy_score
-
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-
-    print(f"\n Accuracy sul test: {acc:.4f}")
-    return acc
-
-
-
-def show_predictions(predictions, n=10):
-    print(f"\n🔮 Prime {n} predizioni:\n")
-    print(predictions[:n])
