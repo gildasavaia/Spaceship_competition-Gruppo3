@@ -75,7 +75,8 @@ def create_pipeline_model():
 
             n_iter_no_change=50,
 
-            random_state=42
+            random_state=42,
+            verbose=True
         ))
     ])
 
@@ -97,75 +98,4 @@ def train_model(model, X, y):
 def predict(model, X_test):
     return model.predict(X_test)
 
-
-# ---------------------------
-# 🔹 Valutazione
-# ---------------------------
-def evaluate_on_test(model, X_test, y_test):
-    y_pred = model.predict(X_test)
-
-    acc = accuracy_score(y_test, y_pred)
-
-    print(f"\n📊 Accuracy sul test: {acc:.4f}")
-
-    return acc
-
-
-# ---------------------------
-# 🔹 Mostra predizioni
-# ---------------------------
-def show_predictions(test_df, predictions, n=10):
-    results = test_df.copy()
-
-    results["Predicted_Transported"] = predictions
-
-    print(f"\n🔮 Prime {n} predizioni:\n")
-
-    if "Transported" in results.columns:
-
-        print(
-            results[
-                ["Transported", "Predicted_Transported"]
-            ].head(n)
-        )
-
-    else:
-
-        print(
-            results[
-                ["Predicted_Transported"]
-            ].head(n)
-        )
-
-    return results
-
-
-# ---------------------------
-# 🔹 Confusion Matrix
-# ---------------------------
-def show_confusion_matrix(model, X_test, y_test):
-    y_pred = model.predict(X_test)
-
-    cm = confusion_matrix(y_test, y_pred)
-
-    print("\n📊 Classification Report:\n")
-    print(classification_report(y_test, y_pred))
-
-    plt.figure(figsize=(6, 5))
-
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt='d',
-        cmap='Blues',
-        xticklabels=["False", "True"],
-        yticklabels=["False", "True"]
-    )
-
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-
-    plt.title("Confusion Matrix - Neural Network")
-
-    plt.show()
 
