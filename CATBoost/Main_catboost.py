@@ -4,92 +4,110 @@ from Model_CatBoost import (
     prepare_test,
     create_catboost_model,
     train_model,
-    evaluate_model,
     predict
+)
+
+from CATBoost.Evaluation_CatBoost import (
+    run_full_evaluation,
+    print_kfold_summary
 )
 
 import os
 import glob
 
-# ==========================================
-# 🔹 MENU INTERATTIVO
-# ==========================================
-
 print("Seleziona il metodo di addestramento per CatBoost:")
-print("1. Holdout (singolo train/test)")
-print("2. K-Fold (validazione incrociata su più file)")
+print("1. Holdout")
+print("2. K-Fold")
 
 scelta = input("Inserisci 1 o 2: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
 
-
-
 if scelta == "1":
 
-    print("\n Avvio addestramento con metodo HOLDOUT...\n")
+    print("\n🚀 Avvio HOLDOUT...\n")
 
-    train_path = os.path.join(data_dir, "holdout_tree_train.csv")
-    test_path = os.path.join(data_dir, "holdout_tree_test.csv")
+    train_path = os.path.join(
+        data_dir,
+        "holdout_tree_train.csv"
+    )
 
+    test_path = os.path.join(
+        data_dir,
+        "holdout_tree_test.csv"
+    )
 
-
-    train_df, test_df = load_data(train_path, test_path)
+    train_df, test_df = load_data(
+        train_path,
+        test_path
+    )
 
     X, y = prepare_data(train_df)
+
     X_test = prepare_test(test_df)
 
-
-
-    y_test = test_df["Transported"] if "Transported" in test_df.columns else None
-
+    y_test = (
+        test_df["Transported"]
+        if "Transported" in test_df.columns
+        else None
+    )
 
     model = create_catboost_model()
 
-
-
-    train_model(model, X, y)
-
-
+    train_model(
+        model,
+        X,
+        y
+    )
 
     if y_test is not None:
-        accuracy = evaluate_model(model, X_test, y_test)
-        print(f"\n Accuracy Holdout: {accuracy:.4f}")
 
+        metrics, cm = run_full_evaluation(
+            model,
+            X_test,
+            y_test,
+            title="HOLDOUT TEST"
+        )
 
+    predictions = predict(
+        model,
+        X_test
+    )
 
-    predictions = predict(model, X_test)
-
-    print("\n Predizioni completate.")
-
-
+    print("\n✅ Predizioni completate.")
 
 
 elif scelta == "2":
 
-    print("\n Ricerca dei file K-Fold in corso...")
+    print("\n🔍 Ricerca K-Fold...\n")
 
-    # Cerca tutti i train fold
-    search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
+    search_pattern = os.path.join(
+        data_dir,
+        "kfold_*_tree_train.csv"
+    )
+
     train_files = glob.glob(search_pattern)
 
     if not train_files:
-        print(" Nessun file K-Fold trovato!")
+
+        print("❌ Nessun fold trovato!")
+
     else:
 
         num_folds = len(train_files)
 
-        print(f" Trovati {num_folds} fold.")
-        print(" Avvio K-Fold Validation...\n")
+        print(f"✅ Trovati {num_folds} fold.\n")
 
-        fold_accuracies = []
+        fold_metrics = []
+
+        fold_confusion_matrices = []
 
         for i in range(1, num_folds + 1):
 
-            print(f"\n{'-' * 40}")
-            print(f" Fold {i}/{num_folds}")
-            print(f"{'-' * 40}")
+            print(f"\n{'-' * 45}")
+            print(f"🔄 Fold {i}/{num_folds}")
+            print(f"{'-' * 45}")
 
             train_path = os.path.join(
                 data_dir,
@@ -101,23 +119,20 @@ elif scelta == "2":
                 f"kfold_{i}_tree_test.csv"
             )
 
-            # Controllo esistenza
             if not os.path.exists(test_path):
-                print(f" Test fold mancante: {test_path}")
+
+                print(f"⚠️ Fold {i} mancante")
+
                 continue
 
-            # =========================
-            # LOAD
-            # =========================
-
-            train_df, test_df = load_data(train_path, test_path)
+            train_df, test_df = load_data(
+                train_path,
+                test_path
+            )
 
             X, y = prepare_data(train_df)
-            X_test = prepare_test(test_df)
 
-            # =========================
-            # TEST LABEL
-            # =========================
+            X_test = prepare_test(test_df)
 
             y_test = (
                 test_df["Transported"]
@@ -125,59 +140,39 @@ elif scelta == "2":
                 else None
             )
 
-            # =========================
-            # MODEL
-            # =========================
-
             model = create_catboost_model()
 
-            # =========================
-            # TRAIN
-            # =========================
-
-            train_model(model, X, y)
-
-            # =========================
-            # EVALUATION
-            # =========================
+            train_model(
+                model,
+                X,
+                y
+            )
 
             if y_test is not None:
 
-                acc = evaluate_model(
+                metrics, cm = run_full_evaluation(
                     model,
                     X_test,
-                    y_test
+                    y_test,
+                    title=f"FOLD {i}"
                 )
 
-                fold_accuracies.append(acc)
+                fold_metrics.append(metrics)
 
-                print(f" Accuracy Fold {i}: {acc:.4f}")
+                fold_confusion_matrices.append(cm)
 
-            # =========================
-            # PREDICTIONS
-            # =========================
-
-            predictions = predict(model, X_test)
-
-        # ==========================================
-        # MEDIA FINALE
-        # ==========================================
-
-        if fold_accuracies:
-
-            media_acc = sum(fold_accuracies) / len(fold_accuracies)
-
-            print(f"\n{'=' * 50}")
-            print(
-                f" Accuracy Media Finale "
-                f"su {len(fold_accuracies)} fold: "
-                f"{media_acc:.4f}"
+            predictions = predict(
+                model,
+                X_test
             )
-            print(f"{'=' * 50}")
 
-# ==========================================
-# 🔹 INPUT NON VALIDO
-# ==========================================
+        if fold_metrics:
+
+            print_kfold_summary(
+                fold_metrics,
+                fold_confusion_matrices
+            )
 
 else:
-    print(" Scelta non valida.")
+
+    print("❌ Scelta non valida.")

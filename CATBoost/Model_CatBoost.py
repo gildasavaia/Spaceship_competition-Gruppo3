@@ -130,23 +130,3 @@ def predict(model, X):
     probs = model.predict_proba(X)[:, 1]
     return (probs > 0.5).astype(int)
 
-
-# =========================
-# EVALUATION (HOLDOUT TEST)
-# =========================
-
-def evaluate_model(model, X_test, y_test):
-    y_pred = predict(model, X_test)
-
-    acc = accuracy_score(y_test, y_pred)
-
-    print("\n Test results")
-    print(f"Accuracy: {acc:.4f}")
-
-    print("\nClassification report:\n")
-    print(classification_report(y_test, y_pred))
-
-    print("\nConfusion matrix:\n")
-    print(confusion_matrix(y_test, y_pred))
-
-    return acc
