@@ -74,6 +74,12 @@ def analizza_regole_gruppi_famiglie(df):
     
     print("-" * 40)
     
+    # Altre relazioni con il Cognome
+    valuta_coesione('Surname', 'Cabin')
+    valuta_coesione('Surname', 'Deck')
+    valuta_coesione('Surname', 'Side')
+    valuta_coesione('Surname', 'VIP')
+    valuta_coesione('Surname', 'CryoSleep')
     valuta_coesione('Surname', 'HomePlanet')
     valuta_coesione('Surname', 'Destination')
 

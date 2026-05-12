@@ -283,7 +283,10 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
     ]
 
 
-
+    # nel caso in cui vi siano un gruppo di passeggeri con tutti i valori mancanti per una feature, 
+    # la moda del gruppo sarà NaN e quindi non risolverà il problema.
+    # In questo caso, la maschera di probabilità copre anche questi gruppi interamente NaN,
+    # garantendo che tutti i valori mancanti vengano imputati. Tuttavia abbiamo verificato che questa casistica non accade mai!
 
     missing_features = [f for f in features if f not in df.columns]
     if missing_features:
@@ -311,6 +314,7 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
             filled_multi = 0
             
             # La maschera di probabilità copre TUTTI i valori mancanti (sia single che gruppi)
+            
             prob_mask = df[feature].isna()
             
             before_prob = (df[feature].isna() & prob_mask).sum()
@@ -336,7 +340,9 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
 
             after_multi = (df[feature].isna() & multi_mask).sum()
             filled_multi = before_multi - after_multi
-
+            
+            # i gruppi interamente NaN vengono trattati come il caso di un singolo individuo con feature NaN. (| = OR) 
+            
             prob_mask = singleton_mask | (df[feature].isna() & multi_mask)
 
             before_prob = (df[feature].isna() & prob_mask).sum()
