@@ -5,7 +5,7 @@ from typing import NamedTuple
 class SplitDatasetOutputs(NamedTuple):
     df_output: pd.DataFrame
 
-def run_split_dataset(df: pd.DataFrame) -> SplitDatasetOutputs:
+def run_split_dataset(df: pd.DataFrame, i_train: int ) -> SplitDatasetOutputs:
     """
     Esegue lo split di colonne specifiche del dataset:
     1. Estrae 'Group' e calcola 'GroupSize' da 'PassengerId'.
@@ -40,8 +40,12 @@ def run_split_dataset(df: pd.DataFrame) -> SplitDatasetOutputs:
     # df_mod['TotalSpent'] = df_mod[spending_cols].fillna(0).sum(axis=1)
 
     # cols_to_drop = spending_cols + ['PassengerId', 'Cabin', 'Name']
-    cols_to_drop = ['PassengerId', 'Cabin', 'Name']
-    df_mod.drop(columns=cols_to_drop, inplace=True)
+    if i_train == 1:
+        cols_to_drop = ['PassengerId', 'Cabin', 'Name']
+        df_mod.drop(columns=cols_to_drop, inplace=True)
+    else: 
+        cols_to_drop = ['Cabin', 'Name']
+        df_mod.drop(columns=cols_to_drop, inplace=True)
     
     # Metti 'Group' e 'GroupSize' in testa e 'Transported' in fondo
     cols = list(df_mod.columns)

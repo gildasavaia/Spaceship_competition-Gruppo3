@@ -397,9 +397,9 @@ def main():
 
     # OP3: Split / feature engineering
     print("\n[Esecuzione OP3] Split dataset e feature engineering...")
-    risultato_split = run_split_dataset(mio_dataframe)
+    risultato_split = run_split_dataset(mio_dataframe, i_train=1)
     mio_dataframe_modificato = risultato_split.df_output
-    risultato_split_test = run_split_dataset(mio_dataframe_test)
+    risultato_split_test = run_split_dataset(mio_dataframe_test, i_train=0)
     mio_dataframe_modificato_test = risultato_split_test.df_output
     
     # --- PRIMA SCELTA: Metodo di Split ---

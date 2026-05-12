@@ -353,11 +353,11 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
             filled_prob = before_prob - after_prob
 
         # Stampa i risultati unificati
-        print(
-            f"[OP4] {feature}: "
-            f"{filled_multi} (moda), "
-            f"{filled_prob} (prob)"
-        )
+        # print(
+            # f"[OP4] {feature}: "
+            # f"{filled_multi} (moda), "
+            # f"{filled_prob} (prob)"
+        # )
 
     # Corretto
     return HandleNullValuesResult(df, probability_dictionaries, age_mean_to_return)
