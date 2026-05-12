@@ -53,16 +53,21 @@ def create_model():
         reg_alpha=0.2,
 
         random_state=42,
-
+        enable_categorical=True,
+        tree_method="hist",
         eval_metric='logloss'
     )
     return model
 
-
+def fix_categorical_dtype(X):
+    for col in X.select_dtypes(include=["object"]).columns:
+        X[col] = X[col].astype("category")
+    return X
 
 def train_model(model, X, y):
     model.fit(X, y)
     return model
+
 
 
 #

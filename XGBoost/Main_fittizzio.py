@@ -21,7 +21,8 @@ y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 # 3. Creazione modello
 # ---------------------------
 model = create_model()
-
+X = fix_categorical_dtype(X)
+X_test = fix_categorical_dtype(X_test)
 # ---------------------------
 # 4. Addestramento modello
 # ---------------------------

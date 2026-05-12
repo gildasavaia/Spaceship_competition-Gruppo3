@@ -12,8 +12,8 @@ from Model_CatBoost import (
 # PATHS
 # =========================
 
-train_path = "../data/preprocessed_folds/holdout_tree_train.csv"
-test_path = "../data/preprocessed_folds/holdout_tree_test.csv"
+train_path = "../data/preprocessed_folds/processed_full_tree.csv"
+test_path = "../data/preprocessed_folds/processed_full_tree_test.csv"
 
 
 # =========================
