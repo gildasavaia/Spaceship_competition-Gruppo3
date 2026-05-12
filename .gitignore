@@ -39,3 +39,6 @@ Thumbs.db
 outputs/
 # Log di CatBoost
 catboost_info/
+
+# Impostazioni di PyCharm (IDE)
+.idea/

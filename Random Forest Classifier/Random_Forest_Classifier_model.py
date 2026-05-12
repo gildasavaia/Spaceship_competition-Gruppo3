@@ -69,3 +69,9 @@ class RandomForestTrainer:
         if self.best_model is None:
             raise Exception("Devi prima addestrare il modello!")
         return self.best_model.predict(X_test)
+
+    def predict_proba(self, X):
+        if self.best_model is None:
+            raise ValueError("Il modello deve essere addestrato prima.")
+        # Prende solo la colonna delle probabilità della classe "True" (Trasportato)
+        return self.best_model.predict_proba(X)[:, 1]

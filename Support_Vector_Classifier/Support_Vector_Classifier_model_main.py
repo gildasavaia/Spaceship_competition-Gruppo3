@@ -1,16 +1,12 @@
 import pandas as pd
 import os
 import joblib
-import warnings
 from pathlib import Path
-from Random_Forest_Classifier_model import RandomForestTrainer
+from Support_Vector_Classifier_model import SupportVectorTrainer
 
-
-# Sostituisci il nome della cartella se l'hai rinominata senza spazi
-# (es. from Random_Forest_Classifier_model import ...)
 
 def main():
-    print("Avvio della pipeline Random Forest per Spaceship Titanic...")
+    print("Avvio della pipeline Support Vector Classifier per Spaceship Titanic...")
 
     # Gestione dinamica dei percorsi
     base_dir = Path(__file__).resolve().parent.parent
@@ -22,7 +18,7 @@ def main():
         return
 
     # =========================================================
-    # 1. RICERCA DINAMICA DEI DATASET
+    # 2. RICERCA DINAMICA DEI DATASET
     # =========================================================
     dataset_disponibili = []
 
@@ -46,23 +42,14 @@ def main():
         return
 
     # =========================================================
-    # 2. MENU INTERATTIVO
+    # 3. MENU INTERATTIVO
     # =========================================================
     mappa_dataset = {}
-    print("\nScegli quale dataset utilizzare per Random Forest:")
+    print("\nScegli il dataset per SVC:")
 
     for i, nome in enumerate(dataset_disponibili, start=1):
         mappa_dataset[str(i)] = nome
-        if "holdout" in nome:
-            desc = "Holdout (Validazione rapida)"
-        elif "kfold" in nome:
-            n_fold = nome.split('_')[1]
-            desc = f"K-Fold numero {n_fold}"
-        elif "full" in nome:
-            desc = "Intero Dataset (per Submission finale)"
-        else:
-            desc = nome
-        print(f"{i}: {desc}")
+        print(f"{i}: {nome}")
 
     scelta = input(f"\nInserisci un numero (1-{len(dataset_disponibili)}): ").strip()
     while scelta not in mappa_dataset:
@@ -78,11 +65,11 @@ def main():
     test_path = preprocessed_dir / f"{dataset_scelto}_test.csv"
 
     print(f"\n{'=' * 60}")
-    print(f"ELABORAZIONE RANDOM FOREST: {dataset_scelto.upper()}")
+    print(f"ELABORAZIONE SVC: {dataset_scelto.upper()}")
     print(f"{'=' * 60}")
 
     # ---------------------------------------------------------
-    # 3. CARICAMENTO E PREPARAZIONE DATI
+    # 4. CARICAMENTO E PREPARAZIONE DATI
     # ---------------------------------------------------------
     print("[1/4] Caricamento dati in corso...")
     train_df = pd.read_csv(train_path)
@@ -93,24 +80,25 @@ def main():
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
     # =====================================================================
-    # TRUCCO ROBUSTO PER RANDOM FOREST: Unisci, Converti e Dividi
-    # Random Forest (sklearn) NON accetta stringhe. Convertiamo tutto in numeri.
+    # TRUCCO ROBUSTO: Unisci, Converti e Dividi (One-Hot Encoding)
+    # L'SVC richiede dati puramente numerici. Trasformiamo le stringhe.
     # =====================================================================
     num_train_rows = X_train.shape[0]
+
+    # Uniamo temporaneamente per avere lo stesso numero di colonne
     combined_df = pd.concat([X_train, X_test], axis=0, ignore_index=True)
 
     # Identifichiamo le colonne testuali
-    colonne_testuali = combined_df.select_dtypes(include=['object', 'category']).columns.tolist()
+    colonne_testuali = combined_df.select_dtypes(include=['object', 'category', 'string']).columns.tolist()
 
     if colonne_testuali:
-        print(f"[*] Trasformazione variabili categoriche: {colonne_testuali}")
-        # One-Hot Encoding (crea colonne binarie 0/1)
+        print(f"[*] Conversione variabili categoriche: {colonne_testuali}")
         combined_df = pd.get_dummies(combined_df, columns=colonne_testuali, drop_first=True)
 
-    # Forza tutto il dataset a essere numerico (float)
+    # Forza la conversione di tutto in float (decimale) per lo StandardScaler
     combined_df = combined_df.astype(float)
 
-    # Ristacchiamo Train e Test
+    # Dividiamo nuovamente i dataset
     X_train = combined_df.iloc[:num_train_rows, :].copy()
     X_test = combined_df.iloc[num_train_rows:, :].copy()
     # =====================================================================
@@ -118,47 +106,47 @@ def main():
     passenger_ids = test_df['PassengerId'] if 'PassengerId' in test_df.columns else range(len(test_df))
 
     # ---------------------------------------------------------
-    # 4. ADDESTRAMENTO E TUNING
+    # 5. ADDESTRAMENTO E TUNING
     # ---------------------------------------------------------
-    print("[2/4] Ricerca iperparametri ottimali (GridSearch)...")
-    trainer = RandomForestTrainer(random_state=42)
+    print("[2/4] Ottimizzazione iperparametri SVC (GridSearch)...")
+    trainer = SupportVectorTrainer(random_state=42)
     trainer.tune_hyperparameters(X_train, y_train)
 
     # ---------------------------------------------------------
-    # 5. PREDIZIONI E PROBABILITÀ
+    # 6. PREDIZIONI E PROBABILITÀ
     # ---------------------------------------------------------
-    print("[3/4] Generazione predizioni e probabilità per Stacking...")
+    print("[3/4] Generazione predizioni e probabilità per lo Stacking...")
     predictions = trainer.predict(X_test)
     probabilities = trainer.predict_proba(X_test)
 
     # ---------------------------------------------------------
-    # 6. SALVATAGGIO OUTPUT
+    # 7. SALVATAGGIO OUTPUT
     # ---------------------------------------------------------
-    print("[4/4] Salvataggio file in 'outputs'...")
+    print("[4/4] Salvataggio risultati in 'outputs'...")
     outputs_dir.mkdir(parents=True, exist_ok=True)
 
-    # File 1: Sottomissione ufficiale (True/False)
-    sub_file = outputs_dir / f"submission_rf_{dataset_scelto}.csv"
+    # 1. Submission Kaggle (Vero/Falso)
+    sub_file = outputs_dir / f"submission_svc_{dataset_scelto}.csv"
     pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
     }).to_csv(sub_file, index=False)
 
-    # File 2: Probabilità per Stacking (0.0 - 1.0)
-    prob_file = outputs_dir / f"prob_rf_{dataset_scelto}.csv"
+    # 2. Probabilità Stacking (Numeri tra 0 e 1)
+    prob_file = outputs_dir / f"prob_svc_{dataset_scelto}.csv"
     pd.DataFrame({
         'PassengerId': passenger_ids,
         'Probability': probabilities
     }).to_csv(prob_file, index=False)
 
-    # File 3: Il modello addestrato (.pkl)
-    model_file = outputs_dir / f"modello_rf_{dataset_scelto}.pkl"
+    # 3. Salvataggio Modello (.pkl)
+    model_file = outputs_dir / f"modello_svc_{dataset_scelto}.pkl"
     joblib.dump(trainer.best_model, model_file)
 
-    print(f"\n✅ Random Forest completato!")
-    print(f"-> File Kaggle: {sub_file.name}")
-    print(f"-> File Stacking: {prob_file.name}")
-    print(f"-> Modello: {model_file.name}")
+    print(f"\n✅ Pipeline SVC completata!")
+    print(f"-> File per Kaggle: {sub_file.name}")
+    print(f"-> File per Stacking: {prob_file.name}")
+    print(f"-> Modello salvato: {model_file.name}")
 
 
 if __name__ == "__main__":
