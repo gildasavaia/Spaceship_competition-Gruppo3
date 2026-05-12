@@ -11,9 +11,7 @@ from Model_CatBoost import (
 import os
 import glob
 
-# ==========================================
-# 🔹 MENU INTERATTIVO
-# ==========================================
+
 
 print("Seleziona il metodo di addestramento per CatBoost:")
 print("1. Holdout (singolo train/test)")
