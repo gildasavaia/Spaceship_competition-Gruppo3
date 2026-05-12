@@ -33,16 +33,30 @@ def prepare_test(test_df):
 
 def create_catboost_model():
     return CatBoostClassifier(
-        iterations=5000,
-        learning_rate=0.02,
+        # Core
+        iterations=2000,
+        learning_rate=0.03,
         depth=6,
+
+        # Quality
         loss_function='Logloss',
-        eval_metric='AUC',
+        eval_metric='Accuracy',
+
+        # Speed
+        thread_count=-1,
         bootstrap_type='Bernoulli',
         subsample=0.8,
-        random_seed=42,
-        verbose=200,
-        early_stopping_rounds=200
+
+        # Regularization
+        l2_leaf_reg=5,
+
+        # Overfitting control
+        random_strength=1,
+        od_type='Iter',
+        od_wait=100,
+
+        # Misc
+        verbose=100
     )
 
 
