@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np  # Importante per convertire le liste in array
 import os
 import joblib
 import warnings
@@ -100,7 +101,10 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
         prob_df.to_csv(prob_file, index=False)
         print(f"✅ File CSV salvati per {dataset_name}.")
 
-    return res_df, prob_df
+        # Catturiamo le risposte vere direttamente dal dataset di test del fold
+    y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None
+
+    return res_df, prob_df, y_test_true, predictions, probabilities
 
 
 def main():
@@ -136,10 +140,11 @@ def main():
         else:
             print("❌ Errore: File holdout mancanti.")
 
-    # ---------------------------------
-    # OPZIONE 2: K-FOLD DINAMICO (FILE TOTAL)
-    # ---------------------------------
+        # ---------------------------------
+        # OPZIONE 2: K-FOLD DINAMICO (FILE TOTAL)
+        # ---------------------------------
     elif scelta == "2":
+
         print("\n🔍 Ricerca dei file K-Fold in corso...")
         search_pattern = str(preprocessed_dir / "kfold_*_tree_train.csv")
         train_files = glob.glob(search_pattern)
@@ -153,6 +158,11 @@ def main():
             all_res = []
             all_prob = []
 
+            # --- NUOVE LISTE PER CATTURARE LE METRICHE ---
+            all_y_true = []
+            all_y_pred = []
+            all_y_probs = []
+
             for i in range(1, num_folds + 1):
                 train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
                 test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
@@ -161,22 +171,45 @@ def main():
                     print(f"⚠️ File test mancante per il fold {i}. Salto...")
                     continue
 
-                # Esegue la pipeline ma NON salva i 5 file separati
-                res, prob = esegui_pipeline_lightgbm(train_path, test_path, f"kfold_{i}_tree", outputs_dir,
-                                                     salva_file_singolo=False)
+                # Ora la funzione restituisce 5 elementi, non più solo 2
+                res, prob, y_true, preds, probs = esegui_pipeline_lightgbm(
+                    train_path, test_path, f"kfold_{i}_tree", outputs_dir, salva_file_singolo=False
+                )
+
                 all_res.append(res)
                 all_prob.append(prob)
 
-            # --- UNIONE IN UN UNICO FILE ---
+                # Accodiamo le risposte e le previsioni nella nostra "grande lista"
+                if y_true is not None:
+                    all_y_true.extend(y_true)
+                    all_y_pred.extend(preds)
+                    all_y_probs.extend(probs)
+
+            # --- UNIONE IN UN UNICO FILE TOTAL ---
             print("\n[*] Unione di tutte le predizioni K-Fold in un unico file TOTAL...")
             final_res = pd.concat(all_res).sort_values('PassengerId')
             final_prob = pd.concat(all_prob).sort_values('PassengerId')
 
             final_res.to_csv(outputs_dir / "submission_lightgbm_kfold_TOTAL.csv", index=False)
             final_prob.to_csv(outputs_dir / "prob_lightgbm_kfold_TOTAL.csv", index=False)
+            print(f"✅ Creato UNICO file di submission!")
 
-            print(f"\n🏆 FINE K-FOLD | Tutti i {num_folds} modelli LightGBM sono stati addestrati!")
-            print(f"✅ Creato UNICO file di submission: submission_lightgbm_kfold_TOTAL.csv")
+            # =====================================================================
+            # 🌟 CALCOLO METRICHE GLOBALI ISPIRATO AD XGBOOST (SENZA PASSENGER_ID)
+            # =====================================================================
+            print("\n[*] Calcolo delle metriche globali sull'intero K-Fold...")
+            if all_y_true:
+                valutatore = MetricsEvaluator(
+                    y_true=np.array(all_y_true),
+                    y_pred=np.array(all_y_pred),
+                    y_probs=np.array(all_y_probs),
+                    dataset_name="LIGHTGBM K-FOLD (GLOBALE)"
+                )
+                valutatore.print_report()
+                valutatore.plot_visuals()
+            else:
+                print("⚠️ Dati veri mancanti. Impossibile calcolare le metriche globali.")
+            # =====================================================================
 
     # ---------------------------------
     # OPZIONE 3: FULL KAGGLE DATASET
