@@ -11,8 +11,8 @@ from XGBoost.Evaluation_XGBoost import (
 print("Seleziona il metodo di addestramento per XGBoost:")
 print("1. Holdout")
 print("2. K-Fold")
-
-scelta = input("Inserisci 1 o 2: ").strip()
+print("3. Full Training & Kaggle Submission")
+scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
@@ -166,6 +166,38 @@ elif scelta == "2":
                 fold_confusion_matrices
             )
 
-else:
+elif scelta == "3":
+    print("\n🚀 Avvio FULL TRAINING XGBoost per Kaggle Submission...\n")
 
+    train_path = os.path.join(data_dir, "processed_full_tree.csv")
+    test_path = os.path.join(data_dir, "processed_full_tree_test.csv")
+
+    if not os.path.exists(train_path) or not os.path.exists(test_path):
+        print(f"❌ Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
+    else:
+        # 1. Caricamento
+        train_df, test_df = load_data(train_path, test_path)
+
+        # 2. Preparazione
+        X_train, y_train = prepare_data(train_df)
+        X_test = prepare_test(test_df)
+
+        # 3. Fix categoriche (fondamentale per XGBoost)
+        X_train = fix_categorical_dtype(X_train)
+        # Nota: X_test verrà sistemato dentro save_submission,
+        # ma è bene assicurarsi che non contenga PassengerId qui se prepare_test non lo toglie
+        if "PassengerId" in X_test.columns:
+            X_test_for_model = X_test.drop("PassengerId", axis=1)
+        else:
+            X_test_for_model = X_test
+
+        # 4. Training
+        model = create_model()
+        print("Addestramento finale in corso...")
+        train_model(model, X_train, y_train)
+
+        # 5. Salvataggio
+        save_submission(model, X_test_for_model, test_df, filename="submission_xgboost_full.csv")
+
+else:
     print(" Scelta non valida.")

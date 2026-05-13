@@ -79,4 +79,27 @@ def predict(model, X_test):
     return model.predict(X_test)
 
 
+def save_submission(model, X_test, original_test_df, filename="submission_xgboost.csv"):
+    """
+    Genera il file CSV per Kaggle.
+    Converte le predizioni in Booleani (True/False).
+    """
+    # Assicuriamoci che i tipi categorici siano corretti
+    X_input = fix_categorical_dtype(X_test.copy())
+
+    # Rimuoviamo PassengerId se presente nelle feature di input
+    if "PassengerId" in X_input.columns:
+        X_input = X_input.drop("PassengerId", axis=1)
+
+    # Otteniamo le predizioni
+    preds = predict(model, X_input)
+
+    # Creiamo il DataFrame nel formato Kaggle
+    submission = pd.DataFrame({
+        "PassengerId": original_test_df["PassengerId"],
+        "Transported": preds.astype(bool)
+    })
+
+    submission.to_csv(filename, index=False)
+    print(f"\n💾 Submission XGBoost salvata con successo in: {filename}")
 
