@@ -83,6 +83,7 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
         )
         # 2. Gli diciamo di stampare il report
         valutatore.print_report()
+        valutatore.plot_visuals()
 
     # 4. Salvataggio del Modello (.pkl)
     print("[4/4] Salvataggio risultati in 'outputs'...")
