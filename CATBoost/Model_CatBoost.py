@@ -127,6 +127,30 @@ def train_model(model, X_train, y_train):
 # =========================
 
 def predict(model, X):
-    probs = model.predict_proba(X)[:, 1]
+    # Identifichiamo le colonne categoriche come fatto nel training
+    cat_features = X.select_dtypes(include=["object"]).columns.tolist()
+
+    # Passiamo esplicitamente le cat_features anche in fase di predizione
+    # Se il modello è già stato addestrato con cat_features,
+    # a volte basta passarle correttamente tramite un oggetto Pool
+    from catboost import Pool
+    test_pool = Pool(data=X, cat_features=cat_features)
+
+    probs = model.predict_proba(test_pool)[:, 1]
     return (probs > 0.5).astype(int)
 
+
+def save_submission(model, X_test, original_test_df, filename="submission_catboost.csv"):
+    # Rimuoviamo PassengerId dai dati di input se presente,
+    # perché il modello non è stato addestrato su di esso
+    X_input = X_test.drop("PassengerId", axis=1) if "PassengerId" in X_test.columns else X_test
+
+    preds = predict(model, X_input)
+
+    submission = pd.DataFrame({
+        "PassengerId": original_test_df["PassengerId"],
+        "Transported": preds.astype(bool)
+    })
+
+    submission.to_csv(filename, index=False)
+    print(f"\n💾 Submission salvata in: {filename}")

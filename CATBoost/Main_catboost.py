@@ -4,7 +4,8 @@ from Model_CatBoost import (
     prepare_test,
     create_catboost_model,
     train_model,
-    predict
+    predict,
+    save_submission
 )
 
 from CATBoost.Evaluation_CatBoost import (
@@ -18,8 +19,8 @@ import glob
 print("Seleziona il metodo di addestramento per CatBoost:")
 print("1. Holdout")
 print("2. K-Fold")
-
-scelta = input("Inserisci 1 o 2: ").strip()
+print("3. Full Training & Kaggle Submission")
+scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
@@ -172,7 +173,31 @@ elif scelta == "2":
                 fold_metrics,
                 fold_confusion_matrices
             )
+elif scelta == "3":
+    print("\n🚀 Avvio FULL TRAINING per Kaggle Submission...\n")
 
+    # Percorsi per i file "Full"
+    train_path = os.path.join(data_dir, "processed_full_tree.csv")
+    test_path = os.path.join(data_dir, "processed_full_tree_test.csv")
+
+    if not os.path.exists(train_path) or not os.path.exists(test_path):
+        print(f"❌ Errore: Assicurati che {train_path} e {test_path} esistano!")
+    else:
+        # 1. Caricamento dati
+        train_df, test_df = load_data(train_path, test_path)
+
+        # 2. Preparazione
+        X_train, y_train = prepare_data(train_df)
+        X_test = prepare_test(test_df)
+
+        # 3. Training sul dataset completo
+        model = create_catboost_model()
+        print("Sperimentazione su tutto il dataset di training...")
+        train_model(model, X_train, y_train)
+
+        # 4. Generazione Submission
+        # Nota: passiamo test_df originale per recuperare i PassengerId
+        save_submission(model, X_test, test_df, filename="submission_catboost_full.csv")
 else:
 
     print("❌ Scelta non valida.")
