@@ -85,6 +85,7 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
         # Stampa le metriche SOLO se stiamo facendo l'Holdout o salvando file singoli
         if salva_file_singolo:
             valutatore.print_report()
+            valutatore.plot_visuals()
 
     # Creazione dei dataframe di output
     res_df = pd.DataFrame({
