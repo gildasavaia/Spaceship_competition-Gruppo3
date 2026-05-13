@@ -92,7 +92,7 @@ def impute_missing_probabilistic(
 
 def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Se CryoSleep == True → tutte le spese devono essere 0.
+    Se CryoSleep == True -> tutte le spese devono essere 0.
     Corregge eventuali inconsistenze presenti nel dataset.
     """
     cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'TotalSpending']
@@ -108,7 +108,7 @@ def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
 
     if n_fixed > 0:
         df.loc[mask, existing_cost_cols] = 0
-        print(f"[OP4] Corrette {n_fixed} righe: CryoSleep=True ma spesa > 0 → impostata a 0.")
+        print(f"[OP4] Corrette {n_fixed} righe: CryoSleep=True ma spesa > 0 -> impostata a 0.")
         
     if "Deck" not in df.columns or "VIP" not in df.columns:
         return df
@@ -221,7 +221,7 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
     Esegue l'imputazione dei valori mancanti:
     - Pulizia CryoSleep e VIP
     - Age: media
-    - Costi: NaN → 0
+    - Costi: NaN -> 0
     - Regola logica CryoSleep
     - Altre feature: moda gruppo + probabilistico
     """
@@ -261,7 +261,7 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
     if existing_cost_cols:
         n_missing_costs = df[existing_cost_cols].isna().sum().sum()
         df[existing_cost_cols] = df[existing_cost_cols].fillna(0)
-        print(f"[OP4] Costi: {n_missing_costs} NaN → 0\n")
+        print(f"[OP4] Costi: {n_missing_costs} NaN -> 0\n")
         
     # AGE
     
@@ -274,7 +274,7 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
         df["Age"] = df["Age"].fillna(age_mean_to_use)
         age_mean_to_return = age_mean_to_use
 
-    # Regola custom: se HomePlanet è NaN ma il ponte è A/B/C/T → HomePlanet='Europa'
+    # Regola custom: se HomePlanet è NaN ma il ponte è A/B/C/T -> HomePlanet='Europa'
     df = enforce_deck_homeplanet_rule(df)
     
     features = [
@@ -331,6 +331,24 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
             filled_prob = before_prob - after_prob
             
         else:
+            # --- NUOVA REGOLA: HomePlanet da membro stesso gruppo + stesso Surnames ---
+            # Se una persona sta in un gruppo e le manca HomePlanet, prova a copiarlo
+            # dal/i membro/i del suo stesso gruppo con lo stesso cognome.
+            if feature == "HomePlanet" and "Surnames" in df.columns:
+                mask_hp = df[feature].isna() & multi_mask & df["Surnames"].notna()
+
+                if mask_hp.any():
+                    def get_mode(x):
+                        m = x.dropna().mode()
+                        return m.iloc[0] if not m.empty else np.nan
+
+                    # Chiave: (Group, Surnames) usando group_col già calcolata
+                    key = group_col.astype(str) + "||" + df["Surnames"].astype(str)
+
+                    # Calcola la moda di HomePlanet all'interno di ciascuna (Group,Surnames)
+                    hp_mode_by_key = df.groupby(key)[feature].transform(get_mode)
+                    df.loc[mask_hp, feature] = hp_mode_by_key[mask_hp]
+
             # --- COMPORTAMENTO STANDARD PER LE ALTRE FEATURE ---
             before_multi = (df[feature].isna() & multi_mask).sum()
 
