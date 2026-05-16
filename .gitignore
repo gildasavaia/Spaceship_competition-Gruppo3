@@ -1,0 +1,44 @@
+# =========================
+# IDE (PyCharm / JetBrains)
+# =========================
+.idea/*
+*.iml
+
+# =========================
+# Python & Ambienti Virtuali
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env/
+.venv/
+
+# =========================
+# Jupyter Notebook
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Dati e Modelli (Machine Learning)
+# =========================
+*.dat
+*.pkl
+*.model
+# Nota: *.csv ignorerà tutti i file csv (train, test e le tue submission).
+# Se vuoi forzare Git a tracciare un file specifico, puoi usare "git add -f nomefile.csv"
+
+# =========================
+# File di Sistema Operativo
+# =========================
+.DS_Store
+Thumbs.db
+
+# Cartella per i salvataggi dei modelli e delle previsioni
+outputs/
+# Log di CatBoost
+catboost_info/
+
+# Impostazioni di PyCharm (IDE)
+.idea/
