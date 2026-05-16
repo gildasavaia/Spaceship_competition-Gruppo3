@@ -1,12 +1,22 @@
 from Model_XGboost import *
-
 import os
 import glob
+import numpy as np  # Ci serve per unire i fold alla fine
 
 from XGBoost.Evaluation_XGBoost import (
     run_full_evaluation,
     print_kfold_summary
 )
+
+# =====================================================================
+# 🌟 IMPORTIAMO IL VALUTATORE UNIVERSALE PER L'ORCHESTRATORE
+# =====================================================================
+import sys
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
+from Evaluation.metrics_calculator import MetricsEvaluator
+# =====================================================================
 
 print("Seleziona il metodo di addestramento per XGBoost:")
 print("1. Holdout")
@@ -18,63 +28,37 @@ data_dir = "../data/preprocessed_folds/"
 
 
 if scelta == "1":
-
     print("\n Avvio HOLDOUT...\n")
+    train_path = os.path.join(data_dir, "holdout_tree_train.csv")
+    test_path = os.path.join(data_dir, "holdout_tree_test.csv")
 
-    train_path = os.path.join(
-        data_dir,
-        "holdout_tree_train.csv"
-    )
-
-    test_path = os.path.join(
-        data_dir,
-        "holdout_tree_test.csv"
-    )
-
-    train_df, test_df = load_data(
-        train_path,
-        test_path
-    )
-
+    train_df, test_df = load_data(train_path, test_path)
     X, y = prepare_data(train_df)
-
     X_test = prepare_test(test_df)
 
-    y_test = (
-        test_df["Transported"]
-        if "Transported" in test_df.columns
-        else None
-    )
+    y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 
     X = fix_categorical_dtype(X)
-
     X_test = fix_categorical_dtype(X_test)
 
     model = create_model()
-
     train_model(model, X, y)
 
     if y_test is not None:
+        metrics, cm = run_full_evaluation(model, X_test, y_test, title="HOLDOUT TEST")
 
-        metrics, cm = run_full_evaluation(
-            model,
-            X_test,
-            y_test,
-            title="HOLDOUT TEST"
-        )
-
-    predictions = predict(
-        model,
-        X_test
-    )
-
+    predictions = predict(model, X_test)
     print("\n Predizioni completate.")
+
+    # 📥 STRADA 2: ESPORTAZIONE AUTOMATICA HOLDOUT PER L'ORCHESTRATORE
+    if y_test is not None:
+        probabilities = model.predict_proba(X_test)[:, 1]
+        valutatore = MetricsEvaluator(y_test, predictions, probabilities, "XGBoost (Holdout)")
+        valutatore.export_to_orchestrator()
 
 
 elif scelta == "2":
-
     print("\n Ricerca K-Fold...\n")
-
     search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
     train_files = glob.glob(search_pattern)
 
@@ -87,8 +71,12 @@ elif scelta == "2":
         fold_metrics = []
         fold_confusion_matrices = []
 
+        # LISTE PER RACCOGLIERE I DATI DA MANDARE ALL'ORCHESTRATORE
+        all_y_true = []
+        all_y_pred = []
+        all_y_probs = []
+
         for i in range(1, num_folds + 1):
-            # Stampiamo solo una riga veloce per mostrare l'avanzamento senza intasare l'output
             print(f"-> Addestramento ed elaborazione Fold {i}/{num_folds}...")
 
             train_path = os.path.join(data_dir, f"kfold_{i}_tree_train.csv")
@@ -111,54 +99,53 @@ elif scelta == "2":
             train_model(model, X, y)
 
             if y_test is not None:
-                # NOTA: Qui impostiamo verbose=False per non stampare i singoli report/grafici
-                metrics, cm = run_full_evaluation(
-                    model,
-                    X_test,
-                    y_test,
-                    title=f"FOLD {i}",
-                    verbose=False
-                )
+                metrics, cm = run_full_evaluation(model, X_test, y_test, title=f"FOLD {i}", verbose=False)
                 fold_metrics.append(metrics)
                 fold_confusion_matrices.append(cm)
 
             predictions = predict(model, X_test)
 
-        # Alla fine del ciclo, stampa il summary complessivo con i grafici medi
+            # Raccogliamo i dati per l'orchestratore ad ogni fold
+            if y_test is not None:
+                probabilities = model.predict_proba(X_test)[:, 1]
+                all_y_true.extend(y_test)
+                all_y_pred.extend(predictions)
+                all_y_probs.extend(probabilities)
+
         if fold_metrics:
             print_kfold_summary(fold_metrics, fold_confusion_matrices)
 
+        # 📥 STRADA 2: ESPORTAZIONE AUTOMATICA K-FOLD GLOBALE PER L'ORCHESTRATORE
+        if all_y_true:
+            valutatore = MetricsEvaluator(
+                y_true=np.array(all_y_true),
+                y_pred=np.array(all_y_pred),
+                y_probs=np.array(all_y_probs),
+                dataset_name="XGBoost (K-Fold)"
+            )
+            valutatore.export_to_orchestrator()
+
+
 elif scelta == "3":
     print("\n🚀 Avvio FULL TRAINING XGBoost per Kaggle Submission...\n")
-
     train_path = os.path.join(data_dir, "processed_full_tree.csv")
     test_path = os.path.join(data_dir, "processed_full_tree_test.csv")
 
     if not os.path.exists(train_path) or not os.path.exists(test_path):
         print(f"❌ Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
     else:
-        # 1. Caricamento
         train_df, test_df = load_data(train_path, test_path)
-
-        # 2. Preparazione
         X_train, y_train = prepare_data(train_df)
         X_test = prepare_test(test_df)
 
-        # 3. Fix categoriche (fondamentale per XGBoost)
-        X_train = fix_categorical_dtype(X_train)
-        # Nota: X_test verrà sistemato dentro save_submission,
-        # ma è bene assicurarsi che non contenga PassengerId qui se prepare_test non lo toglie
         if "PassengerId" in X_test.columns:
             X_test_for_model = X_test.drop("PassengerId", axis=1)
         else:
             X_test_for_model = X_test
 
-        # 4. Training
         model = create_model()
         print("Addestramento finale in corso...")
         train_model(model, X_train, y_train)
-
-        # 5. Salvataggio
         save_submission(model, X_test_for_model, test_df, filename="submission_xgboost_full.csv")
 
 else:

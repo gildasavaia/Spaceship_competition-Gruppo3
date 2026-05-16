@@ -1,18 +1,23 @@
 import os
 import glob
+import numpy as np  # Ci serve per unire i fold alla fine
 from Model_CatBoost import (
-    load_data,
-    prepare_data,
-    prepare_test,
-    create_catboost_model,
-    train_model,
-    predict,
-    save_submission
+    load_data, prepare_data, prepare_test, create_catboost_model,
+    train_model, predict, save_submission
 )
 from Evaluation_CatBoost import (
-    run_full_evaluation,
-    print_kfold_summary
+    run_full_evaluation, print_kfold_summary
 )
+
+# =====================================================================
+# 🌟 IMPORTIAMO IL VALUTATORE UNIVERSALE PER L'ORCHESTRATORE
+# =====================================================================
+import sys
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
+from Evaluation.metrics_calculator import MetricsEvaluator
+# =====================================================================
 
 print("Seleziona il metodo di addestramento per CatBoost:")
 print("1. Holdout")
@@ -22,12 +27,9 @@ scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
-# =========================================================================
-# 1. HOLDOUT
-# =========================================================================
+
 if scelta == "1":
     print("\n Avvio HOLDOUT con CatBoost...\n")
-
     train_path = os.path.join(data_dir, "holdout_tree_train.csv")
     test_path = os.path.join(data_dir, "holdout_tree_test.csv")
 
@@ -37,28 +39,24 @@ if scelta == "1":
 
     y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 
-    # Nota: CatBoost gestisce nativamente i tipi 'object', non serve fix_categorical_dtype
     model = create_catboost_model()
     train_model(model, X, y)
 
     if y_test is not None:
-        metrics, cm = run_full_evaluation(
-            model,
-            X_test,
-            y_test,
-            title="HOLDOUT TEST (CatBoost)",
-            verbose=True  # Mostra il report e il grafico per l'holdout singolo
-        )
+        metrics, cm = run_full_evaluation(model, X_test, y_test, title="HOLDOUT TEST (CatBoost)", verbose=True)
 
     predictions = predict(model, X_test)
     print("\n Predizioni completate.")
 
-# =========================================================================
-# 2. K-FOLD
-# =========================================================================
+    # 📥 STRADA 2: ESPORTAZIONE AUTOMATICA HOLDOUT PER L'ORCHESTRATORE
+    if y_test is not None:
+        probabilities = model.predict_proba(X_test)[:, 1]
+        valutatore = MetricsEvaluator(y_test, predictions, probabilities, "CatBoost (Holdout)")
+        valutatore.export_to_orchestrator()
+
+
 elif scelta == "2":
     print("\n Ricerca K-Fold per CatBoost...\n")
-
     search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
     train_files = glob.glob(search_pattern)
 
@@ -70,6 +68,11 @@ elif scelta == "2":
 
         fold_metrics = []
         fold_confusion_matrices = []
+
+        # LISTE PER RACCOGLIERE I DATI DA MANDARE ALL'ORCHESTRATORE
+        all_y_true = []
+        all_y_pred = []
+        all_y_probs = []
 
         for i in range(1, num_folds + 1):
             print(f"-> Addestramento ed elaborazione Fold {i}/{num_folds}...")
@@ -88,36 +91,39 @@ elif scelta == "2":
             y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 
             model = create_catboost_model()
-
-            # Per evitare che i log di CatBoost intasino lo schermo durante il K-Fold,
-            # sovrascriviamo temporaneamente il verbose interno di CatBoost a False (o 0)
             model.set_params(verbose=0)
             train_model(model, X, y)
 
             if y_test is not None:
-                # verbose=False evita i print e i grafici dei singoli fold intermedi
-                metrics, cm = run_full_evaluation(
-                    model,
-                    X_test,
-                    y_test,
-                    title=f"FOLD {i}",
-                    verbose=False
-                )
+                metrics, cm = run_full_evaluation(model, X_test, y_test, title=f"FOLD {i}", verbose=False)
                 fold_metrics.append(metrics)
                 fold_confusion_matrices.append(cm)
 
             predictions = predict(model, X_test)
 
-        # Stampa finale riassuntiva dei fold (Medie e Grafico finale)
+            # Raccogliamo i dati per l'orchestratore ad ogni fold
+            if y_test is not None:
+                probabilities = model.predict_proba(X_test)[:, 1]
+                all_y_true.extend(y_test)
+                all_y_pred.extend(predictions)
+                all_y_probs.extend(probabilities)
+
         if fold_metrics:
             print_kfold_summary(fold_metrics, fold_confusion_matrices)
 
-# =========================================================================
-# 3. FULL TRAINING & SUBMISSION
-# =========================================================================
+        # 📥 STRADA 2: ESPORTAZIONE AUTOMATICA K-FOLD GLOBALE PER L'ORCHESTRATORE
+        if all_y_true:
+            valutatore = MetricsEvaluator(
+                y_true=np.array(all_y_true),
+                y_pred=np.array(all_y_pred),
+                y_probs=np.array(all_y_probs),
+                dataset_name="CatBoost (K-Fold)"
+            )
+            valutatore.export_to_orchestrator()
+
+
 elif scelta == "3":
     print("\n🚀 Avvio FULL TRAINING CatBoost per Kaggle Submission...\n")
-
     train_path = os.path.join(data_dir, "processed_full_tree.csv")
     test_path = os.path.join(data_dir, "processed_full_tree_test.csv")
 
@@ -125,7 +131,6 @@ elif scelta == "3":
         print(f"❌ Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
     else:
         train_df, test_df = load_data(train_path, test_path)
-
         X_train, y_train = prepare_data(train_df)
         X_test = prepare_test(test_df)
 
@@ -137,7 +142,6 @@ elif scelta == "3":
         model = create_catboost_model()
         print("Addestramento finale in corso...")
         train_model(model, X_train, y_train)
-
         save_submission(model, X_test_for_model, test_df, filename="submission_catboost_full.csv")
 
 else:
