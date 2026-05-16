@@ -75,13 +75,13 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
     })
 
     if 'Transported' in test_df.columns:
-        # 1. Istanziamo l'Oggetto
         valutatore = MetricsEvaluator(
             y_true=test_df['Transported'],
             y_pred=predictions,
             y_probs=probabilities,
-            dataset_name=dataset_name
+            dataset_name="LightGBM (Holdout)"
         )
+
         # Nel K-Fold (salva_file_singolo=False) questo blocco starà in silenzio!
         if salva_file_singolo:
             valutatore.print_report()

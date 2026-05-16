@@ -80,7 +80,7 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
             y_true=test_df['Transported'],
             y_pred=predictions,
             y_probs=probabilities,
-            dataset_name=dataset_name
+            dataset_name="Random Forest (Holdout)"
         )
 
         # Stampa le metriche SOLO se stiamo facendo l'Holdout o salvando file singoli
@@ -215,7 +215,7 @@ def main():
                     y_true=np.array(all_y_true),
                     y_pred=np.array(all_y_pred),
                     y_probs=np.array(all_y_probs),
-                    dataset_name="LIGHTGBM K-FOLD (GLOBALE)"
+                    dataset_name="Random Forest (K-Fold)"
                 )
                 valutatore.print_report()
                 valutatore.plot_visuals()
