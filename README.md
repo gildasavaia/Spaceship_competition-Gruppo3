@@ -196,4 +196,21 @@ Colonne OHE rimosse per evitare la dummy variable trap: CryoSleep_False, VIP_Fal
 3. Regole finanziarie: verifica le regole logiche legate a CryoSleep e all'età dei passeggeri.
 4. Questo script ha guidato la definizione delle regole di dominio implementate in OP4.
 
+## Development
+La fase di Development è il nucleo predittivo del progetto, in cui i dataset generati dalla pipeline di preprocessing,
+sia per gli alberi decisionali che per le reti neurali, vengono dati in input agli algoritmi dei modelli sviluppati per
+prevedere il destino dei passeggeri.
+
+### Architettura dei Modelli
+
+Il progetto sviluppa e confronta 6 diverse famiglie di modelli, ognuna ottimizzata per una specifica rappresentazione dei dati:
+
+| Modello | Cartella di riferimento      | Caratteristiche                                                                                                                                                        |
+| :--- |:-----------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **LightGBM** | `/LightGBM`                  | Algoritmo di Boosting basato su istogrammi, nativamente categorico e velocissimo.                                                                                      |
+| **Random Forest** | `/Random Forest Classifier`  | Ensemble bagging robusto. Converte internamente le categoriche in One-Hot Encoding numerico.                                                                           |
+| **Support Vector Classifier** | `/Support_Vector_Classifier` | Modello geometrico-spaziale. Integra una pipeline interna con StandardScaler per evitare distorsioni sulle distanze.                                                   |
+| **XGBoost** | `/XGBoost`                   | Algoritmo di Gradient Boosting ottimizzato. Richiede una conversione esplicita dei tipi di dato categorici.                                                            |
+| **CatBoost** | `/CATBoost`                  | Algoritmo di Boosting, sviluppato per gestire in modo simmetrico e nativo le variabili categoriche.                                                                    |
+| **Rete Neurale** | `/Rete_Neurale`              | Architettura Deep Learning implementata in PyTorch per catturare relazioni non lineari complesse. |
 
