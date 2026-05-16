@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import json
+from pathlib import Path
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
     roc_auc_score, confusion_matrix, roc_curve
@@ -9,7 +11,8 @@ from sklearn.metrics import (
 
 class MetricsEvaluator:
     """
-    Classe OOP dedicata al calcolo e alla visualizzazione grafica delle metriche.
+    Classe OOP dedicata al calcolo, alla visualizzazione grafica
+    e all'esportazione delle metriche per l'Orchestratore.
     """
 
     def __init__(self, y_true, y_pred, y_probs=None, dataset_name="Dataset"):
@@ -19,8 +22,9 @@ class MetricsEvaluator:
         self.dataset_name = dataset_name
 
     def calculate_metrics(self):
-        """Calcola le metriche testuali."""
+        """Calcola le metriche e le restituisce in un dizionario."""
         metrics = {
+            'Model': self.dataset_name,  # Aggiungiamo il nome del modello!
             'accuracy': accuracy_score(self.y_true, self.y_pred),
             'precision': precision_score(self.y_true, self.y_pred),
             'recall': recall_score(self.y_true, self.y_pred),
@@ -32,9 +36,28 @@ class MetricsEvaluator:
             metrics['roc_auc'] = None
         return metrics
 
-    def print_report(self):
-        """Stampa il report testuale in console."""
+    def export_to_orchestrator(self):
+        """Salva un file temporaneo affinché l'Orchestratore possa raccoglierlo."""
         m = self.calculate_metrics()
+
+        # Troviamo la cartella outputs generale
+        base_dir = Path(__file__).resolve().parent.parent
+        out_dir = base_dir / "outputs"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        temp_file = out_dir / "temp_metrics.json"
+
+        # Salviamo i dati. L'orchestratore li leggerà e poi cancellerà questo file.
+        with open(temp_file, "w") as f:
+            json.dump(m, f)
+
+    def print_report(self):
+        """Stampa il report testuale in console ed esporta i dati."""
+        m = self.calculate_metrics()
+
+        # Mandiamo le metriche all'orchestratore!
+        self.export_to_orchestrator()
+
         print(f"\n{'-' * 50}")
         print(f" 📊 REPORT METRICHE: {self.dataset_name.upper()}")
         print(f"{'-' * 50}")
