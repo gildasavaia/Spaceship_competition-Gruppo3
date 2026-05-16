@@ -82,9 +82,10 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
             y_probs=probabilities,
             dataset_name=dataset_name
         )
-        # 2. Gli diciamo di stampare il report
-        valutatore.print_report()
-        valutatore.plot_visuals()
+        # Nel K-Fold (salva_file_singolo=False) questo blocco starà in silenzio!
+        if salva_file_singolo:
+            valutatore.print_report()
+            valutatore.plot_visuals()
 
     # 4. Salvataggio del Modello (.pkl)
     print("[4/4] Salvataggio risultati in 'outputs'...")
