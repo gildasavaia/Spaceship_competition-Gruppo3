@@ -18,31 +18,26 @@ from sklearn.metrics import (
 # 🔹 EVALUATION SINGOLO MODELLO
 # =========================================================
 
-def run_full_evaluation_nn(model, X_test, y_test, title="Neural Network"):
+def run_full_evaluation_nn(model, X_test, y_test, title="Neural Network", verbose=True):
 
     model.eval()
 
     # =========================
     # TENSOR INPUT
     # =========================
-
     X_tensor = torch.tensor(
         X_test.values if hasattr(X_test, "values") else X_test,
         dtype=torch.float32
     )
 
     with torch.no_grad():
-
         outputs = model(X_tensor).squeeze()
-
         y_probs = outputs.numpy()
-
         y_pred = (outputs > 0.5).int().numpy()
 
     # =========================
     # METRICHE
     # =========================
-
     metrics = {
         "Accuracy": accuracy_score(y_test, y_pred),
         "Precision": precision_score(y_test, y_pred),
@@ -52,29 +47,27 @@ def run_full_evaluation_nn(model, X_test, y_test, title="Neural Network"):
     }
 
     # =========================
-    # PRINT REPORT
-    # =========================
-
-    print(f"\n{'=' * 60}")
-    print(f" NEURAL NETWORK - {title}")
-    print(f"{'=' * 60}")
-
-    for k, v in metrics.items():
-        print(f"{k:10}: {v:.4f}")
-
-    print("\n Classification Report:\n")
-    print(classification_report(y_test, y_pred))
-
-    # =========================
     # CONFUSION MATRIX
     # =========================
-
     cm = confusion_matrix(y_test, y_pred)
-    plot_confusion_matrix(cm, title)
+
+    # =========================
+    # PRINT REPORT (Solo se verbose è True)
+    # =========================
+    if verbose:
+        print(f"\n{'=' * 60}")
+        print(f" NEURAL NETWORK - {title}")
+        print(f"{'=' * 60}")
+
+        for k, v in metrics.items():
+            print(f"{k:10}: {v:.4f}")
+
+        print("\n Classification Report:\n")
+        print(classification_report(y_test, y_pred))
+
+        plot_confusion_matrix(cm, title)
 
     return metrics, cm
-
-
 # =========================================================
 # 🔹 CONFUSION MATRIX
 # =========================================================
