@@ -12,59 +12,42 @@ from sklearn.metrics import (
 )
 
 
-def run_full_evaluation(
-        model,
-        X_test,
-        y_test,
-        title="Test Set"
-):
+def run_full_evaluation(model, X_test, y_test, title="Test Set", verbose=True):
+
+    
+    # Predizioni
 
     y_pred = model.predict(X_test)
+    y_probs = model.predict_proba(X_test)[:, 1]
 
-    # CatBoost può restituire shape diverse
-    y_probs = model.predict_proba(X_test)
 
-    if len(y_probs.shape) > 1:
-        y_probs = y_probs[:, 1]
+    # Metriche
 
     metrics = {
-
-        "Accuracy":
-            accuracy_score(y_test, y_pred),
-
-        "Precision":
-            precision_score(y_test, y_pred),
-
-        "Recall":
-            recall_score(y_test, y_pred),
-
-        "F1-Score":
-            f1_score(y_test, y_pred),
-
-        "AUC-ROC":
-            roc_auc_score(y_test, y_probs)
+        "Accuracy":  accuracy_score(y_test, y_pred),
+        "Precision": precision_score(y_test, y_pred),
+        "Recall":    recall_score(y_test, y_pred),
+        "F1-Score":  f1_score(y_test, y_pred),
+        "AUC-ROC":   roc_auc_score(y_test, y_probs)
     }
 
-    cm = confusion_matrix(
-        y_test,
-        y_pred
-    )
 
-    print(f"\n{'=' * 60}")
-    print(f"📊 REPORT VALUTAZIONE CATBOOST: {title}")
-    print(f"{'=' * 60}")
+    # Confusion Matrix
 
-    for metric_name, metric_value in metrics.items():
+    cm = confusion_matrix(y_test, y_pred)
 
-        print(
-            f"{metric_name:10}: "
-            f"{metric_value:.4f}"
-        )
 
-    plot_confusion_matrix(
-        cm,
-        title
-    )
+    # REPORT E PLOT (Solo se verbose è True)
+
+    if verbose:
+        print(f"\n{'=' * 60}")
+        print(f"📊 REPORT VALUTAZIONE: {title}")
+        print(f"{'=' * 60}")
+
+        for metric_name, metric_value in metrics.items():
+            print(f"{metric_name:10}: {metric_value:.4f}")
+
+        plot_confusion_matrix(cm, title)
 
     return metrics, cm
 
