@@ -120,7 +120,7 @@ def main():
                 script_to_run = base_dir / "CATBoost" / "Main_catboost.py"
                 work_dir = base_dir / "CATBoost"
             elif scelta_modello == "6":
-                script_to_run = base_dir / "Rete_Neurale" / "main_NN_pytch.py"
+                script_to_run = base_dir / "NN_Pytorch" / "main_NN_pytch.py"
                 work_dir = base_dir / "Rete_Neurale"
             elif scelta_modello == "7":
                 # Rompe il ciclo interno (Fase 2) e ricomincia dal ciclo esterno (Fase 1)
