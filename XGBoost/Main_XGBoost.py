@@ -134,18 +134,30 @@ elif scelta == "3":
     if not os.path.exists(train_path) or not os.path.exists(test_path):
         print(f"❌ Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
     else:
+        # 1. Caricamento dei dati
         train_df, test_df = load_data(train_path, test_path)
+
+        # 2. Separazione in Feature (X) e Target (y)
         X_train, y_train = prepare_data(train_df)
         X_test = prepare_test(test_df)
 
+        # 3. Pulizia di PassengerId se presente
         if "PassengerId" in X_test.columns:
             X_test_for_model = X_test.drop("PassengerId", axis=1)
         else:
-            X_test_for_model = X_test
+            X_test_for_model = X_test.copy()
 
+
+        X_train = fix_categorical_dtype(X_train)
+        X_test_for_model = fix_categorical_dtype(X_test_for_model)
+
+        # 4. Inizializzazione del modello ottimizzato
         model = create_model()
-        print("Addestramento finale in corso...")
+
+        print("Addestramento finale sul dataset completo in corso...")
         train_model(model, X_train, y_train)
+
+        # 5. Predizione e Salvataggio dei risultati per Kaggle
         save_submission(model, X_test_for_model, test_df, filename="submission_xgboost_full.csv")
 
 else:
