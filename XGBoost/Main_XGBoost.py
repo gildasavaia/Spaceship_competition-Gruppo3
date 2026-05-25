@@ -123,7 +123,9 @@ elif scelta == "2":
                 y_probs=np.array(all_y_probs),
                 dataset_name="XGBoost (K-Fold)"
             )
-            valutatore.export_to_orchestrator()
+            valutatore.print_report()  # Stampa le metriche a schermo
+            valutatore.plot_visuals()  # Apre la Matrice di Confusione e la Curva ROC
+            valutatore.export_to_orchestrator()  # Manda i voti alla Leaderboard
 
 
 elif scelta == "3":
