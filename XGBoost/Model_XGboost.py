@@ -46,13 +46,13 @@ def create_model():
         learning_rate=0.02,         # Tasso di contrazione dell'aggiornamento dei pesi degli alberi
         max_depth=5,                # Massima profondità consentita per ogni singolo albero di decisione
         min_child_weight=1,         # Somma minima del peso delle istanze richiesta in un nodo figlio
-        gamma=0.05,                 # Riduzione minima della loss richiesta per fare un ulteriore split
+        gamma=0.05,
         subsample=0.9,              # Frazione di righe campionata casualmente per ogni albero
         colsample_bytree=0.85,      # Frazione di colonne campionata casualmente per ogni albero
         reg_lambda=3,               # Termine di regolarizzazione L2 sui pesi delle foglie
         reg_alpha=0.3,              # Termine di regolarizzazione L1 sui pesi delle foglie
         tree_method="hist",         # Algoritmo basato su istogrammi per velocizzare il calcolo dei nodi
-        max_bin=256,                # Numero massimo di bin discreti in cui raggruppare le feature continue
+        max_bin=256,
         n_jobs=-1,                  # Impiego di tutti i thread di calcolo logici disponibili della CPU
         enable_categorical=True,    # Supporto nativo integrato di XGBoost per le colonne di tipo category
         objective='binary:logistic',# Funzione obiettivo per restituire probabilità di classificazione binaria
