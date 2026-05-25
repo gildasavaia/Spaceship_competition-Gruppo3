@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import NamedTuple
 
-# Creiamo una NamedTuple per l'output
+
 class SplitDatasetOutputs(NamedTuple):
     df_output: pd.DataFrame
 
