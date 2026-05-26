@@ -66,7 +66,10 @@ if scelta == "1":
 # MODALITÀ 2: VALIDAZIONE INCROCIATA SU K-FOLD
 # =====================================================================
 elif scelta == "2":
-    print("\n Ricerca K-Fold per XGBoost...\n")
+    print("\n Ricerca K-Fold con ottimizzazione iperparametri per XGBoost...\n")
+    import random
+    from Model_XGboost import create_model_2  # Assicurati di aver aggiunto create_model_2 nel file del modello
+
     search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
     train_files = glob.glob(search_pattern)
 
@@ -76,66 +79,157 @@ elif scelta == "2":
         num_folds = len(train_files)
         print(f" Trovati {num_folds} fold. Inizio elaborazione...\n")
 
-        fold_metrics = []
-        fold_confusion_matrices = []
+        # =====================================================================
+        # 1. GRIGLIA PARAMETRI E GENERAZIONE COMBINAZIONI CASUALI
+        # =====================================================================
+        param_grid = {
+            "n_estimators": [1500, 2500, 3500, 4500],
+            "learning_rate": [0.01, 0.02, 0.05, 0.1],
+            "max_depth": [3, 4, 5, 7],
+            "min_child_weight": [1, 3, 5],
+            "gamma": [0.0, 0.05, 0.1, 0.2],
+            "subsample": [0.7, 0.8, 0.9, 1.0],
+            "colsample_bytree": [0.7, 0.85, 0.9, 1.0],
+            "reg_lambda": [1, 3, 5, 10],
+            "reg_alpha": [0.0, 0.1, 0.3, 0.5]
+        }
 
-        # Contenitori estesi per consolidare le predizioni effettuate su ogni porzione di dati
-        all_y_true = []
-        all_y_pred = []
-        all_y_probs = []
+        # Inseriamo come prima combinazione (Benchmark) i parametri manuali originali
+        original_params = {
+            "n_estimators": 3500, "learning_rate": 0.02, "max_depth": 5,
+            "min_child_weight": 1, "gamma": 0.05, "subsample": 0.9,
+            "colsample_bytree": 0.85, "reg_lambda": 3, "reg_alpha": 0.3
+        }
 
-        for i in range(1, num_folds + 1):
-            print(f"-> Addestramento ed elaborazione Fold {i}/{num_folds}...")
+        combinazioni = [original_params]
+        random.seed(42)  # Seed per garantire la riproducibilità nella scelta delle combinazioni casuali
 
-            train_path = os.path.join(data_dir, f"kfold_{i}_tree_train.csv")
-            test_path = os.path.join(data_dir, f"kfold_{i}_tree_test.csv")
+        # Generiamo le altre 4 combinazioni uniche
+        while len(combinazioni) < 5:
+            scelta_casuale = {k: random.choice(v) for k, v in param_grid.items()}
+            if scelta_casuale not in combinazioni:
+                combinazioni.append(scelta_casuale)
 
-            if not os.path.exists(test_path):
-                print(f" Fold {i} non presente su disco, salto.")
-                continue
+        # Variabili di tracciamento per l'ottimizzazione
+        best_accuracy = -1
+        best_combination_data = {}
+        resoconto_classifica = []
 
-            train_df, test_df = load_data(train_path, test_path)
-            X, y = prepare_data(train_df)
-            X_test = prepare_test(test_df)
+        # =====================================================================
+        # 2. LOOP DI VALUTAZIONE SULLE 5 COMBINAZIONI DI IPERPARAMETRI
+        # =====================================================================
+        for idx, params in enumerate(combinazioni):
+            is_original = " (PARAMETRI ORIGINALI MANUALI)" if idx == 0 else ""
+            print(f"\n" + "=" * 75)
+            print(f" TEST COMBINAZIONE {idx + 1}/5{is_original}")
+            print(f" Parametri in uso: {params}")
+            print("=" * 75)
 
-            # Sincronizzazione dei tipi categorici obbligatoria per ogni iterazione dei file
-            X = fix_categorical_dtype(X)
-            X_test = fix_categorical_dtype(X_test)
+            fold_metrics = []
+            fold_confusion_matrices = []
 
-            y_test = test_df["Transported"] if "Transported" in test_df.columns else None
+            # Liste temporanee per accumulare i dati di predizione di questa specifica combinazione
+            current_y_true = []
+            current_y_pred = []
+            current_y_probs = []
 
-            model = create_model()
-            train_model(model, X, y)
+            for i in range(1, num_folds + 1):
+                train_path = os.path.join(data_dir, f"kfold_{i}_tree_train.csv")
+                test_path = os.path.join(data_dir, f"kfold_{i}_tree_test.csv")
 
-            if y_test is not None:
-                # Raccolta asincrona delle metriche escludendo output grafici intermedi
-                metrics, cm = run_full_evaluation(model, X_test, y_test, title=f"FOLD {i}", verbose=False)
-                fold_metrics.append(metrics)
-                fold_confusion_matrices.append(cm)
+                if not os.path.exists(test_path):
+                    continue
 
-            predictions = predict(model, X_test)
+                train_df, test_df = load_data(train_path, test_path)
+                X, y = prepare_data(train_df)
+                X_test = prepare_test(test_df)
 
-            if y_test is not None:
-                probabilities = model.predict_proba(X_test)[:, 1]
-                all_y_true.extend(y_test)
-                all_y_pred.extend(predictions)
-                all_y_probs.extend(probabilities)
+                X = fix_categorical_dtype(X)
+                X_test = fix_categorical_dtype(X_test)
 
-        if fold_metrics:
-            print_kfold_summary(fold_metrics, fold_confusion_matrices)
+                y_test = test_df["Transported"] if "Transported" in test_df.columns else None
 
-        # Invio definitivo delle liste flat concatenate all'istanza dell'orchestratore universale
-        if all_y_true:
+                # Creazione del modello dinamicamente tramite create_model_2
+                model = create_model_2(**params)
+                train_model(model, X, y)
+
+                if y_test is not None:
+                    # verbose=False evita di aprire grafici intermedi fastidiosi
+                    metrics, cm = run_full_evaluation(model, X_test, y_test, title=f"FOLD {i}", verbose=False)
+                    fold_metrics.append(metrics)
+                    fold_confusion_matrices.append(cm)
+
+                predictions = predict(model, X_test)
+
+                if y_test is not None:
+                    probabilities = model.predict_proba(X_test)[:, 1]
+                    current_y_true.extend(y_test)
+                    current_y_pred.extend(predictions)
+                    current_y_probs.extend(probabilities)
+
+            # Calcolo delle performance medie del cross-validation per la combinazione corrente
+            if fold_metrics:
+                avg_acc = np.mean([m['accuracy'] for m in fold_metrics])
+                print(f"--> Fine K-Fold. Accuratezza Media Combinazione {idx + 1}: {avg_acc:.4f}")
+
+                resoconto_classifica.append({
+                    'index': idx + 1,
+                    'is_original': idx == 0,
+                    'accuracy': avg_acc
+                })
+
+                # Salvataggio dei dati se la combinazione è la migliore trovata finora
+                if avg_acc > best_accuracy:
+                    best_accuracy = avg_acc
+                    best_combination_data = {
+                        'params': params,
+                        'is_original': idx == 0,
+                        'metrics': fold_metrics,
+                        'cms': fold_confusion_matrices,
+                        'y_true': current_y_true,
+                        'y_pred': current_y_pred,
+                        'y_probs': current_y_probs
+                    }
+
+        # =====================================================================
+        # 3. REPORT DI CONFRONTO FINALE
+        # =====================================================================
+        print("\n\n" + "#" * 70)
+        print(" CLASSIFICA FINALE DELLE COMBINAZIONI")
+        print("#" * 70)
+
+        # Ordina la classifica per accuratezza decrescente
+        for res in sorted(resoconto_classifica, key=lambda x: x['accuracy'], reverse=True):
+            tag = " [ORIGINALE PRE-IMPOSTATO]" if res['is_original'] else ""
+            print(f" Posizione -> Combinazione {res['index']}{tag}: Accuratezza Media = {res['accuracy']:.4f}")
+
+        print("\n" + "-" * 70)
+        if best_combination_data['is_original']:
+            print(f" ESITO VERIFICA: I parametri inseriti manualmente a priori\n"
+                  f" sono EFFETTIVAMENTE i migliori! (Acc: {best_accuracy:.4f})")
+        else:
+            print(f" ESITO VERIFICA: Trovata una combinazione casuale MIGLIORE di quella manuale!\n"
+                  f" Nuova Miglior Accuratezza: {best_accuracy:.4f}\n"
+                  f" Iperparametri vincenti: {best_combination_data['params']}")
+        print("-" * 70)
+
+        # =====================================================================
+        # 4. ELABORAZIONE DI SINTESI E INVIO ALL'ORCHESTRATORE (Solo per il vincitore)
+        # =====================================================================
+        print("\n Generazione grafici di sintesi K-Fold per la combinazione vincente...")
+        print_kfold_summary(best_combination_data['metrics'], best_combination_data['cms'])
+
+        if best_combination_data['y_true']:
+            print("\n Invio definitivo dei dati della combinazione ottimale all'orchestrazione esterna...")
             valutatore = MetricsEvaluator(
-                y_true=np.array(all_y_true),
-                y_pred=np.array(all_y_pred),
-                y_probs=np.array(all_y_probs),
-                dataset_name="XGBoost (K-Fold)"
+                y_true=np.array(best_combination_data['y_true']),
+                y_pred=np.array(best_combination_data['y_pred']),
+                y_probs=np.array(best_combination_data['y_probs']),
+                dataset_name="XGBoost (K-Fold Ottimizzato)"
             )
             valutatore.print_report()
             valutatore.plot_visuals()
             valutatore.export_to_orchestrator()
-
 
 # =====================================================================
 # MODALITÀ 3: ADDESTRAMENTO TOTALE E GENERAZIONE FILE SUBMISSION KAGGLE
