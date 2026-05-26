@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 class SVCTrainer:
     """ Questa classe gestisce l'addestramento, l'ottimizzazione e le predizioni del modello Support Vector Classifier."""
 
+
     def __init__(self, random_state=42):
 
         # Inizializziamo il random state per garantire la riproducibilità dei risultati.
@@ -96,7 +97,6 @@ class SVCTrainer:
             self.best_model = random_search.best_estimator_
 
             print(f"Migliori parametri trovati: {random_search.best_params_}")
-            print(f"Miglior accuratezza in CV con tuning: {random_search.best_score_:.4f}")
 
             return self.best_model
 

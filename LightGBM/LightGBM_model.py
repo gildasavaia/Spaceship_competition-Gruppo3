@@ -4,6 +4,7 @@ from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 class LightGBMTrainer:
     """ Questa classe gestisce l'addestramento, l'ottimizzazione e le predizioni del modello LightGBM."""
 
+
     def __init__(self, random_state=42):
 
         # Inizializziamo il random state per garantire la riproducibilità dei risultati.
@@ -11,6 +12,7 @@ class LightGBMTrainer:
 
         # Variabile per memorizzare il modello addestrato.
         self.best_model = None
+
 
     def tune_hyperparameters(self, X, y, param_grid=None, cv_splits=5, fast_mode=True):
         """ Questa funzione gestisce l'addestramento e l'ottimizzazione degli iperparametri del modello.
@@ -35,6 +37,7 @@ class LightGBMTrainer:
 
         if fast_mode:
             print("[Fast Mode] Utilizzo iperparametri ottimali pre-impostati...")
+
             # Passiamo al modello la migliore combinazione di iperparametri trovati.
             self.best_model = lgb.LGBMClassifier(
                 num_leaves=31,                        # Numero massimo di foglie in un albero.
@@ -50,10 +53,10 @@ class LightGBMTrainer:
             print("Addestramento completato con successo.")
             return self.best_model
 
-
         else:
             print("[Tuning Mode] Inizio ottimizzazione con RandomizedSearchCV...")
-            # Inizializziamo un modello "vuoto" di base.
+
+            # Inizializziamo un modello vuoto di base.
             base_model = lgb.LGBMClassifier(random_state=self.random_state, n_jobs=-1)
 
             # Se l'utente non ha passato una griglia personalizzata, usiamo questa di default.
@@ -87,7 +90,6 @@ class LightGBMTrainer:
             self.best_model = random_search.best_estimator_
 
             print(f"Migliori parametri trovati: {random_search.best_params_}")
-            print(f"Miglior accuratezza in CV con tuning: {random_search.best_score_:.4f}")
             return self.best_model
 
 
