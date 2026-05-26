@@ -1,12 +1,3 @@
-""" Questo script è il file principale per l'esecuzione del modello LightGBM. Gestisce l'interfaccia utente tramite un
-menu da riga di comando che permette di scegliere tra tre modalità di esecuzione:
-1. Holdout.
-2. K-Fold.
-3. Processed Full.
-
-Inoltre, applica un passaggio tecnico fondamentale, ovvero la conversione delle variabili testuali in formato 'category'
-per evitare errori tra Train e Test."""
-
 import pandas as pd
 import numpy as np
 import joblib
@@ -42,7 +33,7 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # A differenza degli altri modelli, LightGBM necessita che il set di categorie sia identico tra Train e Test.
+    # Il set di categorie sia identico tra Train e Test.
     num_train_rows = X_train.shape[0]
 
     # Uniamo verticalmente Train e Test.

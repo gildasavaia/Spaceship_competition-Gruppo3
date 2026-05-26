@@ -1,54 +1,45 @@
 import pandas as pd
 import numpy as np
-import os
 import joblib
-import warnings
 import glob
-from pathlib import Path
-from Random_Forest_Classifier_model import RandomForestTrainer
 import sys
+
+from Evaluation.metrics_calculator import MetricsEvaluator
+from Random_Forest_Classifier_model import RandomForestTrainer
 from pathlib import Path
 
-# Aggiungiamo la cartella principale al percorso per poter importare il valutatore
 base_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(base_dir))
 
-from Evaluation.metrics_calculator import MetricsEvaluator
-
-
-# Sostituisci il nome della cartella se l'hai rinominata senza spazi
-# (es. from Random_Forest_Classifier_model import ...)
 
 def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_file_singolo=True):
-    """
-    Funzione core che esegue l'intera pipeline Random Forest per una specifica coppia di Train/Test.
-    Restituisce i DataFrame per permettere l'unione dei K-Fold in un unico file TOTAL.
-    """
-    print(f"\n{'=' * 60}")
-    print(f"ELABORAZIONE RANDOM FOREST: {dataset_name.upper()}")
-    print(f"{'=' * 60}")
+    """Questa funzione esegue l'intera pipeline Random_Forest_Classifier per una specifica coppia di Train/Test.
+    Carica i CSV, prepara i dati per Random_Forest_Classifier, addestra il modello, valuta le metriche e salva gli output."""
 
-    # 1. Caricamento Dati
+    print(f"\n{'-' * 60}")
+    print(f"INIZIO ELABORAZIONE Random Forest Classifier: {dataset_name.upper()}")
+    print(f"{'-' * 60}")
+
+    # 1) Caricamento dai dati attraverso la lettura dei file CSV specificati nei percorsi.
     print("[1/4] Caricamento dati in corso...")
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
 
+    # Separazione delle feature (X) dal target (y), rimuovendo le colonne non predittive.
     X_train = train_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # =====================================================================
-    # TRUCCO ROBUSTO PER RANDOM FOREST: Unisci, Converti e Dividi
-    # Random Forest (sklearn) NON accetta stringhe. Convertiamo tutto in numeri.
-    # =====================================================================
+    # Il set di categorie sia identico tra Train e Test.
     num_train_rows = X_train.shape[0]
+
+    # Uniamo verticalmente Train e Test.
     combined_df = pd.concat([X_train, X_test], axis=0, ignore_index=True)
 
-    # Identifichiamo le colonne testuali
+    # Identificazione delle colonne caratterizzate da stringhe, convertendole in tipo category.
     colonne_testuali = combined_df.select_dtypes(include=['object', 'category']).columns.tolist()
-
     if colonne_testuali:
-        print(f"[*] Trasformazione variabili categoriche: {colonne_testuali}")
+        print(f"****Trasformazione variabili categoriche: {colonne_testuali}****")
         # One-Hot Encoding (crea colonne binarie 0/1)
         combined_df = pd.get_dummies(combined_df, columns=colonne_testuali, drop_first=True)
 
