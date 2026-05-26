@@ -362,20 +362,3 @@ def run_handle_null_values(df_input: pd.DataFrame,  train_prob_dicts=None, train
     # Corretto
     return HandleNullValuesResult(df, probability_dictionaries, age_mean_to_return)
 
-# def main():
-#     input_path = "train_processed.csv"
-#     output_path = "train_imputed_singletons.csv"
-
-#     try:
-#         df = pd.read_csv(input_path)
-#     except FileNotFoundError:
-#         print(f"File non trovato: {input_path}")
-#         return
-
-#     result = run_handle_null_values(df)
-
-#     result.df_output.to_csv(output_path, index=False)
-#     print(f"\nSalvato in: {output_path}")
-
-# if __name__ == "__main__":
-#     main()
