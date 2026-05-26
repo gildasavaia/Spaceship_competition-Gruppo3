@@ -2,15 +2,17 @@ import lightgbm as lgb
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 
 class LightGBMTrainer:
-    """ Classe per gestire l'addestramento, l'ottimizzazione e le predizioni
-    del modello LightGBM per lo Spaceship Titanic."""
+    """ Questa classe gestisce l'addestramento, l'ottimizzazione e le predizioni del modello LightGBM."""
 
     def __init__(self, random_state=42):
+        # Inizializziamo il random state per garantire la riproducibilità dei risultati.
         self.random_state = random_state
+
+        # Variabile per memorizzare il modello addestrato.
         self.best_model = None
 
     def tune_hyperparameters(self, X, y, param_grid=None, cv_splits=5, fast_mode=True):
-        """
+        """ Questa funzione gestisce l'addestramento e l'ottimizzazione del modello tramite un paradigma a doppia modalità:
         Se fast_mode=True: Addestra istantaneamente con i parametri ottimali scolpiti nel codice (Stile XGBoost).
         Se fast_mode=False: Esegue una ricerca veloce con RandomizedSearchCV per trovare nuovi parametri.
         """
