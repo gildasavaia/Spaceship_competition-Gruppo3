@@ -42,15 +42,15 @@ def create_model():
     gli iperparametri per contrastare la varianza e l'overfitting degli alberi.
     """
     model = XGBClassifier(
-        n_estimators=3500,          # Numero massimo di iterazioni di boosting (alberi sequenziali)
-        learning_rate=0.02,         # Tasso di contrazione dell'aggiornamento dei pesi degli alberi
+        n_estimators=1500,          # Numero massimo di iterazioni di boosting (alberi sequenziali)
+        learning_rate=0.01,         # Tasso di contrazione dell'aggiornamento dei pesi degli alberi
         max_depth=5,                # Massima profondità consentita per ogni singolo albero di decisione
         min_child_weight=1,         # Somma minima del peso delle istanze richiesta in un nodo figlio
         gamma=0.05,
-        subsample=0.9,              # Frazione di righe campionata casualmente per ogni albero
-        colsample_bytree=0.85,      # Frazione di colonne campionata casualmente per ogni albero
-        reg_lambda=3,               # Termine di regolarizzazione L2 sui pesi delle foglie
-        reg_alpha=0.3,              # Termine di regolarizzazione L1 sui pesi delle foglie
+        subsample=0.8,              # Frazione di righe campionata casualmente per ogni albero
+        colsample_bytree=0.7,      # Frazione di colonne campionata casualmente per ogni albero
+        reg_lambda=1,               # Termine di regolarizzazione L2 sui pesi delle foglie
+        reg_alpha=0.5,              # Termine di regolarizzazione L1 sui pesi delle foglie
         tree_method="hist",         # Algoritmo basato su istogrammi per velocizzare il calcolo dei nodi
         max_bin=256,
         n_jobs=-1,                  # Impiego di tutti i thread di calcolo logici disponibili della CPU
@@ -61,6 +61,35 @@ def create_model():
     )
     return model
 
+
+def create_model_2(**kwargs):
+    """
+    Istanzia un classificatore XGBClassifier accettando i parametri dinamicamente.
+    Se un parametro non viene passato, utilizza il valore di default originale.
+    """
+    default_params = {
+        "n_estimators": 3500,
+        "learning_rate": 0.02,
+        "max_depth": 5,
+        "min_child_weight": 1,
+        "gamma": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.85,
+        "reg_lambda": 3,
+        "reg_alpha": 0.3,
+        "tree_method": "hist",
+        "max_bin": 256,
+        "n_jobs": -1,
+        "enable_categorical": True,
+        "objective": 'binary:logistic',
+        "eval_metric": 'logloss',
+        "random_state": 42
+    }
+
+    # Sovrascrive i default con i parametri passati in input
+    default_params.update(kwargs)
+
+    return XGBClassifier(**default_params)
 
 def fix_categorical_dtype(X):
     """
