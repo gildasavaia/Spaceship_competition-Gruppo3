@@ -85,7 +85,7 @@ class LightGBMTrainer:
 
 
     def predict(self, X_test):
-        """Questa funzione effettua le predizioni binarie sui nuovi dati."""
+        """ Questa funzione effettua le predizioni binarie sui nuovi dati."""
 
         # Impediamo di fare predizioni se il modello non è stato prima addestrato.
         if self.best_model is None:
@@ -96,7 +96,7 @@ class LightGBMTrainer:
 
 
     def predict_proba(self, X):
-        """Restituisce le probabilità della classe positiva."""
+        """ Restituisce le probabilità della classe positiva."""
 
         # Impediamo di fare predizioni se il modello non è stato prima addestrato.
         if self.best_model is None:
