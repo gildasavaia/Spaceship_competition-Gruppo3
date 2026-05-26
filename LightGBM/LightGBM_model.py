@@ -24,7 +24,14 @@ class LightGBMTrainer:
 
         STATO ATTUALE DELL'IMPLEMENTAZIONE: Per ragioni di performance e per velocizzare l'esecuzione della pipeline,
         abbiamo implementato esclusivamente la logica Fast Mode. Attraverso aggiornamenti del codice, sarà possibile
-        integrare le librerie di Search per abilitare la logica Tuning Mode."""
+        integrare le librerie di Search per abilitare la logica Tuning Mode.
+
+        Argomenti in input:
+        X: Features di training.
+        y: Target di training.
+        param_grid: Griglia di parametri per la ricerca, se fast_mode=False.
+        cv_splits: Numero di fold per la Cross Validation, se fast_mode=False.
+        fast_mode: Se True, usa i parametri preimpostati. Se False, avvia la ricerca."""
 
         if fast_mode:
             print("[Fast Mode] Utilizzo iperparametri ottimali pre-impostati...")
