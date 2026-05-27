@@ -94,7 +94,7 @@ def main():
             print("  [3] Support Vector Classifier (Matematico spaziale)")
             print("  [4] XGBoost                   (Kaggle Standard)")
             print("  [5] CatBoost                  (Re delle variabili categoriche)")
-            print("  [6] Rete Neurale (PyTorch)    (Deep Learning)")
+            print("  [6] Rete Neurale              (PyTorch)")
             print("-" * 65)
             print("  [7] Torna indietro alla Fase 1 (Preprocessing)")
             print("  [0] Esci e Salva Report della Sessione")
