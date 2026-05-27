@@ -94,6 +94,8 @@ def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
     """
     Se CryoSleep == True → tutte le spese devono essere 0.
     Corregge eventuali inconsistenze presenti nel dataset.
+    Se CryoSleep è NaN ma la spesa totale > 0 → imposta CryoSleep a 'False'.
+    Se CryoSleep è NaN ma il passeggero è sui ponti G o T → imposta CryoSleep a 'False'.
     """
     cost_cols = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'TotalSpending']
     existing_cost_cols = [col for col in cost_cols if col in df.columns]
@@ -114,7 +116,7 @@ def enforce_cryo_sleep_spending_rule(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     # Troviamo i passeggeri che sono sui ponti G o T e hanno CryoSleep mancante
-    mask_to_fix = df['Deck'].isin(['T']) & df['CryoSleep'].isna()
+    mask_to_fix = df['Deck'].isin(['T', 'G']) & df['CryoSleep'].isna()
     n_fixed = mask_to_fix.sum()
 
     if n_fixed > 0:

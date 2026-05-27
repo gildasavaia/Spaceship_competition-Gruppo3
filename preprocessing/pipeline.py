@@ -41,16 +41,16 @@ def main():
     print("\nScegli il metodo di divisione del dataset:")
     print("1: Hold-out (Train/Test split)")
     print("2: K-Fold Cross Validation")
-    # L'opzione 3 è attiva ma FANTASMA, non viene mostrata a schermo!
-    scelta = input("Inserisci 1 o 2: ").strip()
+    print("3: Per competizione (Kaggle)")
+    scelta = input("Inserisci 1 o 2 o 3: ").strip()
     
     while scelta not in ['1', '2', '3']:
-        print("Scelta non valida. Inserisci 1 o 2.") 
-        scelta = input("Inserisci 1 o 2: ").strip()
+        print("Scelta non valida. Inserisci 1 o 2 o 3.") 
+        scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
     # --- SECONDA SCELTA: Tipo di Modello ---
     print("\nScegli il tipo di modello per cui preparare i dati:")
-    print("1: Alberi Decisionali (XGBoost, Random Forest, ecc.)")
+    print("1: Alberi Decisionali (XGBoost, CATboost, ecc.)")
     print("2: Reti Neurali / Modelli Lineari (Deep Learning, Regressione Logistica, ecc.)")
     scelta_modello = input("Inserisci 1 o 2: ").strip()
     
