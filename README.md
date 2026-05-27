@@ -73,21 +73,21 @@ train.csv / test.csv
        ▼
   ┌─────────────────────────────────────────┐
   │  SCELTA 1: Metodo di split              │
-  │  1 → Hold-out                           │
+  │  1 → Holdout                            │
   │  2 → K-Fold Cross Validation            │
-  │  3 → [Fantasma] Dataset intero          │
+  │  3 → Per competizione (Kaggle)          │
   └─────────────────────────────────────────┘
        │
        ▼
   ┌─────────────────────────────────────────┐
   │  SCELTA 2: Tipo di modello              │
-  │  1 → Alberi (XGBoost, CatBoost, ecc.)  │
+  │  1 → Alberi (XGBoost, CatBoost, ecc.)   │
   │  2 → Reti Neurali / Modelli Lineari     │
   └─────────────────────────────────────────┘
        │
        ├── Hold-out:   OP4 → OP5 → OP8 → OP9  (su train e test separati)
        ├── K-Fold:     OP4 → OP5 → OP8 → OP9  (per ogni fold)
-       └── Fantasma:   OP4 → OP5 → OP8 → OP9  (intero dataset, per submission)
+       └── Full Validation (preparazione della submission finale per competizione Kaggle):   OP4 → OP5 → OP8 → OP9  (intero dataset, per submission)
 
   In tutti i percorsi, al termine:
   OP2 — EDA / Valutazione  ·  OP6 — Matrice di Correlazione
@@ -130,7 +130,8 @@ Esegue un'analisi di base sul DataFrame: conteggio dei valori nulli per colonna,
 | `Cabin` | `Deck`, `Num`, `Side` | Ponte, numero cabina, lato (P/S) |
 | `Name` | `Names`, `Surnames` | Nome proprio e cognome |
 
-Le colonne originali vengono rimosse. Nel test set, `PassengerId` viene mantenuto per la submission finale (`i_train=0`).
+Le colonne originali vengono rimosse. 
+Se viene scelto il metodo di split numero 3: nel test set, `PassengerId` viene mantenuto per la submission finale (`i_train=0`).
 
 ```python
 risultato = run_split_dataset(df, i_train=1)  # i_train=0 per il test set
@@ -161,14 +162,14 @@ Il modulo più complesso della pipeline. Combina **regole logiche di dominio** c
 
 Per le feature categoriche (`HomePlanet`, `Destination`, `CryoSleep`, `VIP`, `Deck`, `Num`, `Side`, `Surnames`):
 
-1. **Moda del gruppo** — per passeggeri con `GroupSize > 1`, si usa il valore più frequente nel gruppo.
+1. **Moda del gruppo** — per passeggeri con `GroupSize > 1`, si usa il valore più frequente nel gruppo. (Tranne che per 'Destination')
 2. **Imputazione probabilistica** — per passeggeri solitari, si campiona dalla distribuzione globale del train set.
 
 Per le feature numeriche:
 - Costi (`RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`): NaN → `0`
-- `Age`: NaN → media del train (passata come parametro al test per evitare leakage)
+- `Age`: NaN → media del train (passata come parametro al test per evitare data leakage)
 
-> I dizionari di probabilità vengono calcolati **solo sul train** e passati come parametro al test.
+> I dizionari di probabilità vengono calcolati **solo sul train** e passati come parametro al test (per evitare data leakage).
 
 ---
 
@@ -188,7 +189,7 @@ Per le feature numeriche:
 
 Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. Salva il grafico in `outputs/op6/correlation_matrix.png` e restituisce la correlazione ordinata con il target `Transported`.
 
-> La Dummy Variable Trap viene evitata in OP9 (non qui), dove vengono rimosse le colonne ridondanti (`CryoSleep_False`, `VIP_False`, `Side_S`).
+> La Dummy Variable Trap viene evitata in OP9, dove vengono rimosse le colonne ridondanti (`CryoSleep_False`, `VIP_False`, `Side_S`).
 
 ---
 
@@ -196,11 +197,9 @@ Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. S
 
 | Opzione | File | Comportamento |
 |---|---|---|
-| **1 — Hold-out** | `op7_holdout_evaluator.py` | Split classico train/test, proporzione scelta dall'utente |
+| **1 — Holdout** | `op7_holdout_evaluator.py` | Split classico train/test, proporzione scelta dall'utente |
 | **2 — K-Fold** | `op7_kfold_evaluator.py` | K-Fold non stratificato con shuffle, numero di fold scelto dall'utente |
-| **3 — Fantasma** | *(non mostrata nel menu)* | Intero dataset senza split, per la submission finale Kaggle |
-
-> La Versione Fantasma si attiva digitando `3` quando viene chiesta la scelta, ma non appare nel menu. Usarla solo dopo aver validato il modello con Holdout o K-Fold.
+| **3 - Per la competizione su Kaggle  | 'pipeline.py' | Intero dataset senza split, per la submission finale Kaggle |
 
 ---
 
@@ -212,7 +211,7 @@ Produce **due versioni parallele** del dataset:
 | Versione | Destinazione | Trasformazioni |
 |---|---|---|
 | `df_tree` | Modelli ad albero (XGBoost, CatBoost, RF) | Nessuna |
-| `df_nn` | Reti neurali e modelli lineari | `log1p` sulle colonne di spesa + `StandardScaler` |
+| `df_nn` | Reti neurali e modelli lineari | riduzione dell'assimetria dei dati con `log1p` sulle colonne di spesa + `StandardScaler` |
 
 Colonne trasformate con `log1p`: `TotalSpending`, `RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`.
 
@@ -254,10 +253,10 @@ Orchestratore del preprocessing. Dopo OP3 vengono poste due domande interattive:
 
 ```
 Scegli il metodo di divisione del dataset:
-1: Hold-out  |  2: K-Fold  |  [3: Fantasma — non mostrato]
+1: Hold-out  |  2: K-Fold  |  3: Per competizione (Kaggle) |
 
 Scegli il tipo di modello per cui preparare i dati:
-1: Alberi Decisionali  |  2: Reti Neurali / Modelli Lineari
+1: Alberi Decisionali  |  2: Reti Neurali / Modelli Lineari |
 ```
 
 ### Output del Pre-Processing
@@ -287,8 +286,8 @@ Punto di ingresso dell'intera fase di sviluppo. Gestisce il flusso con **due cic
    ▼
 ┌──────────────────────────────────────┐
 │  FASE 1: Preprocessing               │
-│  S → Esegue pipeline.py             │
-│  N → Salta (CSV già pronti)         │
+│  S → Esegue pipeline.py              │
+│  N → Salta (CSV già pronti)          │
 └──────────────────────────────────────┘
    │
    ▼
