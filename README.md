@@ -157,17 +157,23 @@ Il modulo più complesso della pipeline. Combina **regole logiche di dominio** c
 | `Deck = G` → `HomePlanet = Earth` | Regola empirica da analisi del dataset |
 | Spesa > 0 → `CryoSleep = False` | Inferenza inversa dalla spesa |
 | `Deck = T` + CryoSleep mancante → `CryoSleep = False` | Regola specifica per il ponte T |
+| `Deck = D` + `VIP = True` →  `HomePlanet = Europa` | Regola empirica da analisi del dataset |
+| Spesa = 0 + CryoSleep mancante → `CryoSleep = True` | Regola empirica da analisi del dataset |
 
 #### Strategie di imputazione
 
-Per le feature categoriche (`HomePlanet`, `Destination`, `CryoSleep`, `VIP`, `Deck`, `Num`, `Side`, `Surnames`):
+Per le feature categoriche (`HomePlanet`, `Destination`, `CryoSleep`, `VIP`, `Deck`, `Side`):
 
 1. **Moda del gruppo** — per passeggeri con `GroupSize > 1`, si usa il valore più frequente nel gruppo. (Tranne che per 'Destination')
 2. **Imputazione probabilistica** — per passeggeri solitari, si campiona dalla distribuzione globale del train set.
 
 Per le feature numeriche:
 - Costi (`RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`): NaN → `0`
-- `Age`: NaN → media del train (passata come parametro al test per evitare data leakage)
+- `Age`: NaN → Imputazione a cascata (1. Mediana del Gruppo → 2. Mediana per Pianeta d'Origine → 3. Mediana per Ponte → 4. Mediana globale).
+- `NumZone`: NaN →
+  1. Moda di Gruppo: I passeggeri viaggiano spesso in gruppo (famiglie). Se un passeggero ha la cabina mancante ma viaggia con altre persone di cui conosciamo la cabina, imputiamo la             NumZone usando la moda del suo       gruppo.
+  2. Modello Multivariato (Random Forest): Per i passeggeri che viaggiano da soli (o per interi gruppi con cabine mancanti), abbiamo addestrato un modello RandomForestClassifier specifico        sul set di Train.
+     Questo modello predice la zona mancante basandosi su altre feature correlate (Deck, Side, HomePlanet, Destination, VIP).
 
 > I dizionari di probabilità vengono calcolati **solo sul train** e passati come parametro al test (per evitare data leakage).
 
@@ -176,11 +182,14 @@ Per le feature numeriche:
 ### OP5 — `op5_sumcosts_names.py`
 **Aggregazione costi e pulizia colonne**
 
-- Crea `TotalSpending` = somma delle cinque colonne di spesa (calcolata prima di binarizzazioni).
-- Rimuove `Names` (nome proprio non predittivo).
-- `Surnames` viene mantenuta fino a OP9.
-
+- Crea:
+- `TotalSpending` = somma delle cinque colonne di spesa (calcolata prima di binarizzazioni).
+- `SpendingZero`: Un flag binario (`1` se `TotalSpending == 0`).
+- `HasLuxurySpending`: Un flag binario (`1` se la spesa in `Spa` o `VRDeck` è > 0).
+- `IsAlone`: Un flag binario (`1` se `GroupSize == 1`).
 > `TotalSpending` è storicamente una delle feature più predittive in questo dataset.
+> `HasLuxurySpending` è negativamente correlata con la grandtruth
+
 
 ---
 
@@ -213,7 +222,7 @@ Produce **due versioni parallele** del dataset:
 | `df_tree` | Modelli ad albero (XGBoost, CatBoost, RF) | Nessuna |
 | `df_nn` | Reti neurali e modelli lineari | riduzione dell'assimetria dei dati con `log1p` sulle colonne di spesa + `StandardScaler` |
 
-Colonne trasformate con `log1p`: `TotalSpending`, `RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`.
+Colonne trasformate con `log1p`: `TotalSpending`, `RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`, `NumZone`.
 
 > Lo scaler viene fittato **solo sul train** e applicato al test.
 
@@ -328,8 +337,8 @@ All'uscita (opzione `0`), viene generato `outputs/leaderboard_sessione_corrente.
 Esempio:
 | Model | accuracy | precision | recall | f1 | roc_auc |
 |---|---|---|---|---|---|
-| XGBoost (Holdout) | 0.8134 | 0.8201 | 0.8022 | 0.8110 | 0.8891 |
-| CatBoost (K-Fold) | 0.8156 | ... | ... | ... | ... |
+| XGBoost (Holdout) | 0.80383 | 0.8201 | 0.8022 | 0.8110 | 0.8891 |
+| CatBoost (K-Fold) | 0.80687 | ... | ... | ... | ... |
 
 ---
 
@@ -543,36 +552,41 @@ python -m unittest test_catboost_model.py
 
 ## 6. Decisioni Architetturali
 
-- **Due rami paralleli (tree vs nn)** a partire da OP8 — i modelli ad albero non richiedono né scaling né OHE; mantenere due versioni separate evita di degradare le performance degli alberi con trasformazioni inutili.
+- **Due rami paralleli (tree vs nn)** a partire da OP8 — i modelli ad albero non richiedono né scaling né One-Hot Encoding; mantenere due versioni separate evita di degradare le performance degli alberi con trasformazioni inutili.
 - **Imputazione group-first** — la coesione intra-gruppo è >85% per `HomePlanet`: la moda del gruppo è più affidabile dell'imputazione globale. L'imputazione probabilistica viene usata solo come fallback.
 - **Regole di dominio prima dell'imputazione statistica** — applicare prima le regole logiche riduce il numero di valori da imputare e aumenta la coerenza del dataset.
-- **Anti-leakage by design** — dizionari di probabilità, media dell'età e scaler vengono sempre fittati sul train e passati come parametri al test.
-- **Versione Fantasma** — la modalità di training sull'intero dataset è volutamente nascosta dal menu per evitare utilizzi prematuri. Va usata solo dopo aver selezionato il modello migliore tramite Holdout o K-Fold.
+- **Anti-leakage by design** — dizionari di probabilità, mediana dell'età e scaler vengono sempre fittati sul train e passati come parametri al test.
 - **temp_metrics.json come canale di comunicazione** — i modelli sono eseguiti come sottoprocessi indipendenti dall'Orchestratore (`subprocess.run`). Il file JSON temporaneo è il canale di passaggio delle metriche tra il processo figlio (modello) e il processo padre (Orchestratore).
 
 ---
 
-## 7. Requisiti
+## 7. Requisiti (requirements.txt)
 
 ```
-# Pre-processing
-pandas
-numpy
-scikit-learn
-seaborn
-matplotlib
-openpyxl      # per .xlsx
-pyarrow       # per .parquet
+# --- Dati e Preprocessing ---
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+scipy>=1.11
 
-# Modelli
-xgboost
-catboost
-lightgbm
-torch
-joblib
+# --- Visualizzazione ---
+matplotlib>=3.7
+seaborn>=0.13
+plotly>=5.0
+
+# --- Modelli ML ---
+lightgbm>=4.0
+xgboost>=2.0
+catboost>=1.2
+optuna>=3.0        # Hyperparameter tuning
+torch>=2.0         # PyTorch - Rete Neurale (NN_Pytorch/)
+
+# --- Utility ---
+joblib>=1.3
+graphviz>=0.20
 ```
 
 Installazione completa:
 ```bash
-pip install pandas numpy scikit-learn seaborn matplotlib openpyxl pyarrow xgboost catboost lightgbm torch joblib
+   pip install -r requirements.txt
 ```
