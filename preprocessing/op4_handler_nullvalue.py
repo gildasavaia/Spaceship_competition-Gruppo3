@@ -475,7 +475,7 @@ def run_handle_null_values(
     
     features = [
         "HomePlanet", "Destination", "CryoSleep",
-        "VIP", "Deck", "Side", 'Surnames'
+        "VIP", "Deck", "Side"
         # NumZone è imputata separatamente con modello multivariato (vedi sotto)
     ]
 

@@ -57,10 +57,10 @@ def run_split_dataset(df: pd.DataFrame, i_train: int ) -> SplitDatasetOutputs:
 
     # cols_to_drop = spending_cols + ['PassengerId', 'Cabin', 'Name']
     if i_train == 1:
-        cols_to_drop = ['PassengerId', 'Cabin', 'Name','Num']
+        cols_to_drop = ['PassengerId', 'Cabin', 'Name','Num', 'Surnames']
         df_mod.drop(columns=cols_to_drop, inplace=True)
     else: 
-        cols_to_drop = ['Cabin', 'Name','Num']
+        cols_to_drop = ['Cabin', 'Name','Num','Surnames']
         df_mod.drop(columns=cols_to_drop, inplace=True)
     
     # Metti 'Group' e 'GroupSize' in testa e 'Transported' in fondo
