@@ -25,7 +25,7 @@ def run_scaling(df_train, df_test=None):
     df_nn_test = df_test.copy() if df_test is not None else None
 
     # Colonne numeriche da scalare (verifica che corrispondano a quelle che hai post OP5)
-    numeric_cols = ['Age', 'GroupSize', 'Num', 'TotalSpending', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+    numeric_cols = ['Age', 'GroupSize', 'NumZone', 'TotalSpending', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
     
     # Filtriamo solo le colonne numeriche effettivamente presenti nel dataframe
     numeric_cols = [c for c in numeric_cols if c in df_train.columns]

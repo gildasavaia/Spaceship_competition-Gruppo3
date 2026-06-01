@@ -4,13 +4,14 @@ import joblib
 import warnings
 import glob
 import sys
+from pathlib import Path
+
+# Aggiunge la root del progetto al path PRIMA degli import locali
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(base_dir))
 
 from Evaluation.metrics_calculator import MetricsEvaluator
 from LightGBM_model import LightGBMTrainer
-from pathlib import Path
-
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
 
 # Sopprime gli avvisi di LightGBM, ad esempio "No further splits with positive gain" per mantenere il terminale pulito.
 warnings.filterwarnings('ignore', category=UserWarning)

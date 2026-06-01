@@ -31,6 +31,22 @@ def run_split_dataset(df: pd.DataFrame, i_train: int ) -> SplitDatasetOutputs:
     df_mod[['Deck', 'Num', 'Side']] = df_mod['Cabin'].str.split('/', expand=True)
     
     df_mod['Num'] = df_mod['Num'].astype(float)
+
+    # --- 3. Crea la colonna 'NumZone' ---
+    # Divide Num in zone da 200 stanze ciascuna:
+    # Zona 1 = 0-199, Zona 2 = 200-399, ..., Zona 10 = 1800-1999
+    # Labels interi (1-10) per trattare NumZone come feature numerica continua.
+    zone_size = 200
+    num_max = 1894  # valore massimo noto nel dataset
+    bins = list(range(0, num_max + zone_size, zone_size))  # [0, 200, 400, ..., 2000]
+    labels = list(range(1, len(bins)))  # [1, 2, 3, ..., 10]
+    df_mod['NumZone'] = pd.cut(
+        df_mod['Num'],
+        bins=bins,
+        labels=labels,
+        right=False,          # intervalli chiusi a sinistra: [0,200), [200,400)...
+        include_lowest=True   # include il valore 0
+    ).astype(float)           # converte in float per uso come feature numerica
     
     df_mod[['Names', 'Surnames']] = df_mod['Name'].str.split(' ', expand=True)
     
@@ -41,10 +57,10 @@ def run_split_dataset(df: pd.DataFrame, i_train: int ) -> SplitDatasetOutputs:
 
     # cols_to_drop = spending_cols + ['PassengerId', 'Cabin', 'Name']
     if i_train == 1:
-        cols_to_drop = ['PassengerId', 'Cabin', 'Name']
+        cols_to_drop = ['PassengerId', 'Cabin', 'Name','Num']
         df_mod.drop(columns=cols_to_drop, inplace=True)
     else: 
-        cols_to_drop = ['Cabin', 'Name']
+        cols_to_drop = ['Cabin', 'Name','Num']
         df_mod.drop(columns=cols_to_drop, inplace=True)
     
     # Metti 'Group' e 'GroupSize' in testa e 'Transported' in fondo

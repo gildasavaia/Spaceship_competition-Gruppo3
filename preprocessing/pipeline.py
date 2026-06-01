@@ -76,8 +76,12 @@ def main():
         risultato_imputazione = run_handle_null_values(X_train)
         mio_dataframe_imputato = risultato_imputazione.df_output
         
-        train_dicts = risultato_imputazione.probability_dictionaries
-        train_age_mean = risultato_imputazione.age_mean
+        train_dicts               = risultato_imputazione.probability_dictionaries
+        train_age_global_median   = risultato_imputazione.age_global_median
+        train_age_hp_medians      = risultato_imputazione.age_homeplanet_medians
+        train_age_deck_medians    = risultato_imputazione.age_deck_medians
+        train_nz_model            = risultato_imputazione.numzone_model
+        train_nz_encoder          = risultato_imputazione.numzone_encoder
 
         dict_output_path = repository_dictionary / "holdout_probability_dictionaries_train.json"
         with open(dict_output_path, "w", encoding="utf-8") as f:
@@ -89,9 +93,15 @@ def main():
         
         # OP4 (test)
         print("\n[Esecuzione OP4] Gestione e imputazione valori nulli (Test)...")
-        risultato_imputazione = run_handle_null_values(X_test,
-                                                       train_prob_dicts=train_dicts, 
-                                                       train_age_mean=train_age_mean)
+        risultato_imputazione = run_handle_null_values(
+            X_test,
+            train_prob_dicts=train_dicts,
+            train_age_global_median=train_age_global_median,
+            train_age_homeplanet_medians=train_age_hp_medians,
+            train_age_deck_medians=train_age_deck_medians,
+            train_numzone_model=train_nz_model,
+            train_numzone_encoder=train_nz_encoder,
+        )
         mio_dataframe_imputato = risultato_imputazione.df_output
 
         dict_output_path = repository_dictionary / "holdout_probability_dictionaries_test.json"
@@ -158,15 +168,25 @@ def main():
             risultato_train_fold = run_handle_null_values(df_train_fold)
             df_train_imputato = risultato_train_fold.df_output
             
-            train_dicts_fold = risultato_train_fold.probability_dictionaries
-            train_age_mean_fold = risultato_train_fold.age_mean
+            train_dicts_fold            = risultato_train_fold.probability_dictionaries
+            train_age_global_median_fold = risultato_train_fold.age_global_median
+            train_age_hp_medians_fold   = risultato_train_fold.age_homeplanet_medians
+            train_age_deck_medians_fold = risultato_train_fold.age_deck_medians
+            train_nz_model_fold         = risultato_train_fold.numzone_model
+            train_nz_encoder_fold       = risultato_train_fold.numzone_encoder
             
             with open(repository_dictionary / f"kfold_{numero_fold}_prob_dict_train.json", "w", encoding="utf-8") as f:
                 json.dump(risultato_train_fold.probability_dictionaries, f, indent=4)
             
-            risultato_test_fold = run_handle_null_values(df_test_fold, 
-                                                        train_prob_dicts=train_dicts_fold, 
-                                                        train_age_mean=train_age_mean_fold)
+            risultato_test_fold = run_handle_null_values(
+                df_test_fold,
+                train_prob_dicts=train_dicts_fold,
+                train_age_global_median=train_age_global_median_fold,
+                train_age_homeplanet_medians=train_age_hp_medians_fold,
+                train_age_deck_medians=train_age_deck_medians_fold,
+                train_numzone_model=train_nz_model_fold,
+                train_numzone_encoder=train_nz_encoder_fold,
+            )
             df_test_imputato = risultato_test_fold.df_output
             
             with open(repository_dictionary / f"kfold_{numero_fold}_prob_dict_test.json", "w", encoding="utf-8") as f:
@@ -217,17 +237,26 @@ def main():
         # ESECUZIONE FANTASMA: Intero Dataset
         print("\n[Modalità Sviluppatore: Esecuzione su Intero Dataset]")
         
-        # OP4 
-        print("\n[Esecuzione OP4] Gestione e imputazione valori nulli...")
+        # OP4 (train completo)
+        print("\n[Esecuzione OP4] Gestione e imputazione valori nulli (Train completo)...")
         mio_dataframe_modificato2 = run_handle_null_values(mio_dataframe_modificato)
         mio_dataframe_imputato = mio_dataframe_modificato2.df_output
-        
 
         dict_output_path = repository_dictionary / "full_probability_dictionaries.json"
         with open(dict_output_path, "w", encoding="utf-8") as f:
             json.dump(mio_dataframe_modificato2.probability_dictionaries, f, indent=4, ensure_ascii=False)
-            
-        mio_dataframe_modificato2_test = run_handle_null_values(mio_dataframe_modificato_test)
+
+        # OP4 (test Kaggle) — usa modello fittato sul train completo
+        print("\n[Esecuzione OP4] Gestione e imputazione valori nulli (Test Kaggle)...")
+        mio_dataframe_modificato2_test = run_handle_null_values(
+            mio_dataframe_modificato_test,
+            train_prob_dicts=mio_dataframe_modificato2.probability_dictionaries,
+            train_age_global_median=mio_dataframe_modificato2.age_global_median,
+            train_age_homeplanet_medians=mio_dataframe_modificato2.age_homeplanet_medians,
+            train_age_deck_medians=mio_dataframe_modificato2.age_deck_medians,
+            train_numzone_model=mio_dataframe_modificato2.numzone_model,
+            train_numzone_encoder=mio_dataframe_modificato2.numzone_encoder,
+        )
         mio_dataframe_imputato_test = mio_dataframe_modificato2_test.df_output
         
         # OP5

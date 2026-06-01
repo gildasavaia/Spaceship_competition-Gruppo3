@@ -24,6 +24,18 @@ def run_op5(df: pd.DataFrame) -> op5_sumcosts_namesResult:
     colonne_costo_esistenti = [col for col in cost_cols if col in df_processed.columns]
     if colonne_costo_esistenti:
         df_processed['TotalSpending'] = df_processed[colonne_costo_esistenti].sum(axis=1)
+        
+        # Nuove feature di spesa
+        df_processed['SpendingZero'] = (df_processed['TotalSpending'] == 0).astype(int)
+        
+        # Controlliamo la presenza delle colonne specifiche di luxury
+        luxury_cols = [c for c in ['Spa', 'VRDeck'] if c in df_processed.columns]
+        if luxury_cols:
+            df_processed['HasLuxurySpending'] = (df_processed[luxury_cols].sum(axis=1) > 0).astype(int)
+
+    # Nuova feature: IsAlone (1 se GroupSize == 1)
+    if 'GroupSize' in df_processed.columns:
+        df_processed['IsAlone'] = (df_processed['GroupSize'] == 1).astype(int)
 
     # # 2. Trasformazione delle colonne di costo in valori binari (0 e 1)
     # for col in colonne_costo_esistenti:
