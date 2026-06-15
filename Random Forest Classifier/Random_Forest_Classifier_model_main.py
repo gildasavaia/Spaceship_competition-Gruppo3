@@ -190,12 +190,14 @@ def main():
 
             # --- UNIONE IN UN UNICO FILE TOTAL ---
             print("\n[*] Unione di tutte le predizioni K-Fold in un unico file TOTAL...")
+            # Unisce e ordina per PassengerId
             final_res = pd.concat(all_res).sort_values('PassengerId')
             final_prob = pd.concat(all_prob).sort_values('PassengerId')
 
-            final_res.to_csv(outputs_dir / "submission_lightgbm_kfold_TOTAL.csv", index=False)
-            final_prob.to_csv(outputs_dir / "prob_lightgbm_kfold_TOTAL.csv", index=False)
-            print(f"✅ Creato UNICO file di submission!")
+            # Nomi corretti per la Random Forest!
+            final_res.to_csv(outputs_dir / "submission_rf_kfold_TOTAL.csv", index=False)
+            final_prob.to_csv(outputs_dir / "prob_rf_kfold_TOTAL.csv", index=False)
+            print(f"✅ Creato UNICO file di submission per Random Forest!")
 
             # =====================================================================
             # 🌟 CALCOLO METRICHE GLOBALI ISPIRATO AD XGBOOST (SENZA PASSENGER_ID)
