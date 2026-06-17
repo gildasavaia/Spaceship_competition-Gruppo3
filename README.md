@@ -156,7 +156,7 @@ Il modulo più complesso della pipeline. Combina **regole logiche di dominio** c
 | `Deck ∈ {A, B, C, T}` → `HomePlanet = Europa` | Regola empirica da analisi del dataset |
 | `Deck = G` → `HomePlanet = Earth` | Regola empirica da analisi del dataset |
 | Spesa > 0 → `CryoSleep = False` | Inferenza inversa dalla spesa |
-| `Deck = T` + CryoSleep mancante → `CryoSleep = False` | Regola specifica per il ponte T |
+| `Deck ∈ {G, T}` + CryoSleep mancante → `CryoSleep = False` | Regola specifica per il ponte T |
 | `Deck = D` + `VIP = True` →  `HomePlanet = Europa` | Regola empirica da analisi del dataset |
 | Spesa = 0 + CryoSleep mancante → `CryoSleep = True` | Regola empirica da analisi del dataset |
 
