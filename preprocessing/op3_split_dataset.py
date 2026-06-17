@@ -25,9 +25,12 @@ def run_split_dataset(df: pd.DataFrame) -> SplitDatasetOutputs:
     # Crea la colonna 'GroupSize' (conteggio delle persone nello stesso gruppo)
     df_mod['GroupSize'] = df_mod.groupby('Group')['Group'].transform('count')
     
+    
     # --- 2. Split Cabin ---
     # Dividiamo la colonna Cabin usando '/' come separatore.
     df_mod[['Deck', 'Num', 'Side']] = df_mod['Cabin'].str.split('/', expand=True)
+    
+    df_mod['Num'] = df_mod['Num'].astype(float)
     
     df_mod[['Names', 'Surnames']] = df_mod['Name'].str.split(' ', expand=True)
     
