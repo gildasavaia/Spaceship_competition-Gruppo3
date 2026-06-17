@@ -30,7 +30,9 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # Il set di categorie sia identico tra Train e Test.
+    # Uniamo verticalmente Train e Test prima dell'Encoding.
+    # In questo modo garantiamo che vengano generate le stesse identiche Dummy variables per entrambi.
+    # Salviamo il numero di righe del Train per poter dividere correttamente il dataset.
     num_train_rows = X_train.shape[0]
 
     # Uniamo verticalmente Train e Test.
@@ -39,33 +41,31 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
     # Identificazione delle colonne caratterizzate da stringhe, convertendole in tipo category.
     colonne_testuali = combined_df.select_dtypes(include=['object', 'category']).columns.tolist()
     if colonne_testuali:
-        print(f"****Trasformazione variabili categoriche: {colonne_testuali}****")
+        print(f"*** Trasformazione variabili categoriche: {colonne_testuali} ***")
         # One-Hot Encoding (crea colonne binarie 0/1)
         combined_df = pd.get_dummies(combined_df, columns=colonne_testuali, drop_first=True)
 
-    # Forza tutto il dataset a essere numerico (float)
+    # Forza tutto il dataset a essere numerico (float).
     combined_df = combined_df.astype(float)
 
-    # Ristacchiamo Train e Test
+    # Dividiamo nuovamente i due dataset, ora perfettamente allineati e numerici.
     X_train = combined_df.iloc[:num_train_rows, :].copy()
     X_test = combined_df.iloc[num_train_rows:, :].copy()
-    # =====================================================================
 
+    # Salviamo i PassengerId per poterli inserire nel file di submission finale.
     passenger_ids = test_df['PassengerId'] if 'PassengerId' in test_df.columns else range(len(test_df))
 
-    # 2. Addestramento e Tuning
+    # 2) Addestramento e ottimizzazione, istanziamo il nostro Trainer e lo avviamo.
     print("[2/4] Ricerca iperparametri ottimali (GridSearch)...")
     trainer = RandomForestTrainer(random_state=42)
     trainer.tune_hyperparameters(X_train, y_train)
 
-    # 3. Predizioni e Probabilità
+    # 3) Chiediamo al modello di prevedere sia la classe finale (0/1) sia la probabilità continua [0,1].
     print("[3/4] Generazione predizioni e probabilità per Stacking...")
-    predictions = trainer.predict(X_test)
-    probabilities = trainer.predict_proba(X_test)
+    predictions = trainer.predict(X_test) # Array di True/False.
+    probabilities = trainer.predict_proba(X_test) # Array di probabilità decimali (0.0 - 1.0).
 
-    # =====================================================================
-    # 🌟 CALCOLO METRICHE IN TEMPO REALE (SOLO PER HOLDOUT)
-    # =====================================================================
+    # Valutazione delle metriche.
     if 'Transported' in test_df.columns:
         valutatore = MetricsEvaluator(
             y_true=test_df['Transported'],
@@ -74,12 +74,12 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
             dataset_name="Random Forest (Holdout)"
         )
 
-        # Stampa le metriche SOLO se stiamo facendo l'Holdout o salvando file singoli
+        # Stampa le metriche solo se stiamo facendo l'Holdout o salvando file singoli.
         if salva_file_singolo:
             valutatore.print_report()
             valutatore.plot_visuals()
 
-    # Creazione dei dataframe di output
+    # Creazione dei Dataframe di output in cui inserire i risultati per l'esportazione in CSV.
     res_df = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
@@ -89,22 +89,22 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
         'Probability': probabilities
     })
 
-    # 4. Salvataggio del Modello (.pkl)
+    # 4) Salvataggio del modello per poterlo riutilizzare in futuro senza riaddestrare.
     print("[4/4] Salvataggio risultati in 'outputs'...")
     outputs_dir.mkdir(parents=True, exist_ok=True)
     model_file = outputs_dir / f"modello_rf_{dataset_name}.pkl"
     joblib.dump(trainer.best_model, model_file)
 
-    # Salvataggio dei singoli file CSV solo se richiesto
+    # Salvataggio dei singoli file CSV, sia la predizione della classe e sia la probabilità.
     if salva_file_singolo:
         sub_file = outputs_dir / f"submission_rf_{dataset_name}.csv"
         res_df.to_csv(sub_file, index=False)
 
         prob_file = outputs_dir / f"prob_rf_{dataset_name}.csv"
         prob_df.to_csv(prob_file, index=False)
-        print(f"✅ Modello Random Forest {dataset_name} salvato con successo!")
+        print(f"Modello Random Forest {dataset_name} salvato con successo!")
 
-    # Catturiamo le risposte vere direttamente dal dataset di test del fold
+    # Catturiamo le risposte vere direttamente dal dataset di test del fold per usarle nell'aggregazione del K-Fold.
     y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None
 
     return res_df, prob_df, y_test_true, predictions, probabilities
@@ -113,17 +113,16 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
 def main():
     print("Avvio della pipeline Random Forest per Spaceship Titanic...\n")
 
+    # Configurazione dinamica dei percorsi per far girare lo script su qualsiasi macchina.
     base_dir = Path(__file__).resolve().parent.parent
     preprocessed_dir = base_dir / "data" / "preprocessed_folds"
     outputs_dir = base_dir / "outputs"
 
+    # Verifica che il preprocessing sia stato completato.
     if not preprocessed_dir.exists():
         print(f"Errore: La cartella {preprocessed_dir} non esiste. Esegui prima la pipeline di preprocessing!")
         return
 
-    # =========================================================
-    # MENU INTERATTIVO INTELLIGENTE
-    # =========================================================
     print("Seleziona il metodo di addestramento per Random Forest:")
     print("1. Holdout (singolo train/test)")
     print("2. K-Fold (addestramento automatico e output UNIFICATO in file TOTAL)")
@@ -131,9 +130,7 @@ def main():
 
     scelta = input("Inserisci 1, 2 o 3: ").strip()
 
-    # ---------------------------------
-    # OPZIONE 1: HOLDOUT
-    # ---------------------------------
+    # Opzione 1: Holdout Validation.
     if scelta == "1":
         train_path = preprocessed_dir / "holdout_tree_train.csv"
         test_path = preprocessed_dir / "holdout_tree_test.csv"
@@ -141,31 +138,29 @@ def main():
         if train_path.exists() and test_path.exists():
             esegui_pipeline_rf(train_path, test_path, "holdout_tree", outputs_dir, salva_file_singolo=True)
         else:
-            print("❌ Errore: File holdout mancanti.")
+            print("Errore: File holdout mancanti.")
 
-        # ---------------------------------
-        # OPZIONE 2: K-FOLD DINAMICO (FILE TOTAL)
-        # ---------------------------------
+    # Opzione 2: K-Fold Cross Validation.
     elif scelta == "2":
 
-        print("\n🔍 Ricerca dei file K-Fold in corso...")
+        print("\nRicerca dei file K-Fold in corso...")
         search_pattern = str(preprocessed_dir / "kfold_*_tree_train.csv")
         train_files = glob.glob(search_pattern)
 
         if not train_files:
-            print("❌ Errore: Nessun file K-Fold trovato nella cartella 'preprocessed_folds'!")
+            print("Errore: Nessun file K-Fold trovato nella cartella 'preprocessed_folds'!")
         else:
             num_folds = len(train_files)
-            print(f"✅ Trovati {num_folds} fold. Avvio elaborazione in serie...\n")
+            print(f"Trovati {num_folds} fold. Avvio elaborazione in serie...\n")
 
+            # Inizializzazione liste vuote in cui inserire i risultati di tutti i fold.
             all_res = []
             all_prob = []
-
-            # --- NUOVE LISTE PER CATTURARE LE METRICHE ---
             all_y_true = []
             all_y_pred = []
             all_y_probs = []
 
+            # Ciclo iterativo di addestramento su tutti i fold trovati.
             for i in range(1, num_folds + 1):
                 train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
                 test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
@@ -174,7 +169,7 @@ def main():
                     print(f"⚠️ File test mancante per il fold {i}. Salto...")
                     continue
 
-                # Ora la funzione restituisce 5 elementi, non più solo 2
+                # Eseguiamo la pipeline senza salvare i singoli file parziali per singolo fold in modo da non sporcare la cartella.
                 res, prob, y_true, preds, probs = esegui_pipeline_rf(
                     train_path, test_path, f"kfold_{i}_tree", outputs_dir, salva_file_singolo=False
                 )
@@ -182,27 +177,24 @@ def main():
                 all_res.append(res)
                 all_prob.append(prob)
 
-                # Accodiamo le risposte e le previsioni nella nostra "grande lista"
+                # Accodiamo le risposte e le previsioni nella lista.
                 if y_true is not None:
                     all_y_true.extend(y_true)
                     all_y_pred.extend(preds)
                     all_y_probs.extend(probs)
 
-            # --- UNIONE IN UN UNICO FILE TOTAL ---
+            # Unione di tutte le predizioni K-Fold in un unico file TOTAL.
             print("\n[*] Unione di tutte le predizioni K-Fold in un unico file TOTAL...")
             # Unisce e ordina per PassengerId
             final_res = pd.concat(all_res).sort_values('PassengerId')
             final_prob = pd.concat(all_prob).sort_values('PassengerId')
 
-            # Nomi corretti per la Random Forest!
             final_res.to_csv(outputs_dir / "submission_rf_kfold_TOTAL.csv", index=False)
             final_prob.to_csv(outputs_dir / "prob_rf_kfold_TOTAL.csv", index=False)
-            print(f"✅ Creato UNICO file di submission per Random Forest!")
+            print(f"Creato UNICO file di submission per Random Forest!")
 
-            # =====================================================================
-            # 🌟 CALCOLO METRICHE GLOBALI ISPIRATO AD XGBOOST (SENZA PASSENGER_ID)
-            # =====================================================================
-            print("\n[*] Calcolo delle metriche globali sull'intero K-Fold...")
+            # Calcoliamo una metrica globale aggregando le risposte di tutti i 5 fold fusi insieme.
+            print("\nCalcolo delle metriche globali sull'intero K-Fold...")
             if all_y_true:
                 valutatore = MetricsEvaluator(
                     y_true=np.array(all_y_true),
@@ -213,12 +205,9 @@ def main():
                 valutatore.print_report()
                 valutatore.plot_visuals()
             else:
-                print("⚠️ Dati veri mancanti. Impossibile calcolare le metriche globali.")
-            # =====================================================================
+                print("Dati veri mancanti. Impossibile calcolare le metriche globali.")
 
-    # ---------------------------------
-    # OPZIONE 3: FULL KAGGLE DATASET
-    # ---------------------------------
+    # Opzione 3: Full Validation.
     elif scelta == "3":
         train_path = preprocessed_dir / "processed_full_tree.csv"
         test_path = preprocessed_dir / "processed_full_tree_test.csv"
@@ -226,10 +215,10 @@ def main():
         if train_path.exists() and test_path.exists():
             esegui_pipeline_rf(train_path, test_path, "processed_full_tree", outputs_dir, salva_file_singolo=True)
         else:
-            print("❌ Errore: File processed_full mancanti.")
+            print("Errore: File processed_full mancanti.")
 
     else:
-        print("❌ Scelta non valida. Riavvia lo script.")
+        print("Scelta non valida. Riavvia lo script.")
 
 
 if __name__ == "__main__":

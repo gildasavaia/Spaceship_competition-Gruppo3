@@ -6,15 +6,14 @@ import glob
 import sys
 from pathlib import Path
 
-# Aggiunge la root del progetto al path PRIMA degli import locali
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(base_dir))
-
 from Evaluation.metrics_calculator import MetricsEvaluator
 from LightGBM_model import LightGBMTrainer
 
-# Sopprime gli avvisi di LightGBM, ad esempio "No further splits with positive gain" per mantenere il terminale pulito.
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(base_dir))
+
 warnings.filterwarnings('ignore', category=UserWarning)
+
 
 def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, salva_file_singolo=True):
     """Questa funzione esegue l'intera pipeline LightGBM per una specifica coppia di Train/Test. Carica i CSV, prepara i
@@ -43,7 +42,7 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
     # Identificazione delle colonne caratterizzate da stringhe, convertendole in tipo category.
     colonne_testuali = combined_df.select_dtypes(include=['object', 'string']).columns.tolist()
     if colonne_testuali:
-        print(f"**** Colonne testuali rilevate: {colonne_testuali}. Conversione in 'category'...****\n")
+        print(f"*** Colonne testuali rilevate: {colonne_testuali}. Conversione in 'category'... ***\n")
         for col in colonne_testuali:
             combined_df[col] = combined_df[col].astype('category')
 
@@ -61,8 +60,8 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
 
     # 3) Chiediamo al modello di prevedere sia la classe finale (0/1) sia la probabilità continua [0,1].
     print("\n[3/4] Generazione predizioni e probabilità per lo Stacking...")
-    predictions = trainer.predict(X_test)
-    probabilities = trainer.predict_proba(X_test)
+    predictions = trainer.predict(X_test) # Array di True/False.
+    probabilities = trainer.predict_proba(X_test) # Array di probabilità decimali (0.0 - 1.0).
 
     # Creazione dei Dataframe di output in cui inserire i risultati per l'esportazione in CSV.
     res_df = pd.DataFrame({
@@ -103,7 +102,7 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
         prob_df.to_csv(prob_file, index=False)
         print(f"File CSV salvati per {dataset_name}.")
 
-        # Estrazione delle etichette reali per restituirle all'orchestratore per calcoli successivi.
+    # Estrazione delle etichette reali per restituirle all'orchestratore nei calcoli successivi.
     y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None
 
     return res_df, prob_df, y_test_true, predictions, probabilities
@@ -113,7 +112,7 @@ def main():
 
     print("Avvio della pipeline LightGBM per Spaceship Titanic...\n")
 
-    # Configurazione dinamica dei percorsi.
+    # Configurazione dinamica dei percorsi per far girare lo script su qualsiasi macchina.
     base_dir = Path(__file__).resolve().parent.parent
     preprocessed_dir = base_dir / "data" / "preprocessed_folds"
     outputs_dir = base_dir / "outputs"
@@ -159,7 +158,7 @@ def main():
             all_y_pred = []
             all_y_probs = []
 
-            # Addestramento di ciascuno dei K fold.
+            # Ciclo iterativo di addestramento su tutti i fold trovati.
             for i in range(1, num_folds + 1):
                 train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
                 test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
@@ -168,7 +167,7 @@ def main():
                     print(f"File test mancante per il fold {i}.")
                     continue
 
-                # Disattivazione del salvataggio singolo per riempire la cartella di file per ogni singolo fold.
+                # Eseguiamo la pipeline senza salvare i singoli file parziali per singolo fold in modo da non sporcare la cartella.
                 res, prob, y_true, preds, probs = esegui_pipeline_lightgbm(
                     train_path, test_path, f"kfold_{i}_tree", outputs_dir, salva_file_singolo=False
                 )
@@ -176,7 +175,7 @@ def main():
                 all_res.append(res)
                 all_prob.append(prob)
 
-                # Accodiamo le risposte e le previsioni nella nostra "grande lista"
+                # Accodiamo le risposte e le previsioni nella lista.
                 if y_true is not None:
                     all_y_true.extend(y_true)
                     all_y_pred.extend(preds)
@@ -190,7 +189,7 @@ def main():
             final_prob.to_csv(outputs_dir / "prob_lightgbm_kfold_TOTAL.csv", index=False)
             print(f"Creazione file CSV per k-fold.")
 
-            # Calcolo metriche globali.
+            # Calcoliamo una metrica globale aggregando le risposte di tutti i 5 fold fusi insieme.
             print("\nCalcolo delle metriche globali sull'intero K-Fold...")
             if all_y_true:
                 valutatore = MetricsEvaluator(
@@ -206,7 +205,7 @@ def main():
 
     # Opzione 3: Full Validation.
     elif scelta == "3":
-        # Addestra il modello utilizzando il 100% del file train.csv originale.
+        # Usa il 100% dei dati di Train senza sprecarne una parte per la validazione
         train_path = preprocessed_dir / "processed_full_tree.csv"
         test_path = preprocessed_dir / "processed_full_tree_test.csv"
 

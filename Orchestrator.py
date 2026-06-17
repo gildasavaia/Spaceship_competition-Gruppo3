@@ -1,52 +1,72 @@
-import os
 import sys
 import subprocess
 import json
 import pandas as pd
 from pathlib import Path
 
+""" Questo script è il cervello dell'intero progetto, esso gestisce l'esecuzione isolata dei vari moduli (Preprocessing
+e Modelli predittivi) fornendo un'interfaccia utente interattiva a riga di comando.
+
+1) Utilizza il modulo 'subprocess' per far girare ogni algoritmo nel proprio ambiente di memoria. Se un modello va in crash,
+   l'Orchestrator non fa la stessa fine.
+2) Dialoga con la classe MetricsEvaluator raccogliendo i risultati dei modelli tramite un file JSON temporaneo, creando una
+   cronologia della sessione.
+3. Genera una Leaderboard, ovvero alla fine consolida i risultati in un report Pandas (.csv) per permettere un confronto
+   immediato tra i vari modelli"""
+
 
 def print_header(title):
-    print("\n" + "=" * 65)
-    print(f" {title.upper()} ".center(65, '='))
-    print("=" * 65 + "\n")
+    """Utility grafica per stampare titoli centrati e ben visibili nel terminale."""
+
+    print("\n" + "-" * 65)
+    print(f" {title.upper()} ".center(65, '-'))
+    print("-" * 65 + "\n")
 
 
 def run_script(script_path, working_dir):
-    """Esegue uno script Python come sottoprocesso nel suo ambiente isolato."""
+    """ Esegue uno script Python come sottoprocesso nel suo ambiente isolato. Questo pattern assicura che le variabili e
+    le librerie caricate da un modello vengano dimenticate non appena il modello ha finito, prevenendo i memory leak."""
+
     if not script_path.exists():
-        print(f"❌ Errore critico: Il file {script_path.name} non è stato trovato!")
+        print(f"Errore critico: Il file {script_path.name} non è stato trovato!")
         return False
     try:
+        # sys.executable richiama esattamente l'interprete Python che stiamo usando ora.
+        # cwd imposta la cartella di partenza corretta per lo script.
         subprocess.run([sys.executable, str(script_path)], cwd=str(working_dir), check=True)
         return True
+    # Cattura gli errori di codice del sottomodulo.
     except subprocess.CalledProcessError as e:
         print(f"\n Il processo del modello è terminato con un errore (Codice: {e.returncode}).")
         return False
+    # Cattura la chiusura manuale dell'utente.
     except KeyboardInterrupt:
         print("\n Esecuzione interrotta manualmente dall'utente.")
         return False
 
 
 def salva_e_esci(session_metrics, outputs_dir):
-    """Funzione dedicata al salvataggio della Leaderboard prima di chiudere tutto."""
+    """ Funzione dedicata al salvataggio della Leaderboard prima di chiudere tutto. Prende la cronologia dei risultati
+    in memoria e la esporta in CSV."""
+
     print_header("USCITA DAL SISTEMA. GENERAZIONE REPORT...")
     if session_metrics:
-        # Creiamo il DataFrame dalla lista delle metriche salvate
+        # Creiamo un DataFrame Pandas partendo dalla lista di dizionari JSON raccolti.
         df_leaderboard = pd.DataFrame(session_metrics)
 
-        # Riordiniamo le colonne per chiarezza
+        # Riordiniamo le colonne mettendo prima l'Accuracy (la metrica di Kaggle) e poi le altre.
         cols = ['Model', 'accuracy', 'precision', 'recall', 'f1', 'roc_auc']
+        # Filtriamo solo le colonne che esistono effettivamente per evitare errori.
         cols = [c for c in cols if c in df_leaderboard.columns]
         df_leaderboard = df_leaderboard[cols]
 
-        # Salviamo il file riassuntivo
+        # Salviamo il file riassuntivo finale.
         report_path = outputs_dir / "leaderboard_sessione_corrente.csv"
         df_leaderboard.to_csv(report_path, index=False)
 
-        print(f"🏆 Classifica Modelli Salvata con Successo!\n Trovi il file in: {report_path}")
+        print(f"Classifica Modelli Salvata con Successo!\n Trovi il file in: {report_path}")
         print("\nEcco l'anteprima dei tuoi risultati:")
-        print(df_leaderboard.to_string(index=False))
+        print(df_leaderboard.to_string(index=False)) # index=False rende la stampa più pulita.
     else:
         print("Nessuna nuova metrica generata in questa sessione.")
     sys.exit(0)  # Chiude brutalmente e in modo sicuro il programma
@@ -54,17 +74,17 @@ def salva_e_esci(session_metrics, outputs_dir):
 
 def main():
     print_header("SPACESHIP TITANIC - MISSION CONTROL ROOM")
+
+    # Risoluzione dinamica dei percorsi: capisce automaticamente in quale cartella del PC si trova.
     base_dir = Path(__file__).resolve().parent
     outputs_dir = base_dir / "outputs"
     outputs_dir.mkdir(parents=True, exist_ok=True)
 
-    # === LA NOSTRA LISTA GLOBALE DELLE METRICHE ===
-    # È posizionata fuori dai cicli, così se torni al preprocessing NON la perdi!
+    # Lista globale delle metriche. È posizionata fuori dai cicl in modo tale che l'utente possa fare avanti e indietro
+    # tra i menù senza perdere la memoria dei modelli già addestrati.
     session_metrics = []
 
-    # =========================================================
-    # CICLO ESTERNO: GESTISCE IL RITORNO AL PREPROCESSING
-    # =========================================================
+    # CICLO ESTERNO (Fase 1): Gestisce il PreProcessing ed il loop principale.
     while True:
         print_header("Fase 1: Preprocessing dei Dati")
         print("Hai bisogno di generare i file CSV per l'addestramento?")
@@ -78,14 +98,12 @@ def main():
             success = run_script(prep_script, prep_dir)
             if not success:
                 print(" Preprocessing fallito o interrotto.")
-                continue  # Rifa la domanda di preprocessing se qualcosa va storto
+                continue # Se fallisce, l'istruzione 'continue' riavvia il ciclo rifacendo la domanda.
             print("\n Preprocessing completato con successo!")
         else:
             print("\n Preprocessing saltato. Uso i dati CSV esistenti.")
 
-        # =========================================================
-        # CICLO INTERNO: GESTISCE IL MENU DEI MODELLI
-        # =========================================================
+        # CICLO INTERNO (Fase 2): Gestisce il menù dei modelli di Machine Learning.
         while True:
             print_header("Fase 2: Selezione Modello Machine Learning")
             print("Scegli quale algoritmo vuoi addestrare o testare:")
@@ -104,6 +122,7 @@ def main():
             script_to_run = None
             work_dir = None
 
+            # Assegnazione dinamica del percorso dello script in base alla scelta.
             if scelta_modello == "1":
                 script_to_run = base_dir / "LightGBM" / "LightGBM_model_main.py"
                 work_dir = base_dir / "LightGBM"
@@ -123,39 +142,41 @@ def main():
                 script_to_run = base_dir / "NN_Pytorch" / "main_NN_pytch.py"
                 work_dir = base_dir / "Rete_Neurale"
             elif scelta_modello == "7":
-                # Rompe il ciclo interno (Fase 2) e ricomincia dal ciclo esterno (Fase 1)
-                break
+                break # L'istruzione 'break' distrugge il ciclo interno (Fase 2) tornando nuovamente nel ciclo esterno (Fase 1).
             elif scelta_modello == "0":
-                # Salva i risultati ed esce
+                # Salva i risultati ed esce.
                 salva_e_esci(session_metrics, outputs_dir)
             else:
                 print(" Scelta non valida. Assicurati di inserire un numero tra 0 e 7.")
                 continue
 
-            # Esecuzione del modello selezionato
+            # Esecuzione del modello selezionato.
             if script_to_run:
                 print(f"\n Collegamento al modulo... Avvio in corso...")
                 run_script(script_to_run, work_dir)
 
-                # --- IL TRUCCO: RECUPERO DELLE METRICHE ---
+                '''Recupero delle Metriche. Siccome i modelli girano in un processo isolato, le loro variabili muoiono con
+                loro. Per recuperare i punteggi, i modelli scrivono un file JSON. Qui l'Orchestrator lo cerca, lo legge,
+                salva i dati nella lista globale 'session_metrics' e poi distrugge il file per fare pulizia.'''
+
                 temp_file = outputs_dir / "temp_metrics.json"
                 if temp_file.exists():
                     with open(temp_file, "r") as f:
                         new_metrics = json.load(f)
-                    session_metrics.append(new_metrics)
-                    temp_file.unlink()  # Cancelliamo il file per la prossima run
+                    session_metrics.append(new_metrics) # Aggiunge il dizionario letto alla nostra cronologia.
+                    temp_file.unlink() # Cancella il file per evitare che modelli successivi leggano dati vecchi.
                     print(f"\n [Orchestratore] Acquisite metriche per: {new_metrics['Model']}")
 
-                # --- MENU POST-ADDESTRAMENTO ---
+                # Terminata un'esecuzione, chiediamo all'utente cosa fare dopo.
                 print("\n" + "-" * 50)
                 scelta_dopo = input(
                     "Premi INVIO per il Menu Modelli, 'P' per il Preprocessing, o '0' per Salvare e Uscire: ").strip().lower()
 
                 if scelta_dopo == 'p':
-                    break  # Rompe il ciclo modelli e torna alla Fase 1
+                    break # Rompe il ciclo modelli e torna alla Fase 1.
                 elif scelta_dopo == '0':
-                    salva_e_esci(session_metrics, outputs_dir)  # Salva e chiude
-                # Se preme solo INVIO, il ciclo while True dei modelli riparte da capo!
+                    salva_e_esci(session_metrics, outputs_dir) # Salva e chiude.
+                # Se l'utente preme solo INVIO, il codice scorre ed il 'while True' interno riparte in automatico mostrando di nuovo la lista dei modelli.
 
 
 if __name__ == "__main__":
