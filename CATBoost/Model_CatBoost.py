@@ -74,6 +74,68 @@ def train_model(model, X_train, y_train):
     return model
 
 
+"""
+def tune_catboost_with_random_search(X, y, n_iter=20):
+    
+    MODALITÀ TUNING: Esegue la ricerca degli iperparametri tramite RandomizedSearchCV.
+
+    A differenza di Optuna (che è probabilistico/Bayesiano), questo metodo estrae 
+    in modo totalmente casuale 'n_iter' combinazioni all'interno dei range definiti.
+    Esegue una Cross-Validation interna per ogni tentativo per evitare l'overfitting.
+    
+    print(f"\n--- Avvio TUNING MODE (RandomizedSearchCV) - {n_iter} tentativi ---")
+
+    # Individuiamo le colonne categoriche, fondamentali per il corretto fit di CatBoost
+    cat_features = X.select_dtypes(include=["object"]).columns.tolist()
+
+    # Inizializziamo il modello base.
+    # Impostiamo verbose=0 per evitare che i log di ogni singolo albero intasino lo schermo.
+    # Impostiamo thread_count=-1 per far viaggiare CatBoost alla massima velocità su tutti i core.
+    base_model = CatBoostClassifier(
+        loss_function='Logloss',
+        eval_metric='Accuracy',
+        thread_count=-1,
+        random_seed=42,
+        verbose=0
+    )
+
+    # Definiamo lo spazio di ricerca (Griglia delle distribuzioni).
+    # Usiamo liste per valori specifici e distribuzioni uniformi/intere per i range.
+    param_distributions = {
+        'iterations': [1000, 1500, 2000, 2500, 3000],  # Numero massimo di alberi
+        'learning_rate': uniform(0.01, 0.04),  # Passo di aggiornamento (estratto tra 0.01 e 0.05)
+        'depth': [4, 5, 6, 7, 8],  # Profondità massima degli alberi
+        'l2_leaf_reg': randint(1, 10),  # Regolarizzazione L2 (valore intero casuale tra 1 e 9)
+        'random_strength': uniform(0.5, 1.0),  # Rumore sugli split (tra 0.5 e 1.5)
+        'subsample': [0.6, 0.7, 0.8, 0.9],  # Percentuale di righe campionate (Bernoulli)
+        'bootstrap_type': ['Bernoulli']
+    }
+
+    # Configuriamos il modulo RandomizedSearchCV di scikit-learn
+    # NOTA: Impostiamo n_jobs=1 o 2 se notiamo rallentamenti, perché CatBoost parallelizza 
+    # già nativamente al suo interno sfruttando tutti i core (grazie a thread_count=-1).
+    random_search = RandomizedSearchCV(
+        estimator=base_model,
+        param_distributions=param_distributions,
+        n_iter=n_iter,  # Numero di combinazioni casuali che l'algoritmo testerà
+        scoring='accuracy',  # La metrica di Kaggle che vogliamo massimizzare
+        cv=5,  # 5-Fold Cross-Validation interna per ogni combinazione
+        random_state=42,  # Garantisce la riproducibilità dell'estrazione casuale
+        n_jobs=1,  # Lasciamo il parallelismo in mano al motore nativo di CatBoost
+        verbose=1  # Mostra una barra di avanzamento sintetica dei test
+    )
+
+    print("Ricerca in corso sui fold della Cross-Validation...")
+    # Avviamo la ricerca. Passiamo 'cat_features' all'interno del fit tramite kwargs
+    random_search.fit(X, y, cat_features=cat_features)
+
+    print("\n Tuning casuale completato!")
+    print(f"Miglior accuratezza media stimata in CV: {random_search.best_score_:.4f}")
+    print("Migliori iperparametri trovati:", random_search.best_params_)
+
+    # Restituisce il dizionario con la combinazione vincente da dare in pasto al modello finale
+    return random_search.best_params_
+"""
 def predict(model, X):
     """
     Genera predizioni binarie discrete (0 o 1) a partire dai dati di input.
