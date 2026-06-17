@@ -44,7 +44,7 @@ if scelta == "1":
     model = train_model(model, X, y)
 
     # =========================
-    # 🔥 EVALUATION SERIA
+    #  EVALUATION SERIA
     # =========================
 
     if "Transported" in test_df.columns:
