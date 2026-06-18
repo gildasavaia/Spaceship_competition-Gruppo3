@@ -4,6 +4,10 @@ import numpy as np
 import sys
 from pathlib import Path
 
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
+from Evaluation.metrics_calculator import MetricsEvaluator
+
 # Importazione controllata dei moduli di definizione e di analisi del modello XGBoost
 from Model_XGboost import (
     load_data, prepare_data, prepare_test, create_model,
@@ -12,9 +16,7 @@ from Model_XGboost import (
 from Evaluation.Evaluation_Unified import ( run_full_evaluation, print_kfold_summary)
 
 # Registrazione della directory radice nel path per importare l'orchesteratore centralizzato
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
-from Evaluation.metrics_calculator import MetricsEvaluator
+
 
 # Gestione delle opzioni utente da riga di comando per l'addestramento dell'algoritmo
 print("Seleziona il metodo di addestramento per XGBoost:")
@@ -23,17 +25,21 @@ print("2. K-Fold")
 print("3. Full Training & Kaggle Submission")
 scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
-data_dir = "../data/preprocessed_folds/"
+data_dir = base_dir / "data" / "preprocessed_folds"
 
 # =====================================================================
 # MODALITÀ 1: CONFIGURAZIONE ED ESECUZIONE HOLDOUT
 # =====================================================================
 if scelta == "1":
     print("\n Avvio HOLDOUT con XGBoost...\n")
-    train_path = os.path.join(data_dir, "holdout_tree_train.csv")
-    test_path = os.path.join(data_dir, "holdout_tree_test.csv")
+    train_path = data_dir / "holdout_tree_train.csv"
+    test_path = data_dir / "holdout_tree_test.csv"
 
-    train_df, test_df = load_data(train_path, test_path)
+    if not train_path.exists() or not test_path.exists():
+        print(f"Errore: Assicurati che i file 'holdout_tree' esistano in {data_dir}")
+        raise SystemExit(1)
+
+    train_df, test_df = load_data(str(train_path), str(test_path))
     X, y = prepare_data(train_df)
     X_test = prepare_test(test_df)
 
@@ -68,11 +74,11 @@ elif scelta == "2":
     import random
     from Model_XGboost import create_model_2  # Assicurati di aver aggiunto create_model_2 nel file del modello
 
-    search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
+    search_pattern = str(data_dir / "kfold_*_tree_train.csv")
     train_files = glob.glob(search_pattern)
 
     if not train_files:
-        print("Errore: Nessun fold trovato!")
+        print(f"Errore: Assicurati che i file kfold_*_tree_train.csv esistano in {data_dir}")
     else:
         num_folds = len(train_files)
         print(f" Trovati {num_folds} fold. Inizio elaborazione...\n")
