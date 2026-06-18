@@ -20,10 +20,8 @@ def esegui_split_kfold_standard(df, target_col='Transported', random_state=42):
             else:
                 print("Errore: n_splits deve essere un numero intero maggiore di 1.")
         except ValueError:
-            print("Errore: n_splits deve essere un numero intero.") 
+            print("Errore: n_splits deve essere un numero intero.")
             
-        except ValueError:
-            print("Errore: n_splits deve essere un numero.")
     # ==========================================
     # SEPARAZIONE FEATURES E TARGET
     # ==========================================
