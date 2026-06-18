@@ -5,14 +5,14 @@ import torch
 import numpy as np
 import sys
 from pathlib import Path
-
+# Configurazione del percorso per consentire l'accesso al modulo centrale di calcolo metriche
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
 # Importazione selettiva dei moduli logici e di valutazione sviluppati per PyTorch
 from Model_NN_pytch import load_data, prepare_data, prepare_test, NeuralNet, train_model, predict
 from Evaluation.Evaluation_Unified import  run_full_evaluation, print_kfold_summary, plot_loss_curve
 
-# Configurazione del percorso per consentire l'accesso al modulo centrale di calcolo metriche
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
+
 from Evaluation.metrics_calculator import MetricsEvaluator
 
 # Menu interattivo per la definizione del flusso operativo della rete neurale
@@ -208,7 +208,6 @@ elif scelta == "3":
         submission.to_csv(filename, index=False)
         print(f"\n Submission Rete Neurale salvata con successo in: {filename}")
 
-        plot_loss_curve(model)
-
+       
 else:
     print(" Scelta non valida.")

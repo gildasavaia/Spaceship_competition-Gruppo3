@@ -107,12 +107,12 @@ def main():
         while True:
             print_header("Fase 2: Selezione Modello Machine Learning")
             print("Scegli quale algoritmo vuoi addestrare o testare:")
-            print("  [1] LightGBM                  (Il più veloce)")
-            print("  [2] Random Forest             (Robusto, basato su Alberi)")
-            print("  [3] Support Vector Classifier (Matematico spaziale)")
-            print("  [4] XGBoost                   (Kaggle Standard)")
-            print("  [5] CatBoost                  (Re delle variabili categoriche)")
-            print("  [6] Rete Neurale              (PyTorch)")
+            print("  [1] LightGBM (Tree)                 (Il più veloce)")
+            print("  [2] Random Forest (Tree)            (Robusto, basato su Alberi)")
+            print("  [3] Support Vector Classifier (nn) (Matematico spaziale)")
+            print("  [4] XGBoost (Tree)                   (Kaggle Standard)")
+            print("  [5] CatBoost (Tree)                  (Re delle variabili categoriche)")
+            print("  [6] Rete Neurale (nn)              (PyTorch)")
             print("-" * 65)
             print("  [7] Torna indietro alla Fase 1 (Preprocessing)")
             print("  [0] Esci e Salva Report della Sessione")
@@ -125,22 +125,22 @@ def main():
             # Assegnazione dinamica del percorso dello script in base alla scelta.
             if scelta_modello == "1":
                 script_to_run = base_dir / "LightGBM" / "LightGBM_model_main.py"
-                work_dir = base_dir / "LightGBM (Tree)"
+                work_dir = base_dir / "LightGBM"
             elif scelta_modello == "2":
                 script_to_run = base_dir / "Random Forest Classifier" / "Random_Forest_Classifier_model_main.py"
-                work_dir = base_dir / "Random Forest Classifier (Tree)"
+                work_dir = base_dir / "Random Forest Classifier"
             elif scelta_modello == "3":
                 script_to_run = base_dir / "Support_Vector_Classifier" / "Support_Vector_Classifier_model_main.py"
-                work_dir = base_dir / "Support_Vector_Classifier (nn)"
+                work_dir = base_dir / "Support_Vector_Classifier"
             elif scelta_modello == "4":
                 script_to_run = base_dir / "XGBoost" / "Main_XGBoost.py"
-                work_dir = base_dir / "XGBoost (Tree)"
+                work_dir = base_dir / "XGBoost"
             elif scelta_modello == "5":
                 script_to_run = base_dir / "CATBoost" / "Main_catboost.py"
-                work_dir = base_dir / "CATBoost (Tree)"
+                work_dir = base_dir / "CATBoost"
             elif scelta_modello == "6":
                 script_to_run = base_dir / "NN_Pytorch" / "main_NN_pytch.py"
-                work_dir = base_dir / "NN_Pytorch (nn)"
+                work_dir = base_dir / "NN_Pytorch"
             elif scelta_modello == "7":
                 break # L'istruzione 'break' distrugge il ciclo interno (Fase 2) tornando nuovamente nel ciclo esterno (Fase 1).
             elif scelta_modello == "0":
