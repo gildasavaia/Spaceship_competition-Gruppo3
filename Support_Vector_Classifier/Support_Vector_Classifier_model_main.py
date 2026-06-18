@@ -6,10 +6,13 @@ import glob
 from Support_Vector_Classifier_model import SVCTrainer
 import sys
 from pathlib import Path
-from Evaluation.metrics_calculator import MetricsEvaluator
 
 base_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(base_dir))
+
+from Evaluation.metrics_calculator import MetricsEvaluator
+
+
 
 
 warnings.filterwarnings('ignore')
@@ -135,11 +138,11 @@ def main():
 
     # Opzione 1: Holdout Validation.
     if scelta == "1":
-        train_path = preprocessed_dir / "holdout_tree_train.csv"
-        test_path = preprocessed_dir / "holdout_tree_test.csv"
+        train_path = preprocessed_dir / "holdout_nn_train.csv"
+        test_path = preprocessed_dir / "holdout_nn_test.csv"
 
         if train_path.exists() and test_path.exists():
-            esegui_pipeline_svc(train_path, test_path, "holdout_tree", outputs_dir, salva_file_singolo=True)
+            esegui_pipeline_svc(train_path, test_path, "holdout_nn", outputs_dir, salva_file_singolo=True)
         else:
             print("Errore: File holdout mancanti.")
 
@@ -147,7 +150,7 @@ def main():
     elif scelta == "2":
 
         print("\nRicerca dei file K-Fold in corso...")
-        search_pattern = str(preprocessed_dir / "kfold_*_tree_train.csv")
+        search_pattern = str(preprocessed_dir / "kfold_*_nn_train.csv")
         train_files = glob.glob(search_pattern)
 
         if not train_files:
@@ -165,8 +168,8 @@ def main():
 
             # Ciclo iterativo di addestramento su tutti i fold trovati.
             for i in range(1, num_folds + 1):
-                train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
-                test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
+                train_path = preprocessed_dir / f"kfold_{i}_nn_train.csv"
+                test_path = preprocessed_dir / f"kfold_{i}_nn_test.csv"
 
                 if not test_path.exists():
                     print(f"File test mancante per il fold {i}.")
@@ -174,7 +177,7 @@ def main():
 
                 # Eseguiamo la pipeline senza salvare i singoli file parziali per singolo fold in modo da non sporcare la cartella.
                 res, prob, y_true, preds, probs = esegui_pipeline_svc(
-                    train_path, test_path, f"kfold_{i}_tree", outputs_dir, salva_file_singolo=False
+                    train_path, test_path, f"kfold_{i}_nn", outputs_dir, salva_file_singolo=False
                 )
 
                 all_res.append(res)
@@ -190,8 +193,8 @@ def main():
             final_res = pd.concat(all_res).sort_values('PassengerId')
             final_prob = pd.concat(all_prob).sort_values('PassengerId')
 
-            final_res.to_csv(outputs_dir / "submission_lightgbm_kfold_TOTAL.csv", index=False)
-            final_prob.to_csv(outputs_dir / "prob_lightgbm_kfold_TOTAL.csv", index=False)
+            final_res.to_csv(outputs_dir / "submission_svc_kfold_TOTAL.csv", index=False)
+            final_prob.to_csv(outputs_dir / "prob_svc_kfold_TOTAL.csv", index=False)
             print(f"Creazione file CSV per k-fold.")
 
             # Calcoliamo una metrica globale aggregando le risposte di tutti i 5 fold fusi insieme.
@@ -211,11 +214,11 @@ def main():
     # Opzione 3: Full Validation.
     elif scelta == "3":
         # Usa il 100% dei dati di Train senza sprecarne una parte per la validazione
-        train_path = preprocessed_dir / "processed_full_tree.csv"
-        test_path = preprocessed_dir / "processed_full_tree_test.csv"
+        train_path = preprocessed_dir / "processed_full_nn.csv"
+        test_path = preprocessed_dir / "processed_full_nn_test.csv"
 
         if train_path.exists() and test_path.exists():
-            esegui_pipeline_svc(train_path, test_path, "processed_full_tree", outputs_dir, salva_file_singolo=True)
+            esegui_pipeline_svc(train_path, test_path, "processed_full_nn", outputs_dir, salva_file_singolo=True)
         else:
             print("Errore: File processed_full mancanti.")
 

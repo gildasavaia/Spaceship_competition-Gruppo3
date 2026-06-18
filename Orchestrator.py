@@ -125,22 +125,22 @@ def main():
             # Assegnazione dinamica del percorso dello script in base alla scelta.
             if scelta_modello == "1":
                 script_to_run = base_dir / "LightGBM" / "LightGBM_model_main.py"
-                work_dir = base_dir / "LightGBM"
+                work_dir = base_dir / "LightGBM (Tree)"
             elif scelta_modello == "2":
                 script_to_run = base_dir / "Random Forest Classifier" / "Random_Forest_Classifier_model_main.py"
-                work_dir = base_dir / "Random Forest Classifier"
+                work_dir = base_dir / "Random Forest Classifier (Tree)"
             elif scelta_modello == "3":
                 script_to_run = base_dir / "Support_Vector_Classifier" / "Support_Vector_Classifier_model_main.py"
-                work_dir = base_dir / "Support_Vector_Classifier"
+                work_dir = base_dir / "Support_Vector_Classifier (nn)"
             elif scelta_modello == "4":
                 script_to_run = base_dir / "XGBoost" / "Main_XGBoost.py"
-                work_dir = base_dir / "XGBoost"
+                work_dir = base_dir / "XGBoost (Tree)"
             elif scelta_modello == "5":
                 script_to_run = base_dir / "CATBoost" / "Main_catboost.py"
-                work_dir = base_dir / "CATBoost"
+                work_dir = base_dir / "CATBoost (Tree)"
             elif scelta_modello == "6":
                 script_to_run = base_dir / "NN_Pytorch" / "main_NN_pytch.py"
-                work_dir = base_dir / "NN_Pytorch"
+                work_dir = base_dir / "NN_Pytorch (nn)"
             elif scelta_modello == "7":
                 break # L'istruzione 'break' distrugge il ciclo interno (Fase 2) tornando nuovamente nel ciclo esterno (Fase 1).
             elif scelta_modello == "0":
