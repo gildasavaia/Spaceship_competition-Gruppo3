@@ -90,17 +90,12 @@ def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, s
     # 4) Salvataggio del modello per poterlo riutilizzare in futuro senza riaddestrare.
     print("\n[4/4] Salvataggio risultati nella cartella 'outputs'...")
     outputs_dir.mkdir(parents=True, exist_ok=True)
-    model_file = outputs_dir / f"modello_lightgbm_{dataset_name}.pkl"
-    joblib.dump(trainer.best_model, model_file)
 
     # Salvataggio dei singoli file CSV, sia la predizione della classe e sia la probabilità.
     if salva_file_singolo:
         sub_file = outputs_dir / f"submission_lightgbm_{dataset_name}.csv"
         res_df.to_csv(sub_file, index=False)
 
-        prob_file = outputs_dir / f"prob_lightgbm_{dataset_name}.csv"
-        prob_df.to_csv(prob_file, index=False)
-        print(f"File CSV salvati per {dataset_name}.")
 
     # Estrazione delle etichette reali per restituirle all'orchestratore nei calcoli successivi.
     y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None

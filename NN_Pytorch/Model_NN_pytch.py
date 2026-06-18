@@ -78,10 +78,24 @@ class NeuralNet(nn.Module):
         return self.sigmoid(self.out(x))
 
 
-def train_model(model, X, y, epochs=60, batch_size=64, lr=0.005):
+def train_model(model, X, y, epochs=200, batch_size=64, lr=0.005,
+                patience=5, min_delta=1e-3):
     """
     Inizializza la pipeline di addestramento: esegue la standardizzazione Z-score,
     istanzia l'ottimizzatore AdamW, definisce i mini-batch e cicla sulle epoche.
+
+    Include Early Stopping: se la loss media non migliora di almeno `min_delta`
+    per `patience` epoche consecutive, l'addestramento si interrompe anticipatamente.
+
+    Args:
+        model: Il modello NeuralNet da addestrare.
+        X: Features di addestramento.
+        y: Target di addestramento.
+        epochs: Numero massimo di epoche (default: 200, l'early stop terminerà prima).
+        batch_size: Dimensione dei mini-batch (default: 64).
+        lr: Learning rate iniziale (default: 0.005).
+        patience: Numero di epoche consecutive senza miglioramento prima dello stop (default: 5).
+        min_delta: Miglioramento minimo richiesto sulla loss per considerare un'epoca "buona" (default: 1e-3).
     """
     # Inizializzazione e calcolo di media e varianza sul set di addestramento
     scaler = StandardScaler()
@@ -105,6 +119,11 @@ def train_model(model, X, y, epochs=60, batch_size=64, lr=0.005):
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
     loss_history = []
+
+    # --- EARLY STOPPING: variabili di stato ---
+    best_loss = float('inf')    # Miglior loss osservata finora
+    epochs_no_improve = 0       # Contatore di epoche consecutive senza miglioramento
+    stopped_epoch = epochs      # Epoca effettiva di fine addestramento
 
     for epoch in range(epochs):
         model.train()
@@ -139,9 +158,31 @@ def train_model(model, X, y, epochs=60, batch_size=64, lr=0.005):
         if (epoch + 1) % 10 == 0 or epoch == 0:
             print(f"Epoch {epoch + 1}/{epochs} - Loss: {avg_loss:.4f} - LR: {optimizer.param_groups[0]['lr']:.6f}")
 
+        # --- EARLY STOPPING: controllo miglioramento ---
+        # La loss deve essere migliorata di almeno min_delta rispetto alla migliore osservata
+        if best_loss - avg_loss > min_delta:
+            # Miglioramento sufficiente: aggiorna la best_loss e resetta il contatore
+            best_loss = avg_loss
+            epochs_no_improve = 0
+        else:
+            # Nessun miglioramento significativo: incrementa il contatore
+            epochs_no_improve += 1
+
+            if epochs_no_improve >= patience:
+                stopped_epoch = epoch + 1
+                print(f"\n[Early Stopping] Addestramento terminato all'epoca {stopped_epoch}/{epochs}.")
+                print(f"   La loss non è migliorata di almeno {min_delta} per {patience} epoche consecutive.")
+                print(f"   Ultima loss: {avg_loss:.4f} | Miglior loss: {best_loss:.4f}")
+                break
+
+    # Se l'early stopping non si è attivato, segnala il completamento completo
+    if epochs_no_improve < patience:
+        print(f"\nAddestramento completato: tutte le {epochs} epoche eseguite.")
+
     # Memorizzazione degli oggetti all'interno dell'istanza del modello per utilizzi futuri
     model.loss_history = loss_history
     model.scaler = scaler
+    model.stopped_epoch = stopped_epoch
 
     return model
 

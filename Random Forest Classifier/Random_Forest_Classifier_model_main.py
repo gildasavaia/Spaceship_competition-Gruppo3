@@ -94,17 +94,13 @@ def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_f
     # 4) Salvataggio del modello per poterlo riutilizzare in futuro senza riaddestrare.
     print("[4/4] Salvataggio risultati in 'outputs'...")
     outputs_dir.mkdir(parents=True, exist_ok=True)
-    model_file = outputs_dir / f"modello_rf_{dataset_name}.pkl"
-    joblib.dump(trainer.best_model, model_file)
+   
 
     # Salvataggio dei singoli file CSV, sia la predizione della classe e sia la probabilità.
     if salva_file_singolo:
         sub_file = outputs_dir / f"submission_rf_{dataset_name}.csv"
         res_df.to_csv(sub_file, index=False)
 
-        prob_file = outputs_dir / f"prob_rf_{dataset_name}.csv"
-        prob_df.to_csv(prob_file, index=False)
-        print(f"Modello Random Forest {dataset_name} salvato con successo!")
 
     # Catturiamo le risposte vere direttamente dal dataset di test del fold per usarle nell'aggregazione del K-Fold.
     y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None

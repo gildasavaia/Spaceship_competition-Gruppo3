@@ -1,6 +1,7 @@
 import os
 import glob
 import pandas as pd
+# pyrefly: ignore [missing-import]
 import torch
 import numpy as np
 import sys
@@ -27,11 +28,28 @@ data_dir = "../data/preprocessed_folds/"
 
 def align_columns(X, X_test):
     """
-    Esegue la codifica One-Hot (get_dummies) e sincronizza perfettamente
-    le colonne del set di test con quelle generate dal set di addestramento.
+    Allinea le colonne di Train e Test per la rete neurale.
+    
+    I file _nn provenienti dalla pipeline (op9) sono GIÀ one-hot-encoded.
+    Questa funzione si limita a:
+    1. Convertire eventuali colonne object residue (sicurezza) con get_dummies
+    2. Allineare le colonne del test a quelle del train (aggiungendo zeri dove mancano)
+    
+    NOTA SULLO SCALING: I dati numerici arrivano già scalati da op8 (StandardScaler).
+    Lo scaler dentro train_model (Model_NN_pytch.py) riscala tutto: sulle colonne già
+    normalizzate questo è quasi un'identità (media ≈ 0, std ≈ 1), quindi non è dannoso.
+    Sulle colonne one-hot (0/1) lo scaling le uniforma al range delle altre feature,
+    il che è benefico per la convergenza della rete.
     """
-    X = pd.get_dummies(X)
-    X_test = pd.get_dummies(X_test)
+    # Verifica se ci sono colonne object residue non ancora encodate
+    object_cols_train = X.select_dtypes(include=['object']).columns.tolist()
+    object_cols_test = X_test.select_dtypes(include=['object']).columns.tolist()
+    
+    if object_cols_train:
+        print(f"[NN] Colonne object residue trovate nel train: {object_cols_train}. Applico get_dummies...")
+        X = pd.get_dummies(X, columns=object_cols_train)
+    if object_cols_test:
+        X_test = pd.get_dummies(X_test, columns=object_cols_test)
 
     # Reindicizza il test set inserendo zeri dove mancano colonne presenti nel train set
     X_test = X_test.reindex(columns=X.columns, fill_value=0)
@@ -194,7 +212,7 @@ elif scelta == "3":
         model = NeuralNet(input_dim=X_train.shape[1])
 
         print("Addestramento finale sul dataset completo in corso...")
-        model = train_model(model, X_train, y_train, epochs=50)
+        model = train_model(model, X_train, y_train, epochs=200)
 
         preds = predict(model, X_test_for_model)
 
@@ -214,7 +232,7 @@ elif scelta == "3":
         
         submission.to_csv(str(filepath), index=False)
         print(f"\n Submission Rete Neurale salvata con successo in: {filepath}")
-        plot_loss_curve(model, title="Loss Curve - Full Training Neural Network")
+        plot_loss_curve(model)
  
 else:
     print(" Scelta non valida.")
