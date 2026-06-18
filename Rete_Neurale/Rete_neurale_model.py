@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -18,7 +19,6 @@ import seaborn as sns
 # 🔹 Caricamento dati
 # ---------------------------
 def load_data(train_path, test_path):
-
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
 
@@ -29,7 +29,6 @@ def load_data(train_path, test_path):
 # 🔹 Preparazione train
 # ---------------------------
 def prepare_data(train_df):
-
     X = train_df.drop("Transported", axis=1)
     y = train_df["Transported"]
 
@@ -40,7 +39,6 @@ def prepare_data(train_df):
 # 🔹 Preparazione test
 # ---------------------------
 def prepare_test(test_df):
-
     if "Transported" in test_df.columns:
         X_test = test_df.drop("Transported", axis=1)
     else:
@@ -53,7 +51,6 @@ def prepare_test(test_df):
 # 🔹 Creazione rete neurale
 # ---------------------------
 def create_pipeline_model():
-
     model = Pipeline([
 
         ('scaler', StandardScaler()),
@@ -78,7 +75,8 @@ def create_pipeline_model():
 
             n_iter_no_change=50,
 
-            random_state=42
+            random_state=42,
+            verbose=True
         ))
     ])
 
@@ -89,7 +87,6 @@ def create_pipeline_model():
 # 🔹 Training
 # ---------------------------
 def train_model(model, X, y):
-
     model.fit(X, y)
 
     return model
@@ -99,80 +96,6 @@ def train_model(model, X, y):
 # 🔹 Predizione
 # ---------------------------
 def predict(model, X_test):
-
     return model.predict(X_test)
 
 
-# ---------------------------
-# 🔹 Valutazione
-# ---------------------------
-def evaluate_on_test(model, X_test, y_test):
-
-    y_pred = model.predict(X_test)
-
-    acc = accuracy_score(y_test, y_pred)
-
-    print(f"\n📊 Accuracy sul test: {acc:.4f}")
-
-    return acc
-
-
-# ---------------------------
-# 🔹 Mostra predizioni
-# ---------------------------
-def show_predictions(test_df, predictions, n=10):
-
-    results = test_df.copy()
-
-    results["Predicted_Transported"] = predictions
-
-    print(f"\n🔮 Prime {n} predizioni:\n")
-
-    if "Transported" in results.columns:
-
-        print(
-            results[
-                ["Transported", "Predicted_Transported"]
-            ].head(n)
-        )
-
-    else:
-
-        print(
-            results[
-                ["Predicted_Transported"]
-            ].head(n)
-        )
-
-    return results
-
-
-# ---------------------------
-# 🔹 Confusion Matrix
-# ---------------------------
-def show_confusion_matrix(model, X_test, y_test):
-
-    y_pred = model.predict(X_test)
-
-    cm = confusion_matrix(y_test, y_pred)
-
-    print("\n📊 Classification Report:\n")
-    print(classification_report(y_test, y_pred))
-
-    plt.figure(figsize=(6, 5))
-
-    sns.heatmap(
-        cm,
-        annot=True,
-        fmt='d',
-        cmap='Blues',
-        xticklabels=["False", "True"],
-        yticklabels=["False", "True"]
-    )
-
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-
-    plt.title("Confusion Matrix - Neural Network")
-
-    plt.show()

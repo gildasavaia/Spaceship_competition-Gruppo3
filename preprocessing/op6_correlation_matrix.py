@@ -76,33 +76,3 @@ def run_op6(df, config=None):
         "corr_matrix": corr_matrix,
         "corr_with_target": corr_target
     }
-
-
-#motivo per cui abbiamo eliminato deck_A
-    """
-Ecco perché eliminiamo Deck_A ma teniamo la diagonale a 1:
-
-1. La diagonale a 1: Correlazione di una variabile con se stessa
-I valori 1.0 sulla diagonale indicano la correlazione tra una variabile e se stessa (ad esempio, l'età rispetto all'età, o la spesa in RoomService rispetto alla spesa in RoomService).
-
-Perché la teniamo? È semplicemente il modo in cui è strutturata matematicamente una matrice. La formula della correlazione confronta due colonne: se le due colonne sono identiche, il risultato è 1. Non crea nessun problema agli algoritmi di Machine Learning, è solo un punto di riferimento visivo.
-
-2. Eliminare Deck_A: Correlazione perfetta tra variabili diverse (Multicollinearità)
-Il problema con Deck_A non è che è correlato con se stesso, ma che è perfettamente prevedibile guardando le altre variabili.
-Essendo il passeggero assegnato a un solo ponte alla volta, se tenessimo tutte le colonne (Deck_A, Deck_B, Deck_C, ecc.), si verificherebbe questa equazione matematica infallibile:
-
-Deck_A = 1 - (Deck_B + Deck_C + Deck_D + Deck_E + Deck_F + Deck_G + Deck_T)
-
-Se tutte le altre colonne del ponte sono 0, Deck_A deve essere per forza 1.
-
-Perché la togliamo? Questo fenomeno si chiama Trappola delle Variabili Dummy (Dummy Variable Trap) o Multicollinearità perfetta. Se passi queste colonne a un algoritmo come la Regressione Logistica o una Rete Neurale, il modello "va in tilt" (matematicamente la matrice non è invertibile). L'algoritmo non sa a quale colonna dare il peso (importanza), perché l'informazione in Deck_A è letteralmente un "doppione" esatto dell'informazione già contenuta nell'insieme degli altri ponti.
-
-In sintesi:
-La diagonale della matrice dice: "L'Età è identica all'Età". (Informazione ovvia, ma innocua).
-
-Tenere tutti i ponti incluso Deck_A direbbe all'algoritmo: "Guarda questa nuova feature Deck_A... che però è l'esatto opposto matematico della somma di tutte le altre". (Informazione ridondante, che blocca i calcoli matriciali di molti algoritmi).
-
-Ecco perché drop_first=True è considerato uno standard quando si preparano i dati per il Machine Learning!
-
-
-    """

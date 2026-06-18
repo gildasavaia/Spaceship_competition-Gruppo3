@@ -1,182 +1,221 @@
 import pandas as pd
-import os
+import numpy as np
 import joblib
 import warnings
+import glob
+import sys
 from pathlib import Path
+
+from Evaluation.metrics_calculator import MetricsEvaluator
 from LightGBM_model import LightGBMTrainer
 
-# Sopprime gli avvisi di LightGBM ("No further splits with positive gain")
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(base_dir))
+
 warnings.filterwarnings('ignore', category=UserWarning)
 
 
-def main():
-    print("Avvio della pipeline LightGBM per Spaceship Titanic...")
+def esegui_pipeline_lightgbm(train_path, test_path, dataset_name, outputs_dir, salva_file_singolo=True):
+    """Questa funzione esegue l'intera pipeline LightGBM per una specifica coppia di Train/Test. Carica i CSV, prepara i
+    dati per LightGBM, addestra il modello, valuta le metriche e salva gli output."""
 
-    base_dir = Path(__file__).resolve().parent.parent
-    preprocessed_dir = base_dir / "data" / "preprocessed_folds"
-    outputs_dir = base_dir / "outputs"
+    print(f"\n{'-' * 60}")
+    print(f"INIZIO ELABORAZIONE LightGBM: {dataset_name.upper()}")
+    print(f"{'-' * 60}")
 
-    if not preprocessed_dir.exists():
-        print(f"Errore: La cartella {preprocessed_dir} non esiste. Esegui prima pipeline.py!")
-        return
-
-    # =========================================================
-    # 1. RICERCA DINAMICA DEI DATASET
-    # =========================================================
-    dataset_disponibili = []
-
-    # Cerca l'Holdout
-    if (preprocessed_dir / "holdout_tree_train.csv").exists():
-        dataset_disponibili.append("holdout_tree")
-
-    # Cerca tutti i file K-Fold dinamicamente e li ordina per numero
-    fold_files = list(preprocessed_dir.glob("kfold_*_tree_train.csv"))
-    # Funzione per ordinare i file (estrae il numero dal nome, es. da 'kfold_2' prende 2)
-    fold_files.sort(key=lambda x: int(x.name.split('_')[1]) if x.name.split('_')[1].isdigit() else 0)
-
-    for f in fold_files:
-        dataset_disponibili.append(f.name.replace("_train.csv", ""))
-
-    # Cerca il dataset intero
-    if (preprocessed_dir / "processed_full_tree.csv").exists():
-        dataset_disponibili.append("processed_full_tree")
-
-    if not dataset_disponibili:
-        print("Errore: Nessun dataset per gli alberi trovato nella cartella data/preprocessed_folds.")
-        return
-
-    # =========================================================
-    # 2. COSTRUZIONE DEL MENU INTERATTIVO
-    # =========================================================
-    mappa_dataset = {}
-    print("\nScegli quale dataset utilizzare inserendo il numero corrispondente:")
-
-    for i, nome in enumerate(dataset_disponibili, start=1):
-        mappa_dataset[str(i)] = nome
-
-        # Formattazione per rendere il menu leggibile
-        if "holdout" in nome:
-            desc = "Holdout (Train/Test split)"
-        elif "kfold" in nome:
-            numero_fold = nome.split('_')[1]
-            desc = f"K-Fold numero {numero_fold}"
-        elif "full" in nome:
-            desc = "Intero Dataset (Submission finale)"
-        else:
-            desc = nome
-
-        print(f"{i}: {desc}")
-
-    scelta = input(f"\nInserisci un numero da 1 a {len(dataset_disponibili)}: ").strip()
-
-    while scelta not in mappa_dataset:
-        print("Scelta non valida. Riprova.")
-        scelta = input(f"Inserisci un numero da 1 a {len(dataset_disponibili)}: ").strip()
-
-    dataset_scelto = mappa_dataset[scelta]
-
-    # Generazione dei percorsi sicuri
-    if dataset_scelto == 'processed_full_tree':
-        train_path = preprocessed_dir / f"{dataset_scelto}.csv"
-    else:
-        train_path = preprocessed_dir / f"{dataset_scelto}_train.csv"
-
-    test_path = preprocessed_dir / f"{dataset_scelto}_test.csv"
-
-    outputs_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"\n{'=' * 60}")
-    print(f"INIZIO ELABORAZIONE SINGOLA: {dataset_scelto.upper()}")
-    print(f"{'=' * 60}")
-
-    # ---------------------------------------------------------
-    # 3. CARICAMENTO E PREPARAZIONE DATI
-    # ---------------------------------------------------------
+    # 1) Caricamento dai dati attraverso la lettura dei file CSV specificati nei percorsi.
     print("[1/4] Caricamento dati in corso...")
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
 
+    # Separazione delle feature (X) dal target (y), rimuovendo le colonne non predittive.
     X_train = train_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
     y_train = train_df['Transported']
     X_test = test_df.drop(columns=['Transported', 'PassengerId'], errors='ignore')
 
-    # =====================================================================
-    # TRUCCO SUPREMO PER LIGHTGBM: Unisci, Converti e Dividi
-    # Garantisce che le categorie siano identiche al 100% tra Train e Test
-    # =====================================================================
+    # Il set di categorie sia identico tra Train e Test.
     num_train_rows = X_train.shape[0]
 
-    # Uniamo temporaneamente train e test
+    # Uniamo verticalmente Train e Test.
     combined_df = pd.concat([X_train, X_test], axis=0, ignore_index=True)
 
-    # Troviamo le colonne testuali nel calderone unito
+    # Identificazione delle colonne caratterizzate da stringhe, convertendole in tipo category.
     colonne_testuali = combined_df.select_dtypes(include=['object', 'string']).columns.tolist()
-
     if colonne_testuali:
-        print(f"[*] Colonne testuali rilevate: {colonne_testuali}. Conversione in 'category'...")
+        print(f"*** Colonne testuali rilevate: {colonne_testuali}. Conversione in 'category'... ***\n")
         for col in colonne_testuali:
             combined_df[col] = combined_df[col].astype('category')
 
-    # Ristacchiamo i dataset in modo perfetto
+    # Ri-dividiamo il dataset unito tornando ai Train e Test originali, ma ora con i tipi corretti.
     X_train = combined_df.iloc[:num_train_rows, :].copy()
     X_test = combined_df.iloc[num_train_rows:, :].copy()
-    # =====================================================================
 
-    if 'PassengerId' in test_df.columns:
-        passenger_ids = test_df['PassengerId']
-    else:
-        passenger_ids = range(len(test_df))
+    # Salviamo i PassengerId per poterli inserire nel file di submission finale.
+    passenger_ids = test_df['PassengerId'] if 'PassengerId' in test_df.columns else range(len(test_df))
 
-    # ---------------------------------------------------------
-    # 4. INIZIALIZZAZIONE DEL MODELLO
-    # ---------------------------------------------------------
-    print("[2/4] Inizializzazione del modello LightGBM...")
+    # 2) Addestramento e ottimizzazione, istanziamo il nostro Trainer e lo avviamo.
+    print("[2/4] Inizializzazione e tuning del modello LightGBM...")
     trainer = LightGBMTrainer(random_state=42)
-
-    # ---------------------------------------------------------
-    # 5. ADDESTRAMENTO E TUNING
-    # ---------------------------------------------------------
-    print("[3/4] Ottimizzazione e Addestramento in corso...")
     trainer.tune_hyperparameters(X_train, y_train)
 
-    # ---------------------------------------------------------
-    # 6. PREDIZIONE E SALVATAGGIO (con Probabilità per Stacking)
-    # ---------------------------------------------------------
-    print("[4/4] Generazione predizioni, probabilità e salvataggio file...")
+    # 3) Chiediamo al modello di prevedere sia la classe finale (0/1) sia la probabilità continua [0,1].
+    print("\n[3/4] Generazione predizioni e probabilità per lo Stacking...")
+    predictions = trainer.predict(X_test) # Array di True/False.
+    probabilities = trainer.predict_proba(X_test) # Array di probabilità decimali (0.0 - 1.0).
 
-    # 1. Calcolo predizioni (True/False) e probabilità (0.0 - 1.0)
-    predictions = trainer.predict(X_test)
-    probabilities = trainer.predict_proba(X_test)
-
-    # 2. Creazione dei DataFrame
-    # Questo è per Kaggle
-    submission = pd.DataFrame({
+    # Creazione dei Dataframe di output in cui inserire i risultati per l'esportazione in CSV.
+    res_df = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Transported': predictions.astype(bool)
     })
-
-    # Questo è per il nostro Meta-Modello (Ensemble)
-    stacking_df = pd.DataFrame({
+    prob_df = pd.DataFrame({
         'PassengerId': passenger_ids,
         'Probability': probabilities
     })
 
-    # 3. Definizione dei percorsi di salvataggio
-    outputs_dir.mkdir(parents=True, exist_ok=True)  # Sicurezza extra
-    submission_filename = outputs_dir / f"submission_lightgbm_{dataset_scelto}.csv"
-    prob_filename = outputs_dir / f"prob_lightgbm_{dataset_scelto}.csv"
-    model_filename = outputs_dir / f"modello_lightgbm_{dataset_scelto}.pkl"
+    # Valutazione delle metriche.
+    if 'Transported' in test_df.columns:
+        valutatore = MetricsEvaluator(
+            y_true=test_df['Transported'],
+            y_pred=predictions,
+            y_probs=probabilities,
+            dataset_name="LightGBM (Holdout)"
+        )
 
-    # 4. Salvataggio effettivo su disco
-    submission.to_csv(submission_filename, index=False)
-    stacking_df.to_csv(prob_filename, index=False)
-    joblib.dump(trainer.best_model, model_filename)
+        # Se non siamo in un ciclo K-Fold, stampiamo subito i grafici ed il report a schermo.
+        if salva_file_singolo:
+            valutatore.print_report()
+            valutatore.plot_visuals()
 
-    # 5. Messaggi finali
-    print(f"Previsioni (Kaggle) salvate in: {submission_filename.name}")
-    print(f"Probabilità (Stacking) salvate in: {prob_filename.name}")
-    print(f"Modello (Cervello) salvato in: {model_filename.name}")
-    print("\nELABORAZIONE COMPLETATA CON SUCCESSO!")
+    # 4) Salvataggio del modello per poterlo riutilizzare in futuro senza riaddestrare.
+    print("\n[4/4] Salvataggio risultati nella cartella 'outputs'...")
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    model_file = outputs_dir / f"modello_lightgbm_{dataset_name}.pkl"
+    joblib.dump(trainer.best_model, model_file)
+
+    # Salvataggio dei singoli file CSV, sia la predizione della classe e sia la probabilità.
+    if salva_file_singolo:
+        sub_file = outputs_dir / f"submission_lightgbm_{dataset_name}.csv"
+        res_df.to_csv(sub_file, index=False)
+
+        prob_file = outputs_dir / f"prob_lightgbm_{dataset_name}.csv"
+        prob_df.to_csv(prob_file, index=False)
+        print(f"File CSV salvati per {dataset_name}.")
+
+    # Estrazione delle etichette reali per restituirle all'orchestratore nei calcoli successivi.
+    y_test_true = test_df['Transported'] if 'Transported' in test_df.columns else None
+
+    return res_df, prob_df, y_test_true, predictions, probabilities
+
+
+def main():
+
+    print("Avvio della pipeline LightGBM per Spaceship Titanic...\n")
+
+    # Configurazione dinamica dei percorsi per far girare lo script su qualsiasi macchina.
+    base_dir = Path(__file__).resolve().parent.parent
+    preprocessed_dir = base_dir / "data" / "preprocessed_folds"
+    outputs_dir = base_dir / "outputs"
+
+    # Verifica che il preprocessing sia stato completato.
+    if not preprocessed_dir.exists():
+        print(f"Errore: La cartella {preprocessed_dir} non esiste. Eseguire la pipeline di preprocessing.")
+        return
+
+    print("Selezionare il metodo di addestramento per LightGBM:")
+    print("1. Holdout Validation")
+    print("2. K-Fold Cross Validation")
+    print("3. Full Validation (preparazione della submission finale per competizione Kaggle)")
+
+    scelta = input("Inserire il numero corrispondente: ").strip()
+
+    # Opzione 1: Holdout Validation.
+    if scelta == "1":
+        train_path = preprocessed_dir / "holdout_tree_train.csv"
+        test_path = preprocessed_dir / "holdout_tree_test.csv"
+
+        if train_path.exists() and test_path.exists():
+            esegui_pipeline_lightgbm(train_path, test_path, "holdout_tree", outputs_dir, salva_file_singolo=True)
+        else:
+            print("Errore: File holdout mancanti.")
+
+    # Opzione 2: K-Fold Cross Validation.
+    elif scelta == "2":
+        print("\nRicerca dei file K-Fold in corso...")
+        search_pattern = str(preprocessed_dir / "kfold_*_tree_train.csv")
+        train_files = glob.glob(search_pattern)
+
+        if not train_files:
+            print("Errore: Nessun file K-Fold trovato nella cartella 'preprocessed_folds'")
+        else:
+            num_folds = len(train_files)
+            print(f"Trovati {num_folds} fold. Avvio elaborazione...\n")
+
+            # Inizializzazione liste vuote in cui inserire i risultati di tutti i fold.
+            all_res = []
+            all_prob = []
+            all_y_true = []
+            all_y_pred = []
+            all_y_probs = []
+
+            # Ciclo iterativo di addestramento su tutti i fold trovati.
+            for i in range(1, num_folds + 1):
+                train_path = preprocessed_dir / f"kfold_{i}_tree_train.csv"
+                test_path = preprocessed_dir / f"kfold_{i}_tree_test.csv"
+
+                if not test_path.exists():
+                    print(f"File test mancante per il fold {i}.")
+                    continue
+
+                # Eseguiamo la pipeline senza salvare i singoli file parziali per singolo fold in modo da non sporcare la cartella.
+                res, prob, y_true, preds, probs = esegui_pipeline_lightgbm(
+                    train_path, test_path, f"kfold_{i}_tree", outputs_dir, salva_file_singolo=False
+                )
+
+                all_res.append(res)
+                all_prob.append(prob)
+
+                # Accodiamo le risposte e le previsioni nella lista.
+                if y_true is not None:
+                    all_y_true.extend(y_true)
+                    all_y_pred.extend(preds)
+                    all_y_probs.extend(probs)
+
+            # Unione di tutte le predizioni K-Fold in un unico file TOTAL.
+            final_res = pd.concat(all_res).sort_values('PassengerId')
+            final_prob = pd.concat(all_prob).sort_values('PassengerId')
+
+            final_res.to_csv(outputs_dir / "submission_lightgbm_kfold_TOTAL.csv", index=False)
+            final_prob.to_csv(outputs_dir / "prob_lightgbm_kfold_TOTAL.csv", index=False)
+            print(f"Creazione file CSV per k-fold.")
+
+            # Calcoliamo una metrica globale aggregando le risposte di tutti i 5 fold fusi insieme.
+            print("\nCalcolo delle metriche globali sull'intero K-Fold...")
+            if all_y_true:
+                valutatore = MetricsEvaluator(
+                    y_true=np.array(all_y_true),
+                    y_pred=np.array(all_y_pred),
+                    y_probs=np.array(all_y_probs),
+                    dataset_name="LIGHTGBM K-FOLD (GLOBALE)"
+                )
+                valutatore.print_report()
+                valutatore.plot_visuals()
+            else:
+                print("Impossibile calcolare le metriche globali.")
+
+    # Opzione 3: Full Validation.
+    elif scelta == "3":
+        # Usa il 100% dei dati di Train senza sprecarne una parte per la validazione
+        train_path = preprocessed_dir / "processed_full_tree.csv"
+        test_path = preprocessed_dir / "processed_full_tree_test.csv"
+
+        if train_path.exists() and test_path.exists():
+            esegui_pipeline_lightgbm(train_path, test_path, "processed_full_tree", outputs_dir, salva_file_singolo=True)
+        else:
+            print("Errore: File processed_full mancanti.")
+
+    else:
+        print("Scelta non valida. Riavvia lo script.")
 
 
 if __name__ == "__main__":
