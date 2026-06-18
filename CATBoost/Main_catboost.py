@@ -3,6 +3,9 @@ import glob
 import numpy as np
 import sys
 from pathlib import Path
+
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
 from Model_CatBoost import (
     load_data, prepare_data, prepare_test, create_catboost_model,
     train_model, predict, save_submission
@@ -12,8 +15,7 @@ from Evaluation.Evaluation_Unified import (
 )
 
 # Calcolo dinamico della directory principale per permettere l'importazione di moduli esterni
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
+
 from Evaluation.metrics_calculator import MetricsEvaluator
 
 # Interfaccia utente via terminale per la selezione della modalità operativa
@@ -24,7 +26,7 @@ print("3. Full Training & Kaggle Submission")
 scelta = input("Inserisci 1 o 2 o 3: ").strip()
 
 # Directory contenente i file CSV generati in fase di preprocessing
-data_dir = "../data/preprocessed_folds/"
+data_dir = base_dir / "data" / "preprocessed_folds"
 
 
 
@@ -33,11 +35,15 @@ data_dir = "../data/preprocessed_folds/"
 # =====================================================================
 if scelta == "1":
     print("\n Avvio HOLDOUT con CatBoost...\n")
-    train_path = os.path.join(data_dir, "holdout_tree_train.csv")
-    test_path = os.path.join(data_dir, "holdout_tree_test.csv")
+    train_path = data_dir / "holdout_tree_train.csv"
+    test_path = data_dir / "holdout_tree_test.csv"
+
+    if not train_path.exists() or not test_path.exists():
+        print(f"Errore: Assicurati che i file 'holdout_tree.csv' esistano in {data_dir}")
+        raise SystemExit(1)
 
     # Caricamento dei dataset e separazione delle feature dal target
-    train_df, test_df = load_data(train_path, test_path)
+    train_df, test_df = load_data(str(train_path), str(test_path))
     X, y = prepare_data(train_df)
     X_test = prepare_test(test_df)
 
@@ -69,11 +75,11 @@ if scelta == "1":
 elif scelta == "2":
     print("\n Ricerca K-Fold per CatBoost...\n")
     # Identificazione dinamica di tutti i file di train corrispondenti allo schema kfold
-    search_pattern = os.path.join(data_dir, "kfold_*_tree_train.csv")
+    search_pattern = str(data_dir / "kfold_*_tree_train.csv")
     train_files = glob.glob(search_pattern)
 
     if not train_files:
-        print("Errore: Nessun fold trovato!")
+        print(f"Errore: Assicurati che i file 'kfold_*_tree_train.csv' esistano in {data_dir}")
     else:
         num_folds = len(train_files)
         print(f" Trovati {num_folds} fold. Elaborazione in corso...\n")

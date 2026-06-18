@@ -48,7 +48,7 @@ if scelta == "1":
     test_path = os.path.join(data_dir, "holdout_nn_test.csv")
 
     if not os.path.exists(train_path):
-        print(f" Errore: File {train_path} non trovato!")
+        print(f"Errore: Assicurati che i file 'holdout_nn' esistano in {data_dir}")
     else:
         train_df, test_df = load_data(train_path, test_path)
 
@@ -92,13 +92,13 @@ if scelta == "1":
 # OPZIONE 2: VALIDAZIONE INCROCIATA K-FOLD
 # =========================================================
 elif scelta == "2":
-    print("\n K-FOLD NN (PyTorch)...\n")
+    print("\n K-FOLD NN (PyTorch)\n")
 
     search_pattern = os.path.join(data_dir, "kfold_*_nn_train.csv")
     train_files = glob.glob(search_pattern)
 
     if not train_files:
-        print(" Nessun fold trovato!")
+        print(f" Errore: Assicurati che i file 'kfold_*_nn_train.csv' esistano in {data_dir}")
     else:
         num_folds = len(train_files)
         print(f" Trovati {num_folds} fold. Elaborazione in corso...\n")

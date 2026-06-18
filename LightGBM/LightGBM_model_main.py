@@ -137,7 +137,7 @@ def main():
         if train_path.exists() and test_path.exists():
             esegui_pipeline_lightgbm(train_path, test_path, "holdout_tree", outputs_dir, salva_file_singolo=True)
         else:
-            print("Errore: File holdout mancanti.")
+            print(f"Errore: Assicurati che i file 'holdout_tree' esistano in {preprocessed_dir}")
 
     # Opzione 2: K-Fold Cross Validation.
     elif scelta == "2":
@@ -146,7 +146,7 @@ def main():
         train_files = glob.glob(search_pattern)
 
         if not train_files:
-            print("Errore: Nessun file K-Fold trovato nella cartella 'preprocessed_folds'")
+            print(f"Errore: Assicurati che i file 'kfold_*_tree_train.csv' esistano in {preprocessed_dir}")
         else:
             num_folds = len(train_files)
             print(f"Trovati {num_folds} fold. Avvio elaborazione...\n")
@@ -212,7 +212,7 @@ def main():
         if train_path.exists() and test_path.exists():
             esegui_pipeline_lightgbm(train_path, test_path, "processed_full_tree", outputs_dir, salva_file_singolo=True)
         else:
-            print("Errore: File processed_full mancanti.")
+            print(f"Errore: Assicurati che i file 'full_tree' esistano in {preprocessed_dir}")
 
     else:
         print("Scelta non valida. Riavvia lo script.")
