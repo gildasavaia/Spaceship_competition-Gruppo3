@@ -26,7 +26,7 @@ scelta = input("Inserisci 1 o 2 o 3: ").strip()
 # Directory contenente i file CSV generati in fase di preprocessing
 data_dir = "../data/preprocessed_folds/"
 
-scelta = input("Inserisci 1 o 2: ").strip()
+
 
 # =====================================================================
 # MODALITÀ 1: VALUTAZIONE TRAMITE HOLDOUT (TRAIN/TEST SINGOLO)

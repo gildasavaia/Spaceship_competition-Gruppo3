@@ -172,8 +172,8 @@ elif scelta == "2":
 elif scelta == "3":
     print("\n Avvio FULL TRAINING Neural Network per Kaggle Submission...\n")
 
-    train_path = os.path.join(data_dir, "processed_full_tree.csv")
-    test_path = os.path.join(data_dir, "processed_full_tree_test.csv")
+    train_path = os.path.join(data_dir, "processed_full_nn.csv")
+    test_path = os.path.join(data_dir, "processed_full_nn_test.csv")
 
     if not os.path.exists(train_path) or not os.path.exists(test_path):
         print(f" Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
