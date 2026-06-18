@@ -176,7 +176,7 @@ elif scelta == "3":
     test_path = os.path.join(data_dir, "processed_full_nn_test.csv")
 
     if not os.path.exists(train_path) or not os.path.exists(test_path):
-        print(f" Errore: Assicurati che i file 'full_tree' esistano in {data_dir}")
+        print(f" Errore: Assicurati che i file 'full_nn' esistano in {data_dir}")
     else:
         train_df, test_df = load_data(train_path, test_path)
 
