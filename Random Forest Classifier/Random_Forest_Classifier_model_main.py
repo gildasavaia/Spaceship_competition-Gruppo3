@@ -3,13 +3,15 @@ import numpy as np
 import joblib
 import glob
 import sys
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(base_dir))
 
 from Evaluation.metrics_calculator import MetricsEvaluator
 from Random_Forest_Classifier_model import RandomForestTrainer
-from pathlib import Path
 
-base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
+
+
 
 
 def esegui_pipeline_rf(train_path, test_path, dataset_name, outputs_dir, salva_file_singolo=True):
