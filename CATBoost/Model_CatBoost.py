@@ -153,6 +153,8 @@ def save_submission(model, X_test, original_test_df, filename="submission_catboo
     Applica il modello addestrato sul set di test, mappa le predizioni in booleani
     e salva il file finale formattato secondo le specifiche di Kaggle.
     """
+    from pathlib import Path
+    
     # Rimuove la colonna PassengerId prima di passare i dati al modello, poiché non costituisce una feature predittiva
     X_input = X_test.drop("PassengerId", axis=1) if "PassengerId" in X_test.columns else X_test
 
@@ -165,6 +167,14 @@ def save_submission(model, X_test, original_test_df, filename="submission_catboo
         "Transported": preds.astype(bool)
     })
 
+    # Calcolo dinamico della cartella outputs dalla root del progetto
+    base_dir = Path(__file__).resolve().parent.parent
+    outputs_dir = base_dir / "outputs"
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Definizione del percorso completo del file
+    filepath = outputs_dir / filename
+
     # Scrittura del file CSV senza includere l'indice numerico di riga di pandas
-    submission.to_csv(filename, index=False)
-    print(f"\n Submission salvata in: {filename}")
+    submission.to_csv(str(filepath), index=False)
+    print(f"\n Submission salvata in: {filepath}")

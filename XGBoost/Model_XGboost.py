@@ -121,6 +121,8 @@ def save_submission(model, X_test, original_test_df, filename="submission_xgboos
     Applica il modello addestrato sulle feature di test, converte le classi in
     valori booleani (True/False) e scrive il file di sottomissione per Kaggle.
     """
+    from pathlib import Path
+    
     # Creazione di una copia di sicurezza per evitare modifiche involontarie al DataFrame originario
     X_input = fix_categorical_dtype(X_test.copy())
 
@@ -137,6 +139,14 @@ def save_submission(model, X_test, original_test_df, filename="submission_xgboos
         "Transported": preds.astype(bool)
     })
 
+    # Calcolo dinamico della cartella outputs dalla root del progetto
+    base_dir = Path(__file__).resolve().parent.parent
+    outputs_dir = base_dir / "outputs"
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Definizione del percorso completo del file
+    filepath = outputs_dir / filename
+
     # Scrittura fisica del file su disco senza esportare l'indice di riga di pandas
-    submission.to_csv(filename, index=False)
-    print(f"\n Submission salvata correttamente in: {filename}")
+    submission.to_csv(str(filepath), index=False)
+    print(f"\n Submission salvata correttamente in: {filepath}")

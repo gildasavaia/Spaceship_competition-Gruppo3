@@ -204,10 +204,17 @@ elif scelta == "3":
             "Transported": preds.astype(bool)
         })
 
+        # Calcolo dinamico della cartella outputs dalla root del progetto
+        outputs_dir = base_dir / "outputs"
+        outputs_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Definizione del percorso completo del file
         filename = "submission_nn_full.csv"
-        submission.to_csv(filename, index=False)
-        print(f"\n Submission Rete Neurale salvata con successo in: {filename}")
-
-       
+        filepath = outputs_dir / filename
+        
+        submission.to_csv(str(filepath), index=False)
+        print(f"\n Submission Rete Neurale salvata con successo in: {filepath}")
+        plot_loss_curve(model, title="Loss Curve - Full Training Neural Network")
+ 
 else:
     print(" Scelta non valida.")
