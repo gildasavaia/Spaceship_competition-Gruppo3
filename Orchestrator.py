@@ -140,7 +140,7 @@ def main():
                 work_dir = base_dir / "CATBoost"
             elif scelta_modello == "6":
                 script_to_run = base_dir / "NN_Pytorch" / "main_NN_pytch.py"
-                work_dir = base_dir / "Rete_Neurale"
+                work_dir = base_dir / "NN_Pytorch"
             elif scelta_modello == "7":
                 break # L'istruzione 'break' distrugge il ciclo interno (Fase 2) tornando nuovamente nel ciclo esterno (Fase 1).
             elif scelta_modello == "0":

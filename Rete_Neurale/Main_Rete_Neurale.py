@@ -17,11 +17,7 @@ print("1. Holdout (singolo train/test)")
 print("2. K-Fold (validazione incrociata su più file)")
 scelta = input("Inserisci 1 o 2: ").strip()
 
-print("Seleziona il metodo di addestramento per la Rete Neurale:")
-print("1. Holdout (singolo train/test)")
-print("2. K-Fold (validazione incrociata su più file)")
 
-scelta = input("Inserisci 1 o 2: ").strip()
 
 data_dir = "../data/preprocessed_folds/"
 
