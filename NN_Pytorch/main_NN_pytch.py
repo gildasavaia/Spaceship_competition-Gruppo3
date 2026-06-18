@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Importazione selettiva dei moduli logici e di valutazione sviluppati per PyTorch
 from Model_NN_pytch import load_data, prepare_data, prepare_test, NeuralNet, train_model, predict
-from Evaluation_NN_pytch import run_full_evaluation_nn, print_kfold_summary_nn, plot_loss_curve
+from Evaluation.Evaluation_Unified import  run_full_evaluation, print_kfold_summary, plot_loss_curve
 
 # Configurazione del percorso per consentire l'accesso al modulo centrale di calcolo metriche
 base_dir = Path(__file__).resolve().parent.parent
@@ -65,7 +65,7 @@ if scelta == "1":
         # Calcola la valutazione formale se la colonna target reale esiste
         if "Transported" in test_df.columns:
             y_test = test_df["Transported"].astype(int)
-            metrics, cm = run_full_evaluation_nn(model, X_test, y_test, title="HOLDOUT NN", verbose=True)
+            metrics, cm = run_full_evaluation(model, X_test, y_test, title="HOLDOUT NN", verbose=True, is_nn=True)
 
         predictions = predict(model, X_test)
         plot_loss_curve(model)
@@ -134,7 +134,7 @@ elif scelta == "2":
             if "Transported" in test_df.columns:
                 y_test = test_df["Transported"].astype(int)
                 # Esegue la valutazione silenziata impostando verbose=False
-                metrics, cm = run_full_evaluation_nn(model, X_test, y_test, title=f"FOLD {i}", verbose=False)
+                metrics, cm = run_full_evaluation(model, X_test, y_test, title=f"FOLD {i}", verbose=False, is_nn=True)
 
                 fold_metrics.append(metrics)
                 fold_confusion_matrices.append(cm)
@@ -155,7 +155,7 @@ elif scelta == "2":
 
         # Stampa il riepilogo complessivo aggregato di tutti i fold elaborati
         if fold_metrics:
-            print_kfold_summary_nn(fold_metrics, fold_confusion_matrices)
+            print_kfold_summary(fold_metrics, fold_confusion_matrices, is_nn=True)
 
         # Esporta l'array unificato contenente i risultati di tutti i fold
         if all_y_true:

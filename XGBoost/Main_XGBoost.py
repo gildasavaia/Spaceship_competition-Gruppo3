@@ -9,9 +9,7 @@ from Model_XGboost import (
     load_data, prepare_data, prepare_test, create_model,
     fix_categorical_dtype, train_model, predict, save_submission
 )
-from Evaluation_XGBoost import (
-    run_full_evaluation, print_kfold_summary
-)
+from Evaluation.Evaluation_Unified import ( run_full_evaluation, print_kfold_summary)
 
 # Registrazione della directory radice nel path per importare l'orchesteratore centralizzato
 base_dir = Path(__file__).resolve().parent.parent
