@@ -46,10 +46,10 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
         pd.DataFrame(oh_encoded_train, columns=oh_cols)
     ], axis=1)
 
-    # --- NOVITÀ: ELIMINAZIONE COLONNA 'CryoSleep_False' NEL TRAIN ---
-    df_nn_train_enc = df_nn_train_enc.drop(columns=['CryoSleep_False'], errors='ignore')
-    df_nn_train_enc = df_nn_train_enc.drop(columns=['VIP_False'], errors='ignore')
-    df_nn_train_enc = df_nn_train_enc.drop(columns=['Side_S'], errors='ignore')
+
+    # df_nn_train_enc = df_nn_train_enc.drop(columns=['CryoSleep_False'], errors='ignore')
+    # df_nn_train_enc = df_nn_train_enc.drop(columns=['VIP_False'], errors='ignore')
+    # df_nn_train_enc = df_nn_train_enc.drop(columns=['Side_S'], errors='ignore')
     # ----------------------------------------------------------------
 
     # Transform sul test
@@ -61,11 +61,11 @@ def run_encoding(df_tree_train, df_nn_train, df_tree_test=None, df_nn_test=None)
             pd.DataFrame(oh_encoded_test, columns=oh_cols)
         ], axis=1)
         
-        # --- NOVITÀ: ELIMINAZIONE COLONNA 'CryoSleep_False' NEL TEST ---
-        df_nn_test_enc = df_nn_test_enc.drop(columns=['CryoSleep_False'], errors='ignore')
-        df_nn_test_enc = df_nn_test_enc.drop(columns=['VIP_False'], errors='ignore')
-        df_nn_test_enc = df_nn_test_enc.drop(columns=['Side_S'], errors='ignore')
-        # ---------------------------------------------------------------
+
+        # df_nn_test_enc = df_nn_test_enc.drop(columns=['CryoSleep_False'], errors='ignore')
+        # df_nn_test_enc = df_nn_test_enc.drop(columns=['VIP_False'], errors='ignore')
+        # df_nn_test_enc = df_nn_test_enc.drop(columns=['Side_S'], errors='ignore')
+        # # ---------------------------------------------------------------
     
     df_tree_train_enc = df_tree_train.copy()  # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST COMMENTA QUESTE RIGA
     df_tree_test_enc = df_tree_test.copy() if df_tree_test is not None else None # SE VUOI TESTARE ALBERI DECISIONALI CHE NON SIANO CAT BOOST O XGBOOST COMMENTA QUESTE RIGA

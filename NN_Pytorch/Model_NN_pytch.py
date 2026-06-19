@@ -51,18 +51,19 @@ class NeuralNet(nn.Module):
         self.fc1 = nn.Linear(input_dim, 128)
         self.bn1 = nn.BatchNorm1d(128)
         self.relu1 = nn.ReLU()
-        self.drop1 = nn.Dropout(0.3)  # Esclusione casuale del 30% dei nodi ad ogni passo
+        self.drop1 = nn.Dropout(0.4)  # Più aggressivo in ingresso per regolarizzare
 
         # Secondo blocco di elaborazione nascosto
         self.fc2 = nn.Linear(128, 64)
         self.bn2 = nn.BatchNorm1d(64)
         self.relu2 = nn.ReLU()
-        self.drop2 = nn.Dropout(0.2)  # Esclusione casuale del 20% dei nodi ad ogni passo
+        self.drop2 = nn.Dropout(0.3)  # Bilanciato con il primo layer
 
         # Terzo blocco di riduzione dimensionale
         self.fc3 = nn.Linear(64, 32)
         self.bn3 = nn.BatchNorm1d(32)
         self.relu3 = nn.ReLU()
+        self.drop3 = nn.Dropout(0.2)  # Dropout anche sul terzo blocco
 
         # Livello finale di output con attivazione Sigmoide per classificazione probabilistica binaria
         self.out = nn.Linear(32, 1)
@@ -74,12 +75,12 @@ class NeuralNet(nn.Module):
         """
         x = self.drop1(self.relu1(self.bn1(self.fc1(x))))
         x = self.drop2(self.relu2(self.bn2(self.fc2(x))))
-        x = self.relu3(self.bn3(self.fc3(x)))
+        x = self.drop3(self.relu3(self.bn3(self.fc3(x))))
         return self.sigmoid(self.out(x))
 
 
 def train_model(model, X, y, epochs=200, batch_size=64, lr=0.005,
-                patience=5, min_delta=1e-3):
+                patience=10, min_delta=1e-3):
     """
     Inizializza la pipeline di addestramento: esegue la standardizzazione Z-score,
     istanzia l'ottimizzatore AdamW, definisce i mini-batch e cicla sulle epoche.
@@ -113,10 +114,12 @@ def train_model(model, X, y, epochs=200, batch_size=64, lr=0.005,
     criterion = nn.BCELoss()  # Binary Cross Entropy Loss per obiettivi binari
 
     # AdamW include una correzione nativa sul weight decay (regolarizzazione L2 sui pesi)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-3)
 
     # Algoritmo di pianificazione del tasso di apprendimento basato sulla stasi della loss
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    # La patience DEVE essere minore di quella dell'early stopping (10), così la rete
+    # prova a ridurre il learning rate prima di arrendersi e fermarsi.
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     loss_history = []
 

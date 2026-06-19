@@ -30,40 +30,10 @@ def run_scaling(df_train, df_test=None):
     # Filtriamo solo le colonne numeriche effettivamente presenti nel dataframe
     numeric_cols = [c for c in numeric_cols if c in df_train.columns]
 
-    # Trasformazione Logaritmica su TotalSpending
-    if 'TotalSpending' in df_nn_train.columns:
-        df_nn_train['TotalSpending'] = np.log1p(df_nn_train['TotalSpending'])
-        if df_nn_test is not None:
-            df_nn_test['TotalSpending'] = np.log1p(df_nn_test['TotalSpending'])
-            
-    if 'RoomService' in df_nn_train.columns:
-        df_nn_train['RoomService'] = np.log1p(df_nn_train['RoomService'])
-        if df_nn_test is not None:
-            df_nn_test['RoomService'] = np.log1p(df_nn_test['RoomService'])
-    if 'FoodCourt' in df_nn_train.columns:
-        df_nn_train['FoodCourt'] = np.log1p(df_nn_train['FoodCourt'])
-        if df_nn_test is not None:
-            df_nn_test['FoodCourt'] = np.log1p(df_nn_test['FoodCourt'])
-    if 'ShoppingMall' in df_nn_train.columns:
-        df_nn_train['ShoppingMall'] = np.log1p(df_nn_train['ShoppingMall'])
-        if df_nn_test is not None:
-            df_nn_test['ShoppingMall'] = np.log1p(df_nn_test['ShoppingMall'])
-    if 'Spa' in df_nn_train.columns:
-        df_nn_train['Spa'] = np.log1p(df_nn_train['Spa'])
-        if df_nn_test is not None:
-            df_nn_test['Spa'] = np.log1p(df_nn_test['Spa'])
-    if 'VRDeck' in df_nn_train.columns:
-        df_nn_train['VRDeck'] = np.log1p(df_nn_train['VRDeck'])
-        if df_nn_test is not None:
-            df_nn_test['VRDeck'] = np.log1p(df_nn_test['VRDeck'])
-    # Standardizzazione
-    if numeric_cols:
-        scaler = StandardScaler()
-        # FIT solo sul TRAIN, e TRANSFORM su TRAIN
-        df_nn_train[numeric_cols] = scaler.fit_transform(df_nn_train[numeric_cols])
-        
-        # Solo TRANSFORM sul TEST (usando media e varianza del train)
-        if df_nn_test is not None:
-            df_nn_test[numeric_cols] = scaler.transform(df_nn_test[numeric_cols])
+
+    # Lo scaling per il ramo NN viene gestito internamente da train_model()
+    # in Model_NN_pytch.py. Questo evita il doppio scaling e permette di
+    # scalare anche le colonne one-hot in modo omogeneo.
+    scaler = None
 
     return ScalingResult(df_tree_train, df_nn_train, df_tree_test, df_nn_test, scaler)
