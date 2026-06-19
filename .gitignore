@@ -35,8 +35,6 @@ env/
 .DS_Store
 Thumbs.db
 
-# Cartella per i salvataggi dei modelli e delle previsioni
-outputs/
 # Log di CatBoost
 catboost_info/
 
