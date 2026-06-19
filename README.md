@@ -17,8 +17,7 @@ Competizione Kaggle **Spaceship Titanic**: predire quali passeggeri sono stati t
    - [OP5 — Aggregazione Costi](#op5--op5_sumcosts_namespy)
    - [OP6 — Matrice di Correlazione](#op6--op6_correlation_matrixpy)
    - [OP7 — Divisione del Dataset](#op7--divisione-del-dataset)
-   - [OP8 — Scaling](#op8--op8_scalingpy)
-   - [OP9 — Encoding](#op9--op9_encodingpy)
+   - [OP8 — Encoding](#op8--op8_encodingpy)
    - [relations.py — Analisi Regole di Dominio](#relationspy--analisi-regole-di-dominio)
    - [pipeline.py — Pipeline Principale](#pipelinepy--pipeline-principale)
    - [Output del Pre-Processing](#output-del-pre-processing)
@@ -37,7 +36,7 @@ Competizione Kaggle **Spaceship Titanic**: predire quali passeggeri sono stati t
 
 ---
 
-## 2. Avvio Rapido
+## 1. Avvio Rapido
 
 ```bash
 # Avvia l'intero sistema (preprocessing + modelli)
@@ -53,7 +52,16 @@ python preprocessing/pipeline.py
 
 ---
 
-## 3. Fase 1 — Pre-Processing
+## Panoramica dei Moduli
+
+Il progetto è strutturato in tre macro-aree principali:
+1. **Pre-Processing**: Si occupa della pulizia dei dati, feature engineering, imputazione dei valori nulli e della preparazione dei dataset per i modelli (encoding).
+2. **Development**: Riguarda l'addestramento dei vari modelli di Machine Learning (Alberi Decisionali, Reti Neurali, SVC) applicando diverse tecniche di validazione (Hold-out, K-Fold).
+3. **Evaluation**: Modulo dedicato alla valutazione quantitativa (metriche come Accuracy, ROC-AUC, ecc.) e visiva (Matrice di Confusione, Curve ROC) delle performance dei modelli.
+
+---
+
+## 2. Fase 1 — Pre-Processing
 
 ### Panoramica della Pipeline
 
@@ -85,9 +93,9 @@ train.csv / test.csv
   │  2 → Reti Neurali / Modelli Lineari     │
   └─────────────────────────────────────────┘
        │
-       ├── Hold-out:   OP4 → OP5 → OP8 → OP9  (su train e test separati)
-       ├── K-Fold:     OP4 → OP5 → OP8 → OP9  (per ogni fold)
-       └── Full Validation (preparazione della submission finale per competizione Kaggle):   OP4 → OP5 → OP8 → OP9  (intero dataset, per submission)
+       ├── Hold-out:   OP4 → OP5 → OP8  (su train e test separati)
+       ├── K-Fold:     OP4 → OP5 → OP8  (per ogni fold)
+       └── Full Validation (preparazione della submission finale per competizione Kaggle):   OP4 → OP5 → OP8  (intero dataset, per submission)
 
   In tutti i percorsi, al termine:
   OP2 — EDA / Valutazione  ·  OP6 — Matrice di Correlazione
@@ -196,9 +204,9 @@ Per le feature numeriche:
 ### OP6 — `op6_correlation_matrix.py`
 **Matrice di correlazione**
 
-Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. Salva il grafico in `outputs/op6/correlation_matrix.png` e restituisce la correlazione ordinata con il target `Transported`.
+Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. Crea due grafici: una matrice di correlazione e un istogramma con la classifica delle feature. Salva i grafici nella cartella `outputs/op6/` e restituisce la correlazione ordinata con il target `Transported`.
 
-> La Dummy Variable Trap viene evitata in OP9, dove vengono rimosse le colonne ridondanti (`CryoSleep_False`, `VIP_False`, `Side_S`).
+> La Dummy Variable Trap viene evitata in OP8, dove vengono rimosse le colonne ridondanti (`CryoSleep_False`, `VIP_False`, `Side_S`).
 
 ---
 
@@ -212,29 +220,15 @@ Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. S
 
 ---
 
-### OP8 — `op8_scaling.py`
-**Normalizzazione e standardizzazione**
-
-Produce **due versioni parallele** del dataset:
-
-| Versione | Destinazione | Trasformazioni |
-|---|---|---|
-| `df_tree` | Modelli ad albero (XGBoost, CatBoost, RF) | Nessuna |
-| `df_nn` | Reti neurali e modelli lineari | riduzione dell'assimetria dei dati con `log1p` sulle colonne di spesa + `StandardScaler` |
-
-Colonne trasformate con `log1p`: `TotalSpending`, `RoomService`, `FoodCourt`, `ShoppingMall`, `Spa`, `VRDeck`, `NumZone`.
-
-> Lo scaler viene fittato **solo sul train** e applicato al test.
-
----
-
-### OP9 — `op9_encoding.py`
+### OP8 — `op8_encoding.py`
 **Encoding delle variabili categoriche**
+
+Produce **due versioni parallele** del dataset (la fase di scaling separata è stata rimossa, in quanto i modelli gestiscono lo scaling nativamente):
 
 | Versione | Encoder | Note |
 |---|---|---|
-| `df_tree` | Nessuno (passthrough) | XGBoost e CatBoost gestiscono le categoriche nativamente |
-| `df_nn` | One-Hot Encoding | Rimozione colonne ridondanti per evitare multicollinearità |
+| `df_tree` | Nessuno (passthrough) | I modelli ad albero gestiscono le categoriche nativamente |
+| `df_nn` | One-Hot Encoding | Viene eseguito solo il One-Hot Encoding (nessuna trasformazione log), rimozione colonne ridondanti |
 
 Colonne codificate: `HomePlanet`, `CryoSleep`, `Destination`, `VIP`, `Deck`, `Side`.
 Colonne sempre rimosse: `Group`, `Surnames`.
@@ -283,7 +277,7 @@ Tutti i file sono in `data/preprocessed_folds/`. I dizionari di imputazione JSON
 
 ---
 
-## 4. Fase 2 — Development & Evaluation
+## 3. Fase 2 — Development & Evaluation
 
 ### Orchestrator — `Orchestrator.py`
 
@@ -478,14 +472,16 @@ Input → Linear(128) → BN → ReLU → Dropout(0.4)
 | `scheduler` | `ReduceLROnPlateau` (factor=0.5, patience=3) |
 | `loss` | BCELoss |
 
+**Nota**: Il modello `main_NN_pytch` è stato aggiornato per richiedere il dataset `tree` invece del dataset `nn` in input.
+
 Lo `StandardScaler` viene salvato come `model.scaler` per il transform sul test senza refitting. La funzione `align_columns()` gestisce il disallineamento OHE tra train e test tramite `.reindex()`.
 
 ##### Meccanismo di Early Stopping e Gestione LR
 Per ottimizzare l'addestramento e prevenire l'overfitting, la pipeline integra una strategia combinata tra lo scheduler del tasso di apprendimento e un controllo dinamico di interruzione anticipata (**Early Stopping**):
 
 * **Patience dello Scheduler:** Impostata a **3 epoche**. Se la loss si stabilizza, il learning rate viene dimezzato (`factor=0.5`) per rifinire la convergenza prima che intervenga lo stop.
-* **Patience dell'Early Stopping:** Impostata a **10 epoche** consecutive senza miglioramenti significativi.
-* **Min Delta:** `1e-3` (soglia minima di variazione della loss per considerare l'epoca come un reale miglioramento).
+* **Patience dell'Early Stopping:** Impostata a **10 iterazioni consecutive** dove la loss non diminuisce di almeno 0.001.
+* **Min Delta:** `0.001` (soglia minima di variazione della loss per considerare l'epoca come un reale miglioramento).
 * **Tracciamento dello Stato:** Viene monitorata la `best_loss` ad ogni epoca per identificare il punto di arresto ottimale e salvare la storia dei gradienti all'interno dell'istanza del modello (`model.loss_history`).
 Nelle modalità *Holdout* (Opzione 1) e *K-Fold* (Opzione 2), l'addestramento segue invece rigidamente il numero di epoche prefissate in tabella (rispettivamente 50 e 30 epoche).
 
@@ -493,6 +489,8 @@ Nelle modalità *Holdout* (Opzione 1) e *K-Fold* (Opzione 2), l'addestramento se
 
 
 ### Output del Development
+
+> **Nota sulle submission:** Tutti i risultati (comprese le submission finali per la competizione Kaggle) verranno salvati all'interno della cartella `outputs/`.
 
 | File | Quando viene creato |
 |---|---|
@@ -502,11 +500,11 @@ Nelle modalità *Holdout* (Opzione 1) e *K-Fold* (Opzione 2), l'addestramento se
 | `outputs/submission_<tipo>_<dataset>.csv` | In Holdout e Full Training |
 | `outputs/prob_<tipo>_<dataset>.csv` | In Holdout e Full Training (LightGBM, RF, SVC) |
 | `outputs/submission_*_kfold_TOTAL.csv` | In K-Fold (predizioni aggregate) |
-| `outputs/op6/correlation_matrix.png` | Dopo OP6 nel preprocessing |
+| Grafici in `outputs/op6/` | Dopo OP6 nel preprocessing |
 
 ---
 
-## 5. Test Unitari
+## 4. Test Unitari
 
 ### Test Preprocessing (Test1 – Test5)
 
@@ -515,12 +513,9 @@ Ogni test crea un DataFrame sintetico, esegue il modulo da testare e verifica il
 | Test | Modulo | Obiettivo |
 |---|---|---|
 | `Test1.py` | `op3` | Split corretto di `Cabin` e `PassengerId`, conteggio `GroupSize` |
-| `Test2.py` | `op8` | Lo scaler fa `.fit()` solo sul train — nessun data leakage |
 | `Test3.py` | `op4` | Zero NaN dopo l'imputazione, regole di dominio applicate |
-| `Test4.py` | `op9` | Encoder robusto a categorie sconosciute, colonne allineate tra train e test |
+| `Test4.py` | `op8` | Encoder robusto a categorie sconosciute, colonne allineate tra train e test |
 | `Test5.py` | `op5` | `TotalSpending` matematicamente corretto, `Names` rimossa, `Surnames` conservata |
-
-**Dettaglio Test2 (Data Leakage):** crea un train con Age media=25 e un test con Age media=90. Se lo scaler porta anche il test a media≈0, significa che ha fatto il fit anche sul test (leakage). Il test fallisce in quel caso.
 
 **Dettaglio Test4 (Categoria aliena):** inserisce il pianeta `'Plutone'` nel test set, mai visto nel train. Verifica che `handle_unknown='ignore'` eviti il crash e che le colonne di train e test siano identiche dopo l'OHE.
 
@@ -552,9 +547,9 @@ python -m unittest test_catboost_model.py
 
 ---
 
-## 6. Decisioni Architetturali
+## 5. Decisioni Architetturali
 
-- **Due rami paralleli (tree vs nn)** a partire da OP8 — i modelli ad albero non richiedono né scaling né One-Hot Encoding; mantenere due versioni separate evita di degradare le performance degli alberi con trasformazioni inutili.
+- **Due rami paralleli (tree vs nn)** a partire da OP8 — i modelli ad albero non richiedono One-Hot Encoding; mantenere due versioni separate evita di degradare le performance degli alberi con trasformazioni inutili (lo scaling è stato rimosso poiché integrato e gestito nativamente dai modelli).
 - **Imputazione group-first** — la coesione intra-gruppo è >85% per `HomePlanet`: la moda del gruppo è più affidabile dell'imputazione globale. L'imputazione probabilistica viene usata solo come fallback.
 - **Regole di dominio prima dell'imputazione statistica** — applicare prima le regole logiche riduce il numero di valori da imputare e aumenta la coerenza del dataset.
 - **Anti-leakage by design** — dizionari di probabilità, mediana dell'età e scaler vengono sempre fittati sul train e passati come parametri al test.
