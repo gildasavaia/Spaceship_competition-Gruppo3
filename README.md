@@ -14,12 +14,12 @@ Competizione Kaggle **Spaceship Titanic**: predire quali passeggeri sono stati t
    - [OP2 — Analisi Esplorativa](#op2--op2_data_evaluationpy)
    - [OP3 — Feature Engineering](#op3--op3_split_datasetpy)
    - [OP4 — Gestione Valori Nulli](#op4--op4_handler_nullvaluepy)
-   - [OP5 — Aggregazione Costi](#op5--op5_sumcosts_namespy)
+   - [OP5 — Aggregazione Costi e Creazione Nuove Feauture](#op5--op5_sumcosts_namespy)
    - [OP6 — Matrice di Correlazione](#op6--op6_correlation_matrixpy)
    - [OP7 — Divisione del Dataset](#op7--divisione-del-dataset)
    - [OP8 — Encoding](#op8--op8_encodingpy)
    - [relations.py — Analisi Regole di Dominio](#relationspy--analisi-regole-di-dominio)
-   - [pipeline.py — Pipeline Principale](#pipelinepy--pipeline-principale)
+   - [pipeline.py — Pipeline Principale (Pre-Processing](#pipelinepy--pipeline-principale)
    - [Output del Pre-Processing](#output-del-pre-processing)
 4. [Fase 2 — Development & Evaluation](#4-fase-2--development--evaluation)
    - [Orchestrator](#orchestrator--orchestratorpy)
@@ -55,7 +55,7 @@ python preprocessing/pipeline.py
 ## Panoramica dei Moduli
 
 Il progetto è strutturato in tre macro-aree principali:
-1. **Pre-Processing**: Si occupa della pulizia dei dati, feature engineering, imputazione dei valori nulli e della preparazione dei dataset per i modelli (encoding).
+1. **Pre-Processing**: Si occupa della pulizia dei dati, feature engineering, imputazione dei valori nulli e della preparazione dei dataset per i modelli.
 2. **Development**: Riguarda l'addestramento dei vari modelli di Machine Learning (Alberi Decisionali, Reti Neurali, SVC) applicando diverse tecniche di validazione (Hold-out, K-Fold).
 3. **Evaluation**: Modulo dedicato alla valutazione quantitativa (metriche come Accuracy, ROC-AUC, ecc.) e visiva (Matrice di Confusione, Curve ROC) delle performance dei modelli.
 
@@ -150,7 +150,7 @@ risultato = run_split_dataset(df, i_train=1)  # i_train=0 per il test set
 ### OP4 — `op4_handler_nullvalue.py`
 **Gestione dei valori mancanti**
 
-Il modulo più complesso della pipeline. Combina **regole logiche di dominio** con **strategie statistiche** di imputazione.
+Combina **regole logiche di dominio** con **strategie statistiche** di imputazione.
 
 #### Regole di dominio
 
@@ -195,16 +195,13 @@ Per le feature numeriche:
 - `SpendingZero`: Un flag binario (`1` se `TotalSpending == 0`).
 - `HasLuxurySpending`: Un flag binario (`1` se la spesa in `Spa` o `VRDeck` è > 0).
 - `IsAlone`: Un flag binario (`1` se `GroupSize == 1`).
-> `TotalSpending` è storicamente una delle feature più predittive in questo dataset.
-> `HasLuxurySpending` è negativamente correlata con la grandtruth
-
 
 ---
 
 ### OP6 — `op6_correlation_matrix.py`
 **Matrice di correlazione**
 
-Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. Crea due grafici: una matrice di correlazione e un istogramma con la classifica delle feature. Salva i grafici nella cartella `outputs/op6/` e restituisce la correlazione ordinata con il target `Transported`.
+Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. Crea due grafici: una matrice di correlazione e un istogramma con la classifica in ordine decrescente delle feature. Salva i grafici nella cartella `outputs/op6/` e restituisce la correlazione ordinata con il target `Transported`.
 
 > La Dummy Variable Trap viene evitata in OP8, dove vengono rimosse le colonne ridondanti (`CryoSleep_False`, `VIP_False`, `Side_S`).
 
@@ -216,14 +213,14 @@ Esegue OHE completo (`drop_first=False`) e calcola la matrice di correlazione. C
 |---|---|---|
 | **1 — Holdout** | `op7_holdout_evaluator.py` | Split classico train/test, proporzione scelta dall'utente |
 | **2 — K-Fold** | `op7_kfold_evaluator.py` | K-Fold non stratificato con shuffle, numero di fold scelto dall'utente |
-| **3 - Per la competizione su Kaggle  | 'pipeline.py' | Intero dataset senza split, per la submission finale Kaggle |
+| **3 - Per la competizione su Kaggle**  | 'pipeline.py' | Intero dataset senza split, per la submission finale Kaggle |
 
 ---
 
 ### OP8 — `op8_encoding.py`
 **Encoding delle variabili categoriche**
 
-Produce **due versioni parallele** del dataset (la fase di scaling separata è stata rimossa, in quanto i modelli gestiscono lo scaling nativamente):
+Produce **due versioni parallele** del dataset:
 
 | Versione | Encoder | Note |
 |---|---|---|
@@ -290,18 +287,18 @@ Punto di ingresso dell'intera fase di sviluppo. Gestisce il flusso con **due cic
 ┌──────────────────────────────────────┐
 │  FASE 1: Preprocessing               │
 │  S → Esegue pipeline.py              │
-│  N → Salta (CSV già pronti)          │
+│  N → Salta (Se CSV già pronti)       │
 └──────────────────────────────────────┘
    │
    ▼
 ┌──────────────────────────────────────┐
 │  FASE 2: Selezione Modello           │
-│  [1] LightGBM                        │
-│  [2] Random Forest                   │
-│  [3] Support Vector Classifier       │
-│  [4] XGBoost                         │
-│  [5] CatBoost                        │
-│  [6] Rete Neurale (PyTorch)          │
+│  [1] LightGBM (Tree)                 │
+│  [2] Random Forest (Tree)            │
+│  [3] Support Vector Classifier (nn)  │
+│  [4] XGBoost (Tree)                  │
+│  [5] CatBoost (Tree)                 │
+│  [6] Rete Neurale (nn)               │
 │  [7] Torna al Preprocessing          │
 │  [0] Esci e Salva Report             │
 └──────────────────────────────────────┘
@@ -385,7 +382,7 @@ In K-Fold, LightGBM, Random Forest e SVC producono anche un **file TOTAL** (`sub
 ---
 
 ### Modelli Disponibili
-**Nota sulle trasformazioni**: Ogni singolo modello esegue la propria standardizzazione/normalizzazione dei dati in totale autonomia al suo interno (se necessaria) e gestisce nativamente le feature categoriche. Questo approccio evita il data leakage e mantiene la pipeline di preprocessing indipendente.
+**Nota sulle trasformazioni**: Ogni singolo modello esegue la propria standardizzazione/normalizzazione dei dati in totale autonomia al suo interno (se necessaria) e gestisce nativamente le feature categoriche.
 
 #### XGBoost — `XGBoost/`
 
@@ -472,8 +469,6 @@ Input → Linear(128) → BN → ReLU → Dropout(0.4)
 | `optimizer` | AdamW (`weight_decay=1e-3`) |
 | `scheduler` | `ReduceLROnPlateau` (factor=0.5, patience=3) |
 | `loss` | BCELoss |
-
-**Nota**: Il modello `main_NN_pytch` è stato aggiornato per richiedere il dataset `tree` invece del dataset `nn` in input.
 
 Lo `StandardScaler` viene salvato come `model.scaler` per il transform sul test senza refitting. La funzione `align_columns()` gestisce il disallineamento OHE tra train e test tramite `.reindex()`.
 
