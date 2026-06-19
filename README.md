@@ -385,6 +385,7 @@ In K-Fold, LightGBM, Random Forest e SVC producono anche un **file TOTAL** (`sub
 ---
 
 ### Modelli Disponibili
+**Nota sulle trasformazioni**: Ogni singolo modello esegue la propria standardizzazione/normalizzazione dei dati in totale autonomia al suo interno (se necessaria) e gestisce nativamente le feature categoriche. Questo approccio evita il data leakage e mantiene la pipeline di preprocessing indipendente.
 
 #### XGBoost — `XGBoost/`
 
