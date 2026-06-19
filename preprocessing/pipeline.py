@@ -220,7 +220,7 @@ def main():
                 run_evaluation(df_eval_train)
                 
                 # print("\n[Esecuzione OP6] Calcolo matrice di correlazione sull'ultimo fold...")
-            run_op6(df_eval_train, output_dir="outputs/op6")
+        run_op6(df_eval_train, output_dir="outputs/op6")
 
         return results
     
