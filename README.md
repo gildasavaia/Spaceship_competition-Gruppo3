@@ -479,16 +479,17 @@ Input → Linear(128) → BN → ReLU → Dropout(0.3)
 | `loss` | BCELoss |
 
 Lo `StandardScaler` viene salvato come `model.scaler` per il transform sul test senza refitting. La funzione `align_columns()` gestisce il disallineamento OHE tra train e test tramite `.reindex()`.
+Meccanismo di Early Stopping (Opzione 3 — Full Training)
+Per l'addestramento sul dataset completo (**Full Training / Opzione 3**), il limite massimo è esteso a **200 epoche**, ma viene introdotto un controllo dinamico di **Early Stopping** sulla loss di validazione per prevenire l'overfitting e ottimizzare i tempi di calcolo:
+
+* **Patience:** 5 epoche (interruzione se la loss non migliora per 5 epoche consecutive).
+* **Min Delta:** `1e-3` (soglia minima di variazione della loss considerata come reale miglioramento).
+* **Ripristino pesi:** Ad ogni ciclo viene tenuto traccia del valore `best_loss` per congelare lo stato ottimale della rete prima dell'arresto.
+
+Nelle modalità *Holdout* (Opzione 1) e *K-Fold* (Opzione 2), l'addestramento segue invece rigidamente il numero di epoche prefissate in tabella (rispettivamente 50 e 30 epoche).
 
 ---
 
-#### Rete Neurale sklearn — `Rete_Neurale/`
-
-Implementazione alternativa con `MLPClassifier` in una Pipeline sklearn (`StandardScaler` + MLP). Architettura: `hidden_layer_sizes=(128, 64)`, `early_stopping=True`, `max_iter=2000`.
-
-> Versione alternativa: supporta solo Holdout e K-Fold, non integrata con l'Orchestratore.
-
----
 
 ### Output del Development
 
