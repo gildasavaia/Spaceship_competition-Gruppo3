@@ -464,28 +464,29 @@ Stessa gestione One-Hot Encoding del Random Forest. Serializzato in `outputs/mod
 Implementazione custom con architettura piramidale. **Versione integrata con l'Orchestratore.**
 
 ```
-Input → Linear(128) → BN → ReLU → Dropout(0.3)
-      → Linear(64)  → BN → ReLU → Dropout(0.2)
-      → Linear(32)  → BN → ReLU
+Input → Linear(128) → BN → ReLU → Dropout(0.4)
+      → Linear(64)  → BN → ReLU → Dropout(0.3)
+      → Linear(32)  → BN → ReLU → Dropout(0.2)
       → Linear(1)   → Sigmoid
 ```
 
 | Parametro | Valore |
 |---|---|
-| `epochs` | 50 (Holdout/Full) / 30 (K-Fold) |
+| `epochs` | 50 (Holdout) / 30 (K-Fold) / 200 (Full) |
 | `batch_size` | 64 |
-| `optimizer` | AdamW (`weight_decay=1e-4`) |
-| `scheduler` | `ReduceLROnPlateau` (factor=0.5, patience=5) |
+| `optimizer` | AdamW (`weight_decay=1e-3`) |
+| `scheduler` | `ReduceLROnPlateau` (factor=0.5, patience=3) |
 | `loss` | BCELoss |
 
 Lo `StandardScaler` viene salvato come `model.scaler` per il transform sul test senza refitting. La funzione `align_columns()` gestisce il disallineamento OHE tra train e test tramite `.reindex()`.
-Meccanismo di Early Stopping (Opzione 3 — Full Training)
-Per l'addestramento sul dataset completo (**Full Training / Opzione 3**), il limite massimo è esteso a **200 epoche**, ma viene introdotto un controllo dinamico di **Early Stopping** sulla loss di validazione per prevenire l'overfitting e ottimizzare i tempi di calcolo:
 
-* **Patience:** 5 epoche (interruzione se la loss non migliora per 5 epoche consecutive).
-* **Min Delta:** `1e-3` (soglia minima di variazione della loss considerata come reale miglioramento).
-* **Ripristino pesi:** Ad ogni ciclo viene tenuto traccia del valore `best_loss` per congelare lo stato ottimale della rete prima dell'arresto.
+##### Meccanismo di Early Stopping e Gestione LR
+Per ottimizzare l'addestramento e prevenire l'overfitting, la pipeline integra una strategia combinata tra lo scheduler del tasso di apprendimento e un controllo dinamico di interruzione anticipata (**Early Stopping**):
 
+* **Patience dello Scheduler:** Impostata a **3 epoche**. Se la loss si stabilizza, il learning rate viene dimezzato (`factor=0.5`) per rifinire la convergenza prima che intervenga lo stop.
+* **Patience dell'Early Stopping:** Impostata a **10 epoche** consecutive senza miglioramenti significativi.
+* **Min Delta:** `1e-3` (soglia minima di variazione della loss per considerare l'epoca come un reale miglioramento).
+* **Tracciamento dello Stato:** Viene monitorata la `best_loss` ad ogni epoca per identificare il punto di arresto ottimale e salvare la storia dei gradienti all'interno dell'istanza del modello (`model.loss_history`).
 Nelle modalità *Holdout* (Opzione 1) e *K-Fold* (Opzione 2), l'addestramento segue invece rigidamente il numero di epoche prefissate in tabella (rispettivamente 50 e 30 epoche).
 
 ---
