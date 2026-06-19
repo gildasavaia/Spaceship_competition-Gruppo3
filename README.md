@@ -271,6 +271,7 @@ Scegli il tipo di modello per cui preparare i dati:
 | Fantasma | Reti Neurali | `processed_full_nn.csv`, `processed_full_nn_test.csv` |
 
 Tutti i file sono in `data/preprocessed_folds/`. I dizionari di imputazione JSON vengono salvati in `data/probability_dictionaries/`.
+La cartella `report_missing/` raccoglie invece un report di analisi sui valori mancanti e sulle distribuzioni delle colonne, utile per la pirma parte di analisi.
 
 ---
 
