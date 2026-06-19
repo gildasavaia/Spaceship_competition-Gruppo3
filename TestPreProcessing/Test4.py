@@ -9,8 +9,8 @@ from pathlib import Path
 base_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(base_dir / "preprocessing"))
 
-# Importiamo la funzione dal file op9_encoding
-from op9_encoding import run_encoding
+# Importiamo la funzione dal file op8_encoding
+from op8_encoding import run_encoding
 
 """ TEST 4: Robustezza One-Hot Encoding e Allineamento (op9)
 Obiettivo: Simulazione di uno scenario di stress in cui il Test set contiene categorie aliene mai

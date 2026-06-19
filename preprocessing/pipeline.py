@@ -10,8 +10,7 @@ from op5_sumcosts_names import run_op5
 from op6_correlation_matrix import run_op6
 from op7_holdout_evaluator import esegui_split_dati as run_holdout
 from op7_kfold_evaluator import esegui_split_kfold_standard as run_kfold
-from op8_scaling import run_scaling 
-from op9_encoding import run_encoding
+from op8_encoding import run_encoding
 
 def main():
     print("INIZIO PIPELINE DI PREPROCESSING")
@@ -115,17 +114,13 @@ def main():
         df_train = pd.concat([X_train, y_train], axis=1)
         df_test = pd.concat([X_test, y_test], axis=1)
         
-        # --- OP8: SCALING ---
-        print("\n[Esecuzione OP8] Standardizzazione e Log Transformation...")
-        scaling_result = run_scaling(df_train, df_test)
-        
-        # --- OP9: ENCODING ---
-        print("\n[Esecuzione OP9] Encoding variabili categoriche...")
+        # --- OP8: ENCODING ---
+        print("\n[Esecuzione OP8] Encoding variabili categoriche...")
         encoding_result = run_encoding(
-            scaling_result.df_tree_train,
-            scaling_result.df_nn_train,
-            scaling_result.df_tree_test,
-            scaling_result.df_nn_test
+            df_train,
+            df_train,
+            df_test,
+            df_test
         )
         
         # Salvataggio dinamico basato sulla scelta
@@ -197,17 +192,13 @@ def main():
             df_train_finale = run_op5(df_train_imputato).df_output
             df_test_finale = run_op5(df_test_imputato).df_output
 
-            # --- OP8: SCALING ---
-            print(f"   -> [OP8] Scaling sul Fold {i+1}...")
-            scaling_result = run_scaling(df_train_finale, df_test_finale)
-
-            # --- OP9: ENCODING ---
-            print(f"   -> [OP9] Encoding sul Fold {i+1}...")
+            # --- OP8: ENCODING ---
+            print(f"   -> [OP8] Encoding sul Fold {i+1}...")
             encoding_result = run_encoding(
-                scaling_result.df_tree_train,
-                scaling_result.df_nn_train,
-                scaling_result.df_tree_test,
-                scaling_result.df_nn_test
+                df_train_finale,
+                df_train_finale,
+                df_test_finale,
+                df_test_finale
             )
             
             # Salvataggio dinamico basato sulla scelta
@@ -266,18 +257,13 @@ def main():
         
         
         # OP8
-        print("\n[Esecuzione OP8] Scaling dei dati...")
-        scaling_result = run_scaling(mio_dataframe_finale)
-        scaling_result_test = run_scaling(mio_dataframe_finale_test)
-
-        # OP9
-        print("\n[Esecuzione OP9] Encoding variabili categoriche...")
+        print("\n[Esecuzione OP8] Encoding variabili categoriche...")
         # Fit sul train e transform sul test (passiamo test come 3°/4° argomento)
         encoding_result = run_encoding(
-            scaling_result.df_tree_train,
-            scaling_result.df_nn_train,
-            scaling_result_test.df_tree_train,
-            scaling_result_test.df_nn_train
+            mio_dataframe_finale,
+            mio_dataframe_finale,
+            mio_dataframe_finale_test,
+            mio_dataframe_finale_test
         )
         # Salvataggio dinamico
         if scelta_modello == '1':

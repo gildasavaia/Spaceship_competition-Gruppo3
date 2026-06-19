@@ -35,11 +35,6 @@ def align_columns(X, X_test):
     1. Convertire eventuali colonne object residue (sicurezza) con get_dummies
     2. Allineare le colonne del test a quelle del train (aggiungendo zeri dove mancano)
     
-    NOTA SULLO SCALING: I dati numerici arrivano già scalati da op8 (StandardScaler).
-    Lo scaler dentro train_model (Model_NN_pytch.py) riscala tutto: sulle colonne già
-    normalizzate questo è quasi un'identità (media ≈ 0, std ≈ 1), quindi non è dannoso.
-    Sulle colonne one-hot (0/1) lo scaling le uniforma al range delle altre feature,
-    il che è benefico per la convergenza della rete.
     """
     # Verifica se ci sono colonne object residue non ancora encodate
     object_cols_train = X.select_dtypes(include=['object']).columns.tolist()
